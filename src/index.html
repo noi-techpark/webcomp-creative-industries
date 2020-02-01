@@ -21,15 +21,27 @@
                     <div id="map" class="map"></div>
                 </div>
                 <div class="col-md-3">
-                    <div class="form-check" v-for="layer in layers" :key="layer.id">
+                    <div class="form-check" v-for="industrie in industries" :key="industrie.id">
                         <label class="form-check-label">
                             <input
                               class="form-check-input"
                               type="checkbox"
-                              v-model="layer.active"
-                              @change="layerChanged(layer.id, layer.active)"
+                              v-model="industrie.active"
+                              @change="industrieChanged(industrie.id, industrie.active)"
                             />
-                            {{ layer.name }}
+                            {{ industrie.name }}
+                          </label>
+                    </div>
+
+                    <div class="form-check" v-for="activity in activities">
+                        <label class="form-check-label">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              v-model="activity.active"
+                              @change="activityChanged(activity.id, activity.active)"
+                            />
+                            {{ activity.name }}
                           </label>
                     </div>
                 </div>
@@ -42,6 +54,7 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/"></script>
 
     <script src="app.js"></script>
+    <script src="../data/data.js"></script>
 
 </body>
 
