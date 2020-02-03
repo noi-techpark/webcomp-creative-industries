@@ -10,40 +10,68 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css">
 
-    <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div id="app" class="container">
-        <div id="app" class="container">
-            <div class="row">
-                <div class="col-md-9">
-                    <div id="map" class="map"></div>
+        <div class="row">
+            <div class="col-md-9">
+                <div id="map" class="map"></div>
+            </div>
+            <div id="omnibox" class="margined shadowed rounded">
+                <div class="navbar">
+                    Sectors
                 </div>
-                <div class="col-md-3">
-                    <div class="form-check" v-for="industrie in industries" :key="industrie.id">
-                        <label class="form-check-label">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              v-model="industrie.active"
-                              @change="industrieChanged(industrie.id, industrie.active)"
-                            />
-                            {{ industrie.name }}
-                          </label>
+                <div id="industries" class="singlebox active">
+                    <div class="select-list">
+                        <div class="select-item center-area" v-for="industrie in industries" :key="industrie.id"
+                            @click="industrieSelected(industrie.id)">
+                            <div class="icon center-y rounded">
+                                <!-- {{ industrie.icon }} -->
+                            </div>
+                            <div class="select-item-label center-y">{{ industrie.name }}</div>
+                            <div class="center-y right"></div>
+                        </div>
                     </div>
+                </div>
+                <div id="sectors" class="singlebox">
+                    <div class="select-list">
+                        <div class="select-item center-area" v-for="sector in filters.sectors" @click="sectorSelected(sector)">
+                            <div class="icon center-y rounded">
+                                <!-- {{ industrie.icon }} -->
+                            </div>
+                            <div class="select-item-label center-y">{{ sector }}</div>
+                            <div class="center-y right"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="results" class="singlebox">
+                    <div class="select-item center-area" v-for="point in results">
+                        <div class="icon center-y rounded">
+                            <!-- {{ industrie.icon }} -->
+                        </div>
+                        <div class="select-item-label center-y">{{ point.name }}</div>
+                        <div class="center-y right"></div>
+                    </div>
+                </div>
 
-                    <div class="form-check" v-for="activity in activities">
-                        <label class="form-check-label">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              v-model="activity.active"
-                              @change="activityChanged(activity.id, activity.active)"
-                            />
-                            {{ activity.name }}
-                          </label>
-                    </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check" v-for="industrie in industries" :key="industrie.id">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" v-model="industrie.active"
+                            @change="industrieChanged(industrie.id, industrie.active)" />
+                        {{ industrie.name }}
+                    </label>
+                </div>
+
+                <div class="form-check" v-for="activity in activities">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" v-model="activity.active"
+                            @change="activityChanged(activity.id, activity.active)" />
+                        {{ activity.name }}
+                    </label>
                 </div>
             </div>
         </div>
@@ -51,10 +79,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/" type="text/html"></script>
 
+    <script src="repo.js"></script>
     <script src="app.js"></script>
-    <script src="../data/data.js"></script>
 
 </body>
 
