@@ -1,5 +1,7 @@
-#app {
+#map {
+  position: absolute;
   height: 800px;
+  width: 1200px;
 }
 
 .row {
@@ -7,8 +9,7 @@
 }
 
 .map {
-  height: 100%;
-  z-index: 10;
+  z-index: 0;
 }
 
 #omnibox {
@@ -17,31 +18,60 @@
   width: 400px;
   height: 65%;
   background: white;
+  overflow: hidden;
+}
+
+#omnibox ::after, ::before {
+  box-sizing: border-box;
 }
 
 .navbar {
   height: 75px;
-  background-color: lightgrey;
   padding: 0 30px;
 }
 
 #omnibox .singlebox {
   display: none;
+  position: absolute;
   overflow-y: scroll;
   height: calc(100% - 75px);
+  width: 100%;
+  box-sizing: border-box;
+  background-color: white;
 }
 
 #omnibox .singlebox.active {
   display: block;
 }
 
-.select-item {
+#industries {
+  z-index: 100;
+}
+
+#sectors {
+  z-index: 110;
+}
+
+#results {
+  z-index: 120;
+}
+
+#selection {
+  z-index: 130;
+}
+
+#filters {
+  z-index: 200;
+  margin: 0 30px;
+}
+
+.select-list > .select-item {
   height: 75px;
   padding: 0 30px;
   cursor: pointer;
 }
 
-.select-item:hover {
+.select-list > .select-item:hover {
   background: whitesmoke;
 }
 
@@ -49,24 +79,27 @@
   height: 50px;
   width: 50px;
   margin-right: 15px !important;
-  background: lightgreen;
 }
 
 .leaflet-bar {
-    border-radius: 10px;
+  border-radius: 10px;
 }
 
 .leaflet-touch .leaflet-bar a:first-child {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .leaflet-touch .leaflet-bar a:last-child {
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 /* STYLE */
+
+.primary-bg {
+  background-color: #a6bc10;
+}
 
 .margined {
   margin: 30px;
@@ -82,12 +115,51 @@
 
 .center-area {
   display: flex;
+  flex: auto;
+  height: 100%;
+  /* width: 100%; */
 }
 
 .center-area .center-y {
-  margin: auto 0;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
-.center-area .right {
-  margin-right: 0;
+.center-area .center-x {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.icon {
+  height: 30px;
+  width: 30px;
+}
+
+.button {
+  height: 40px;
+  width: 40px;
+  background-color: #EEEEEE;
+  cursor: pointer;
+}
+
+.button .icon {
+  height: 25px;
+  width: 25px;
+  fill: grey;
+}
+
+/* ICONS */
+
+.back-icon {
+  background-image: url("assets/icons/left.svg");
+  margin-right: 15px !important;
+}
+
+.forward-icon {
+  background-image: url("assets/icons/right.svg");
+  margin-left: 15px !important;
+}
+
+.filter-icon {
+  background-image: url("assets/icons/filter.svg");
 }

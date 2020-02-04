@@ -2,9 +2,12 @@ new Vue({
   el: '#app',
   data: {
     map: null,
+    center: [46.643211, 11.365379],
+    zoom: 9,
     markers: null,
     testIcon: null,
     tileLayer: null,
+    singlebox: 'industries',
     activities: repo.activities,
     industries: repo.industries,
     points: repo.points,
@@ -13,9 +16,8 @@ new Vue({
       sectors: [],
       activities: [],
     },
-    // results: points.filter(function(i) {
-    //   return i.active == true;
-    // }),
+    results: null,
+    search: true,
   },
   mounted() {
     this.initMap();
@@ -24,18 +26,67 @@ new Vue({
     this.renderFilters();
   },
   methods: {
+    showFilters() {
+      document.getElementById('filters').classList.toggle("active");
+    },
 
-    sectorSelected(sectorId) {
-      document.getElementById('sectors').classList.toggle("active");
-      document.getElementById('results').classList.toggle("active");
+    stepBack() {
+      document.getElementById(this.singlebox).classList.toggle("active");
 
-      this.filters.sectors = [sectorId];
+      
+      switch (this.singlebox) {
+        case 'selection':
+          document.getElementById('nav-title').innerHTML = this.filters.sectors[0];
+          this.map.flyTo(this.center, this.zoom);
+          
+          this.singlebox = 'results';
+          break;
+          
+        case 'results':
+          const industrie = this.industries.find(industrie => industrie.id === this.filters.industries[0]);
+          document.getElementById('nav-title').innerHTML = industrie.name;
+          this.filters.sectors = industrie.sectors;
+
+          this.singlebox = 'sectors';
+          break;
+
+        case 'sectors':
+          document.getElementById('nav-title').innerHTML = "Industries";
+          this.initFilters();
+
+          this.singlebox = 'industries';
+          break;
+      }
+
       this.renderFilters();
     },
 
+    pointSelected(id) {
+      const point = this.points.find(point => point.id === id);
+
+      this.activateSinglebox('selection');
+      document.getElementById('nav-title').innerHTML = point.name;
+
+      this.map.flyTo(point.coords, 16);
+      // Todo: change icon to selection
+    },
+
+    sectorSelected(sectorId) {
+      this.activateSinglebox('results');
+      document.getElementById('nav-title').innerHTML = sectorId;
+
+      this.filters.sectors = [sectorId];
+      this.renderFilters();
+      this.results = this.points.filter(function (i) {
+        return i.active === true;
+      });
+    },
+
     industrieSelected(industrieId) {
-      document.getElementById('industries').classList.toggle("active");
-      document.getElementById('sectors').classList.toggle("active");
+      const industrie = this.industries.find(industrie => industrie.id === industrieId);
+
+      this.activateSinglebox('sectors');
+      document.getElementById('nav-title').innerHTML = industrie.name;
 
       this.industries.forEach((industrie) => {
         if (industrie.id !== industrieId) {
@@ -46,7 +97,6 @@ new Vue({
         this.industrieChanged(industrie.id, industrie.active);
       });
 
-      const industrie = this.industries.find(industrie => industrie.id === industrieId);
       this.filters.sectors = industrie.sectors;
     },
 
@@ -78,6 +128,11 @@ new Vue({
       this.renderFilters();
     },
 
+    activateSinglebox(id) {
+      document.getElementById(id).classList.toggle("active");
+      this.singlebox = id;
+    },
+
     renderFilters() {
       // var newMarkers = new L.MarkerClusterGroup();
       var newMarkers = new L.LayerGroup();
@@ -87,9 +142,13 @@ new Vue({
         var a = this.filters.industries.includes(point.industrie);
         var b = this.filters.sectors.includes(point.sector);
         var c = this.filters.activities.includes(point.activity);
+        // console.log(a + " " + b + " " + c);
 
         if (a && b && c) {
           point.leafletObject.addTo(newMarkers);
+          point.active = true;
+        } else {
+          point.active = false;
         }
       });
 
@@ -113,10 +172,10 @@ new Vue({
 
         if (!industrie.sectors.includes(point.sector)) {
           industrie.sectors.push(point.sector);
+        }
 
-          if (!this.filters.sectors.includes(point.sector)) {
-            this.filters.sectors.push(point.sector);
-          }
+        if (!this.filters.sectors.includes(point.sector)) {
+          this.filters.sectors.push(point.sector);
         }
       });
 
@@ -144,7 +203,7 @@ new Vue({
     },
 
     initMap() {
-      this.map = L.map('map', { zoomControl: false }).setView([46.643211, 11.365379], 9);
+      this.map = L.map('map', { zoomControl: false }).setView(this.center, this.zoom);
       L.control.zoom({ position: 'bottomright' }).addTo(this.map);
       this.tileLayer = L.tileLayer(
         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
