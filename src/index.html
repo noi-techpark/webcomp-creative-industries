@@ -14,27 +14,68 @@
 <body>
     <div id="app" class="container">
         <div id="map" class="map"></div>
+        <div id="center-button" class="inline-block button white-bg rounded" @click="centerMap">
+            <div class="center-area">
+                <div class="center-icon icon center-x center-y"></div>
+            </div>
+        </div>
+        <div id="logo"></div>
         <div id="omnibox" class="margined shadowed rounded">
-            <div class="navbar">
-                <div class="row center-area">
-                    <div id="nav-back" class="center-y icon back-icon" v-if="singlebox !== 'industries'"
-                        @click="stepBack"></div>
-                    <div id="nav-title" class="center-y title">Industries</div>
-                    <div id="filter-button" class="button rounded center-y" @click="showFilters">
-                        <div class="center-area">
-                            <svg class="icon center-x center-y" viewBox="-4 0 393 393.99003"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="m368.3125 0h-351.261719c-6.195312-.0117188-11.875 3.449219-14.707031 8.960938-2.871094 5.585937-2.3671875 12.3125 1.300781 17.414062l128.6875 181.28125c.042969.0625.089844.121094.132813.183594 4.675781 6.3125 7.203125 13.957031 7.21875 21.816406v147.796875c-.027344 4.378906 1.691406 8.582031 4.777344 11.6875 3.085937 3.105469 7.28125 4.847656 11.65625 4.847656 2.226562 0 4.425781-.445312 6.480468-1.296875l72.3125-27.574218c6.480469-1.976563 10.78125-8.089844 10.78125-15.453126v-120.007812c.011719-7.855469 2.542969-15.503906 7.214844-21.816406.042969-.0625.089844-.121094.132812-.183594l128.683594-181.289062c3.667969-5.097657 4.171875-11.820313 1.300782-17.40625-2.832032-5.511719-8.511719-8.9726568-14.710938-8.960938zm-131.53125 195.992188c-7.1875 9.753906-11.074219 21.546874-11.097656 33.664062v117.578125l-66 25.164063v-142.742188c-.023438-12.117188-3.910156-23.910156-11.101563-33.664062l-124.933593-175.992188h338.070312zm0 0" />
-                            </svg>
+            <div id="nav" class="navbar active">
+                <div class="row">
+                    <div class="center-area fill">
+                        <div id="nav-back" class="inline-block center-y icon back-icon clickable"
+                            v-if="singlebox !== 'industries'" @click="stepBack"></div>
+                        <div id="nav-title" class="inline-block center-y title">Industries</div>
+                    </div>
+                    <div class="center-area">
+                        <input id="search-bar" class="inline-block center-y rounded" type="text" v-model="searchValue">
+                        <div id="search-button" class="inline-block button rounded center-y" @click="toggleSearchbar()">
+                            <div class="center-area">
+                                <div class="icon center-x center-y">
+                                    <svg id="Capa_1" enable-background="new 0 0 515.558 515.558"
+                                        viewBox="0 0 515.558 515.558" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="m378.344 332.78c25.37-34.645 40.545-77.2 40.545-123.333 0-115.484-93.961-209.445-209.445-209.445s-209.444 93.961-209.444 209.445 93.961 209.445 209.445 209.445c46.133 0 88.692-15.177 123.337-40.547l137.212 137.212 45.564-45.564c0-.001-137.214-137.213-137.214-137.213zm-168.899 21.667c-79.958 0-145-65.042-145-145s65.042-145 145-145 145 65.042 145 145-65.043 145-145 145z" />
+                                        </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="filter-button" class="inline-block button primary-bg rounded center-y"
+                            @click="showFilters">
+                            <div class="center-area">
+                                <div class="icon center-x center-y">
+                                    <svg version="1.1" viewBox="-5 0 394 394" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="m367.82 0h-351.26c-6.1992-0.011719-11.879 3.4492-14.711 8.9609-2.8711 5.5859-2.3672 12.312 1.3008 17.414l128.69 181.29c0.042968 0.0625 0.089843 0.12109 0.13281 0.18359 4.6758 6.3125 7.207 13.961 7.2188 21.816v147.8c-0.027344 4.375 1.6914 8.582 4.7734 11.688 3.0859 3.1016 7.2812 4.8516 11.656 4.8516 2.2227-0.003906 4.4258-0.44531 6.4805-1.3008l72.312-27.57c6.4766-1.9805 10.777-8.0938 10.777-15.453v-120.02c0.011719-7.8555 2.543-15.504 7.2148-21.816 0.042968-0.0625 0.089844-0.12109 0.13281-0.18359l128.69-181.29c3.668-5.0977 4.1719-11.82 1.3008-17.406-2.8281-5.5156-8.5117-8.9766-14.707-8.9648z" />
+                                        </svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div id="search-button" class="button rounded center-y">
-                        <div class="icon search-icon center-x center-y"></div>
+                </div>
+            </div>
+            <div id="nav-filters" class="navbar">
+                <div class="row">
+                    <div class="center-area fill">
+                        <div class="inline-block center-y title">Filter</div>
+                    </div>
+                    <div class="center-area">
+                        <div class="inline-block button primary-bg rounded center-y" @click="showFilters">
+                            <div class="center-area">
+                                <div class="icon center-x center-y">
+                                <svg enable-background="new 0 0 492 492" version="1.1"
+                                    viewBox="0 0 492 492" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="m484.13 104.48-16.116-16.116c-5.064-5.068-11.816-7.856-19.024-7.856s-13.964 2.788-19.028 7.856l-226.45 226.45-141.48-141.49c-5.064-5.06-11.82-7.852-19.028-7.852-7.204 0-13.956 2.792-19.024 7.852l-16.12 16.112c-5.068 5.076-7.852 11.836-7.852 19.036 0 7.204 2.784 13.96 7.852 19.028l159.74 159.74c0.212 0.3 0.436 0.58 0.696 0.836l16.12 15.852c5.064 5.048 11.82 7.572 19.084 7.572h0.084c7.212 0 13.968-2.524 19.024-7.572l16.124-15.992c0.26-0.256 0.48-0.468 0.612-0.684l244.78-244.76c10.5-10.476 10.5-27.52 4e-3 -38.008z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
             </div>
+
             <div id="industries" class="singlebox active">
                 <div class="select-list">
                     <div class="select-item center-area" v-for="industrie in industries" :key="industrie.id"
@@ -55,18 +96,20 @@
                             <!-- {{ industrie.icon }} -->
                         </div>
                         <div class="select-item-label center-y">{{ sector }}</div>
-                        <div class="center-y right"></div>
+                        <div class="center-y icon forward-icon"></div>
                     </div>
                 </div>
             </div>
             <div id="results" class="singlebox">
                 <div class="select-list">
+                    <div class="select-item center-area" v-if="this.results.length === 0">
+                        <div class="select-item-label center-y">No results.</div>
+                    </div>
                     <div class="select-item center-area" v-for="point in results" @click="pointSelected(point.id)">
                         <div class="center-y icon rounded primary-bg">
                             <!-- {{ industrie.icon }} -->
                         </div>
                         <div class="select-item-label center-y">{{ point.name }}</div>
-                        <div class="center-y right"></div>
                     </div>
                 </div>
             </div>
@@ -74,7 +117,7 @@
 
             </div>
             <div id="filters" class="singlebox">
-                <div>
+                <div class="filter-class">
                     <div class="title">Type:</div>
                     <div class="form-check" v-for="activity in activities">
                         <label class="form-check-label">
@@ -85,7 +128,7 @@
                     </div>
                 </div>
 
-                <div v-if="search">
+                <div class="filter-class" v-if="search">
                     <div class="title">Industrie:</div>
                     <div class="form-check" v-for="industrie in industries" :key="industrie.id">
                         <label class="form-check-label">

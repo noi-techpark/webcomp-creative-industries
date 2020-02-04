@@ -25,14 +25,9 @@ var repo = new Vue({
         sectors: [],
         active: false,
         marker: L.icon({
-          iconUrl: 'leaf-green.png',
-          shadowUrl: 'leaf-shadow.png',
-
-          iconSize: [38, 95], // size of the icon
-          shadowSize: [50, 64], // size of the shadow
-          iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
-          shadowAnchor: [4, 62],  // the same for the shadow
-          popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+          iconUrl: 'assets/markers/pin.svg',
+          iconSize: [50, 33], // size of the icon
+          iconAnchor: [24, 32], // point of the icon which will correspond to marker's location
         }),
       },
       {
@@ -111,6 +106,14 @@ var repo = new Vue({
         sector: 'Software Production',
         activity: 0,
         coords: [46.458827, 11.332528],
+      },
+      {
+        id: 7,
+        name: 'Test',
+        industrie: 0,
+        sector: 'Private Uni',
+        activity: 2,
+        coords: [46.488827, 11.332528],
       },
     ],
   },

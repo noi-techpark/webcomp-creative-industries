@@ -16,8 +16,9 @@ new Vue({
       sectors: [],
       activities: [],
     },
-    results: null,
-    search: true,
+    results: repo.points,
+    searchValue: '',
+    search: false,
   },
   mounted() {
     this.initMap();
@@ -26,22 +27,93 @@ new Vue({
     this.renderFilters();
   },
   methods: {
+    activate(id) {
+      const el = document.getElementById(id).classList;
+
+      if (!el.contains("active")) {
+        el.toggle("active");
+      }
+    },
+
+    deactivate(id) {
+      const el = document.getElementById(id).classList;
+
+      if (el.contains("active")) {
+        el.toggle("active");
+      }
+    },
+
+    searching() {
+      var b = this.searchValue.toLowerCase();
+      this.results = this.points.filter(function (point) {
+        var a = point.name.toLowerCase();
+        return a.includes(b);
+      });
+
+      console.log(this.results);
+      this.points.forEach((point) => {
+        if (this.results.includes(point)) {
+          console.log(point.id);
+          point.active = true;
+        } else {
+          point.active = false;
+        }
+      });
+
+      this.renderFilters();
+    },
+
+    toggleSearchbar() {
+      this.activate('search-button');
+      this.activate('search-bar');
+      document.getElementById('search-bar').focus();
+
+      this.initFilters();
+      this.showActivePoints();
+      this.search = true;
+
+      this.activateSinglebox('results');
+      document.getElementById('nav-title').innerHTML = "";
+    },
+
     showFilters() {
       document.getElementById('filters').classList.toggle("active");
+      document.getElementById('nav-filters').classList.toggle("active");
+      document.getElementById('nav').classList.toggle("active");
+    },
+
+    centerMap() {
+      this.map.flyTo(this.center, this.zoom);
+    },
+
+    backToStart() {
+      console.log(this.singlebox);
+      if (this.singlebox !== 'industries') {
+        this.stepBack();
+        console.log(this.singlebox);
+        this.backToStart();
+      }
     },
 
     stepBack() {
-      document.getElementById(this.singlebox).classList.toggle("active");
+      this.deactivate(this.singlebox);
 
-      
+      if (this.search) {
+        this.deactivate('search-button');
+        this.deactivate('search-bar');
+        this.search = false;
+        this.backToStart();
+        return;
+      }
+
       switch (this.singlebox) {
         case 'selection':
           document.getElementById('nav-title').innerHTML = this.filters.sectors[0];
-          this.map.flyTo(this.center, this.zoom);
-          
+          this.centerMap();
+
           this.singlebox = 'results';
           break;
-          
+
         case 'results':
           const industrie = this.industries.find(industrie => industrie.id === this.filters.industries[0]);
           document.getElementById('nav-title').innerHTML = industrie.name;
@@ -111,6 +183,10 @@ new Vue({
         });
       }
 
+      this.points.forEach((point) => {
+        point.active = true;
+      });
+
       this.renderFilters();
     },
 
@@ -125,36 +201,47 @@ new Vue({
         });
       }
 
+      this.points.forEach((point) => {
+        point.active = true;
+      });
+
       this.renderFilters();
     },
 
     activateSinglebox(id) {
-      document.getElementById(id).classList.toggle("active");
+      this.activate(id);
       this.singlebox = id;
     },
 
-    renderFilters() {
+    showActivePoints() {
       // var newMarkers = new L.MarkerClusterGroup();
       var newMarkers = new L.LayerGroup();
 
       this.points.forEach((point) => {
-
-        var a = this.filters.industries.includes(point.industrie);
-        var b = this.filters.sectors.includes(point.sector);
-        var c = this.filters.activities.includes(point.activity);
-        // console.log(a + " " + b + " " + c);
-
-        if (a && b && c) {
+        if (point.active) {
           point.leafletObject.addTo(newMarkers);
-          point.active = true;
-        } else {
-          point.active = false;
         }
       });
 
       this.markers.removeFrom(this.map);
       this.markers = newMarkers;
       this.markers.addTo(this.map);
+    },
+
+    renderFilters() {
+      this.points.forEach((point) => {
+
+        var a = this.filters.industries.includes(point.industrie);
+        var b = this.filters.sectors.includes(point.sector);
+        var c = this.filters.activities.includes(point.activity);
+
+        if (a && b && c) {
+        } else {
+          point.active = false;
+        }
+      });
+
+      this.showActivePoints();
     },
 
 
@@ -177,6 +264,8 @@ new Vue({
         if (!this.filters.sectors.includes(point.sector)) {
           this.filters.sectors.push(point.sector);
         }
+
+        point.active = true;
       });
 
       this.activities.forEach((activity) => {
@@ -186,6 +275,8 @@ new Vue({
           this.filters.activities.push(activity.id);
         }
       });
+
+      searchValue = '';
     },
 
     initMarkers() {
@@ -216,4 +307,9 @@ new Vue({
       this.tileLayer.addTo(this.map);
     },
   },
+  watch: {
+    'searchValue': function () {
+      this.searching();
+    },
+  }
 });
