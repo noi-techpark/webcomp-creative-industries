@@ -1,3 +1,18 @@
+/* INIT */
+
+html, body {
+  font-size: large;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+.title {
+  font-size: 1.3rem;
+}
+
+/* CUSTOM */
+
+
 #app {
   position: relative;
   height: 800px;
@@ -66,10 +81,7 @@
   border-left: 1px solid rgba(0, 0, 0, 0.2);
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
-}
-
-#filter-button {
-  margin-left: 15px;;
+  margin-left: 0;
 }
 
 #omnibox .singlebox {
@@ -205,6 +217,7 @@
 .button {
   height: 40px;
   width: 40px;
+  margin-left: 15px;
   background-color: #eeeeee;
   cursor: pointer;
 }
@@ -222,10 +235,6 @@
 
 .clickable {
   cursor: pointer;
-}
-
-.title {
-  font-size: 1.3rem;
 }
 
 .active {

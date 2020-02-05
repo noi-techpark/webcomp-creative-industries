@@ -1,4 +1,4 @@
-new Vue({
+var myname = new Vue({
   el: '#app',
   data: {
     map: null,
@@ -49,21 +49,23 @@ new Vue({
         var a = point.name.toLowerCase();
         return a.includes(b);
       });
-
-      console.log(this.results);
+      
       this.points.forEach((point) => {
         if (this.results.includes(point)) {
-          console.log(point.id);
           point.active = true;
         } else {
           point.active = false;
         }
       });
-
+      
       this.renderFilters();
     },
 
     toggleSearchbar() {
+      if (this.search) {
+        return;
+      }
+
       this.activate('search-button');
       this.activate('search-bar');
       document.getElementById('search-bar').focus();
@@ -87,10 +89,8 @@ new Vue({
     },
 
     backToStart() {
-      console.log(this.singlebox);
       if (this.singlebox !== 'industries') {
         this.stepBack();
-        console.log(this.singlebox);
         this.backToStart();
       }
     },
@@ -101,7 +101,9 @@ new Vue({
       if (this.search) {
         this.deactivate('search-button');
         this.deactivate('search-bar');
+        this.searchValue = '';
         this.search = false;
+
         this.backToStart();
         return;
       }
@@ -130,6 +132,7 @@ new Vue({
           break;
       }
 
+      this.activateAllPoints();
       this.renderFilters();
     },
 
@@ -160,16 +163,18 @@ new Vue({
       this.activateSinglebox('sectors');
       document.getElementById('nav-title').innerHTML = industrie.name;
 
-      this.industries.forEach((industrie) => {
-        if (industrie.id !== industrieId) {
-          industrie.active = false;
+      this.industries.forEach((i) => {
+        if (i.id !== industrieId) {
+          i.active = false;
         } else {
-          industrie.active = true;
+          i.active = true;
         }
-        this.industrieChanged(industrie.id, industrie.active);
+        this.industrieChanged(i.id, i.active);
       });
 
       this.filters.sectors = industrie.sectors;
+
+      this.searching();
     },
 
     industrieChanged(industrieId, active) {
@@ -183,11 +188,7 @@ new Vue({
         });
       }
 
-      this.points.forEach((point) => {
-        point.active = true;
-      });
-
-      this.renderFilters();
+      this.searching();
     },
 
     activityChanged(activityId, active) {
@@ -205,12 +206,18 @@ new Vue({
         point.active = true;
       });
 
-      this.renderFilters();
+      this.searching();
     },
 
     activateSinglebox(id) {
       this.activate(id);
       this.singlebox = id;
+    },
+
+    activateAllPoints() {
+      this.points.forEach((point) => {
+        point.active = true;
+      });
     },
 
     showActivePoints() {
@@ -238,6 +245,9 @@ new Vue({
         if (a && b && c) {
         } else {
           point.active = false;
+          this.results = this.results.filter( function(i) {
+            return i !== point;
+          });
         }
       });
 
@@ -246,6 +256,7 @@ new Vue({
 
 
     initFilters() {
+      this.filters.industries = [];
       this.industries.forEach((industrie) => {
         industrie.active = true;
 
@@ -254,10 +265,12 @@ new Vue({
         }
       });
 
+      this.filters.sectors = [];
       this.points.forEach((point) => {
         const industrie = this.industries.find(industrie => industrie.id === point.industrie);
 
         if (!industrie.sectors.includes(point.sector)) {
+          console.log("Push " + point.sector + " for " + industrie.name)
           industrie.sectors.push(point.sector);
         }
 
@@ -268,6 +281,7 @@ new Vue({
         point.active = true;
       });
 
+      this.filters.activities = [];
       this.activities.forEach((activity) => {
         activity.active = true;
 
@@ -286,7 +300,8 @@ new Vue({
       this.points.forEach((point) => {
         const industrie = this.industries.find(industrie => industrie.id === point.industrie);
 
-        point.leafletObject = L.marker(point.coords, { icon: industrie.marker });
+        point.leafletObject = L.marker(point.coords, { icon: industrie.marker, title: point.name });
+        point.leafletObject.on('click', function(e) { myname.pointSelected(point.id) } );
         point.leafletObject.addTo(this.markers);
       });
 
