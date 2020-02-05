@@ -221,8 +221,8 @@ var myname = new Vue({
     },
 
     showActivePoints() {
-      // var newMarkers = new L.MarkerClusterGroup();
-      var newMarkers = new L.LayerGroup();
+      var newMarkers = new L.MarkerClusterGroup();
+      // var newMarkers = new L.LayerGroup();
 
       this.points.forEach((point) => {
         if (point.active) {
@@ -294,8 +294,8 @@ var myname = new Vue({
     },
 
     initMarkers() {
-      // var markers = new L.MarkerClusterGroup();
-      this.markers = new L.layerGroup();
+      this.markers = new L.MarkerClusterGroup();
+      // this.markers = new L.layerGroup();
 
       this.points.forEach((point) => {
         const industrie = this.industries.find(industrie => industrie.id === point.industrie);
