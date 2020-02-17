@@ -18,34 +18,123 @@ var repo = new Vue({
         active: false,
       },
     ],
+    marker: L.icon({
+      iconUrl: 'assets/markers/pin.svg',
+      iconSize: [50, 33], // size of the icon
+      iconAnchor: [24, 32], // point of the icon which will correspond to marker's location
+    }),
     industries: [
+      // {
+      //   id: 0,
+      //   name: 'Education',
+      //   sectors: [],
+      //   active: false,
+      //   marker: L.icon({
+      //     iconUrl: 'assets/markers/pin.svg',
+      //     iconSize: [50, 33], // size of the icon
+      //     iconAnchor: [24, 32], // point of the icon which will correspond to marker's location
+      //   }),
+      // },
+      // {
+      //   id: 1,
+      //   name: 'Technology',
+      //   sectors: [],
+      //   active: false,
+      //   marker: L.icon({
+      //     iconUrl: 'leaf-green.png',
+      //     shadowUrl: 'leaf-shadow.png',
+
+      //     iconSize: [38, 95], // size of the icon
+      //     shadowSize: [50, 64], // size of the shadow
+      //     iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+      //     shadowAnchor: [4, 62],  // the same for the shadow
+      //     popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+      //   }),
+      // },
       {
         id: 0,
-        name: 'Education',
+        name: 'Architecture',
         sectors: [],
         active: false,
-        marker: L.icon({
-          iconUrl: 'assets/markers/pin.svg',
-          iconSize: [50, 33], // size of the icon
-          iconAnchor: [24, 32], // point of the icon which will correspond to marker's location
-        }),
+        icon: 'assets/icons/industries/00.svg',
       },
       {
         id: 1,
-        name: 'Technology',
+        name: 'Software Production',
         sectors: [],
         active: false,
-        marker: L.icon({
-          iconUrl: 'leaf-green.png',
-          shadowUrl: 'leaf-shadow.png',
-
-          iconSize: [38, 95], // size of the icon
-          shadowSize: [50, 64], // size of the shadow
-          iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
-          shadowAnchor: [4, 62],  // the same for the shadow
-          popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-        }),
+        icon: 'assets/icons/industries/01.svg',
       },
+      {
+        id: 2,
+        name: 'Design',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/02.svg',
+      },
+      {
+        id: 3,
+        name: 'Editoria & Stampa',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/03.svg',
+      },
+      {
+        id: 4,
+        name: 'Visual Arts',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/04.svg',
+      },
+      {
+        id: 5,
+        name: 'Video Production',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/05.svg',
+      },
+      {
+        id: 6,
+        name: 'Radio & TV',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/06.svg',
+      },
+      {
+        id: 7,
+        name: 'Music',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/07.svg',
+      },
+      {
+        id: 8,
+        name: 'Performing Arts',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/08.svg',
+      },
+      {
+        id: 9,
+        name: '',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/09.svg',
+      },
+      {
+        id: 10,
+        name: 'Education',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/10.svg',
+      },
+      {
+        id: 11,
+        name: 'Advertising',
+        sectors: [],
+        active: false,
+        icon: 'assets/icons/industries/11.svg',
+      }
     ],
     points: [
       {
@@ -54,7 +143,15 @@ var repo = new Vue({
         industrie: 0,
         sector: 'UniBz',
         activity: 2,
+        address: "Piazza Universita', 39100 Bolzano (BZ)",
         coords: [46.4906700, 11.3398200],
+        logo: "assets/logos/flashbeing.png",
+        description: "Lorem Ipsum lorot sit amet",
+        linkedin: "",
+        facebook: "",
+        website: "jdsajsd",
+        phone: "",
+        mail: "",
         active: false,
       },
       {
@@ -63,7 +160,15 @@ var repo = new Vue({
         industrie: 0,
         sector: 'UniBz',
         activity: 2,
+        address: "Via Volta",
         coords: [46.7150300, 11.6559800],
+        logo: "assets/logos/unibz.png",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        linkedin: "linkedin",
+        facebook: "facebook",
+        website: "jdsajsd",
+        phone: "38923820",
+        mail: "shsaas@kjdfjds.co",
         active: false,
       },
       {
@@ -73,6 +178,13 @@ var repo = new Vue({
         sector: 'UniBz',
         activity: 2,
         coords: [46.7994200, 11.9342900],
+        logo: "assets/logos/unibz.png",
+        description: "Lorem Ipsum lorot sit amet",
+        linkedin: "",
+        facebook: "",
+        website: "jdsajsd",
+        phone: "",
+        mail: "",
         active: false,
       },
       {
@@ -82,6 +194,14 @@ var repo = new Vue({
         sector: 'Private Uni',
         activity: 2,
         coords: [46.499657, 11.313190],
+        logo: "assets/logos/unibz.png",
+        description: "Lorem Ipsum lorot sit amet",
+        linkedin: "",
+        facebook: "",
+        website: "jdsajsd",
+        phone: "",
+        mail: "",
+        active: false,
       },
       {
         id: 4,
@@ -90,6 +210,14 @@ var repo = new Vue({
         sector: 'Software Production',
         activity: 1,
         coords: [46.488827, 11.332528],
+        logo: "assets/logos/flashbeing.png",
+        description: "Lorem Ipsum lorot sit amet",
+        linkedin: "",
+        facebook: "",
+        website: "jdsajsd",
+        phone: "",
+        mail: "",
+        active: false,
       },
       {
         id: 5,
@@ -116,5 +244,9 @@ var repo = new Vue({
         coords: [46.488827, 11.332528],
       },
     ],
+  },
+  mounted() {
+
+    console.log(mergeImages(['assets/markers/pin.svg']));
   },
 });

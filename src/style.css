@@ -1,17 +1,16 @@
 /* INIT */
 
-html, body {
+html,
+body {
   font-size: large;
   font-family: Arial, Helvetica, sans-serif;
 }
-
 
 .title {
   font-size: 1.3rem;
 }
 
 /* CUSTOM */
-
 
 #app {
   position: relative;
@@ -108,6 +107,11 @@ html, body {
 
 #selection {
   z-index: 130;
+  padding: 0 30px;
+}
+
+#selection .row {
+  margin: 25px 0;
 }
 
 #filters {
@@ -174,7 +178,7 @@ html, body {
 }
 
 .rounded {
-  border-radius: 10px !important;
+  border-radius: 10px;
 }
 
 .center-area {
@@ -197,14 +201,14 @@ html, body {
   width: 100%;
 }
 
-.row {
-  display: flex;
-  height: 100%;
-  justify-content: space-between;
-}
-
 .inline-block {
   display: inline-block;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  border-bottom: 0.5px lightgray solid;
 }
 
 .icon {
@@ -232,6 +236,51 @@ html, body {
   opacity: 40%;
 }
 
+.row {
+  height: 100px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.social {
+  display: flex;
+}
+
+.social > :first-child {
+  margin-right: 15px;
+}
+
+.logo {
+  background-size: contain;
+  width: 100px;
+}
+
+.description {
+  margin-top: 15px;
+  margin-bottom: 30px;
+}
+
+.contact {
+  height: 40px;
+  margin: 15px 0;
+}
+
+.contact > .button {
+  margin-right: 15px;
+  margin-left: 0px;
+  cursor: auto;
+}
+
+.contact .icon {
+  fill: white;
+  opacity: 90%;
+}
 
 .clickable {
   cursor: pointer;
@@ -260,4 +309,12 @@ html, body {
 
 .center-icon {
   background-image: url("assets/icons/center-map.svg");
+}
+
+.facebook-icon {
+  background-image: url("assets/icons/facebook.jpeg");
+}
+
+.linkedin-icon {
+  background-image: url("assets/icons/linkedin.png");
 }

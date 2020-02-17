@@ -17,6 +17,7 @@ var myname = new Vue({
       activities: [],
     },
     results: repo.points,
+    selection: repo.points[0],
     searchValue: '',
     search: false,
   },
@@ -141,6 +142,7 @@ var myname = new Vue({
 
       this.activateSinglebox('selection');
       document.getElementById('nav-title').innerHTML = point.name;
+      this.selection = point;
 
       this.map.flyTo(point.coords, 16);
       // Todo: change icon to selection
@@ -300,7 +302,7 @@ var myname = new Vue({
       this.points.forEach((point) => {
         const industrie = this.industries.find(industrie => industrie.id === point.industrie);
 
-        point.leafletObject = L.marker(point.coords, { icon: industrie.marker, title: point.name });
+        point.leafletObject = L.marker(point.coords, { icon: repo.marker, title: point.name });
         point.leafletObject.on('click', function(e) { myname.pointSelected(point.id) } );
         point.leafletObject.addTo(this.markers);
       });
