@@ -123,7 +123,7 @@
         </div>
         <div id="results" class="singlebox">
           <div class="select-list">
-            <div class="select-item center-area" v-if="this.results.length === 0">
+            <div class="select-item center-area" v-if="results.length === 0">
               <div class="select-item-label center-y">No results.</div>
             </div>
             <div
@@ -263,7 +263,8 @@
         </div>
       </div>
     </div>
-    <img id="h">
+
+    <!-- <img id="h" /> -->
 
     <div>
       <!-- <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script> -->
@@ -286,20 +287,35 @@
 
 <script>
 import * as L from "leaflet";
-import mergeImages from "merge-images";
+require("leaflet.markercluster");
+
+// import mergeImages from "merge-images";
 
 export default {
   data() {
     return {
       searchValue: "",
-      center: [46.643211, 11.365379],
-      zoom: 9,
-      marker: null,
       markers: [],
-      testIcon: "",
-      // tileLayer: null,
+      tileLayer: null,
       singlebox: "industries",
-      activities: [
+      filters: {
+        industries: [],
+        sectors: [],
+        activities: []
+      },
+      results: [],
+      selection: "",
+      search: false,
+
+      // path: ""
+    };
+  },
+  props: {
+    center: { type: Array, default: () => [46.643211, 11.365379] },
+    zoom: { type: Number, default: 9 },
+    activities: {
+      type: Array,
+      default: () => [
         {
           id: 0,
           name: "Freelancer",
@@ -315,28 +331,46 @@ export default {
           name: "Entity",
           active: false
         }
-      ],
-      industries: [
+      ]
+    },
+    industries: {
+      type: Array,
+      default: () => [
         {
           id: 0,
           name: "Architecture",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/00.svg")
+          icon: require("@/assets/icons/industries/00.svg"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/00.svg"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 1,
           name: "Software Production",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/01.svg")
+          icon: require("@/assets/icons/industries/01.svg"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/01.svg"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 2,
           name: "Design",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/02.svg")
+          icon: require("@/assets/icons/industries/02.svg"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/02.svg"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 3,
@@ -401,8 +435,11 @@ export default {
           active: false,
           icon: require("@/assets/icons/industries/11.svg")
         }
-      ],
-      points: [
+      ]
+    },
+    points: {
+      type: Array,
+      default: () => [
         {
           id: 0,
           name: "Bozen",
@@ -510,48 +547,46 @@ export default {
           activity: 2,
           coords: [46.488827, 11.332528]
         }
-      ],
-      filters: {
-        industries: [],
-        sectors: [],
-        activities: []
-      },
-      results: [],
-      selection: "",
-      search: false,
-
-      path: ''
-    };
+      ]
+    }
   },
   mounted() {
-    this.path = require('@/assets/icons/industries/00.svg');
-    this.getIconURL('src/assets/icons/industries/00.svg');
+    /*
+    this.path = require("@/assets/icons/industries/00.svg");
+    this.getIconURL("src/assets/icons/industries/01.svg");
 
-      // fetch('./src/assets/markers/pin.svg').then(icon =>
+    fetch('./src/assets/markers/pin.svg').then(icon =>
     this.marker = L.icon({
-          iconUrl: require('@/assets/markers/pin.svg'),
-          iconSize: [18, 30], // size of the icon
-          iconAnchor: [24, 32], // point of the icon which will correspond to marker's location
-      });
-      // );
-    console.log(document.getElementById("map"));
-    this.searchValue = "";
+      iconUrl: require("@/assets/markers/pin.svg"),
+      iconSize: [18, 30], // size of the icon
+      iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+    })
+    );
+    */
+
     this.initMap();
     this.initMarkers();
     this.initFilters();
     this.renderFilters();
   },
   methods: {
-      getIconURL() {  
-        // var x = '@/assets/icons/industries/00.svg';
-         mergeImages([
-           {src: require('@/assets/markers/pin.svg'), width: 185, height: 300},
-           {src: require('@/assets/icons/industries/00.svg'), width:100, height: 100, x:42, y: 45}
-           ]).then(b64 => document.getElementById('h').src = b64)
+    /*
+    getIconURL() {
+      // var x = '@/assets/icons/industries/00.svg';
+      mergeImages([
+        { src: require("@/assets/markers/pin.svg"), width: 185, height: 300 },
+        {
+          src: require("@/assets/icons/industries/00.svg"),
+          width: 100,
+          height: 100,
+          x: 42,
+          y: 50
+        }
+      ]).then(b64 => (document.getElementById("h").src = b64));
 
-         return document.getElementById('h').src;
-
-      },
+      return document.getElementById("h").src;
+    },
+    */
 
     activate(id) {
       const el = document.getElementById(id).classList;
@@ -588,9 +623,6 @@ export default {
     },
 
     toggleSearchbar() {
-      // if (this.search) {
-      //   return;
-      // }
 
       this.activate("title-header");
 
@@ -791,8 +823,8 @@ export default {
     },
 
     showActivePoints() {
-      // var newMarkers = new L.MarkerClusterGroup();
-      var newMarkers = new L.LayerGroup();
+      var newMarkers = new L.MarkerClusterGroup();
+      // var newMarkers = new L.LayerGroup();
 
       this.points.forEach(point => {
         if (point.active) {
@@ -863,17 +895,20 @@ export default {
     },
 
     initMarkers() {
-      // this.markers = new L.MarkerClusterGroup();
-      this.markers = new L.layerGroup();
+      this.markers = new L.MarkerClusterGroup();
+      // this.markers = new L.layerGroup();
 
       this.points.forEach(point => {
-        // const industrie = this.industries.find(industrie => industrie.id === point.industrie);
+        const industrie = this.industries.find(
+          industrie => industrie.id === point.industrie
+        );
+        console.log(industrie.name);
 
         point.leafletObject = L.marker(point.coords, {
-          icon: this.marker,
+          icon: industrie.marker,
           title: point.name
         });
-        point.leafletObject.on("click", function() {
+        point.leafletObject.on("click", () => {
           this.pointSelected(point.id);
         });
         point.leafletObject.addTo(this.markers);
@@ -901,14 +936,19 @@ export default {
     }
   },
   watch: {
-        'searchValue': function () {
-            this.searching();
-        },
-    },
+    searchValue: function() {
+      this.searching();
+    }
+  }
 };
 </script>
 
 <style>
+/* #h {
+  height: 300px;
+  width: 180px;
+} */
+
 /* INIT */
 
 html,
@@ -925,8 +965,8 @@ body {
 
 #app {
   position: relative;
-  height: 600px;
-  width: 900px;
+  height: 700px;
+  width: 1100px;
 }
 
 #map {
