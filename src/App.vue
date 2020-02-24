@@ -27,6 +27,7 @@
                 class="search-bar inline-block center-y rounded"
                 v-bind:class="{active: searchIsActive}"
                 type="text"
+                placeholder="Freelancers, Companies, ..."
                 v-model="searchValue"
               />
               <div
@@ -35,28 +36,13 @@
                 @click="toggleSearchbar()"
               >
                 <div class="center-area">
-                  <div class="icon center-x center-y">
-                    <svg
-                      id="Capa_1"
-                      enable-background="new 0 0 515.558 515.558"
-                      viewBox="0 0 515.558 515.558"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="m378.344 332.78c25.37-34.645 40.545-77.2 40.545-123.333 0-115.484-93.961-209.445-209.445-209.445s-209.444 93.961-209.444 209.445 93.961 209.445 209.445 209.445c46.133 0 88.692-15.177 123.337-40.547l137.212 137.212 45.564-45.564c0-.001-137.214-137.213-137.214-137.213zm-168.899 21.667c-79.958 0-145-65.042-145-145s65.042-145 145-145 145 65.042 145 145-65.043 145-145 145z"
-                      />
-                    </svg>
+                  <div class="search-icon icon center-x center-y">
                   </div>
                 </div>
               </div>
-              <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
+              <div class="inline-block button rounded center-y" @click="showFilters()">
                 <div class="center-area">
-                  <div class="icon center-x center-y">
-                    <svg version="1.1" viewBox="-5 0 394 394" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="m367.82 0h-351.26c-6.1992-0.011719-11.879 3.4492-14.711 8.9609-2.8711 5.5859-2.3672 12.312 1.3008 17.414l128.69 181.29c0.042968 0.0625 0.089843 0.12109 0.13281 0.18359 4.6758 6.3125 7.207 13.961 7.2188 21.816v147.8c-0.027344 4.375 1.6914 8.582 4.7734 11.688 3.0859 3.1016 7.2812 4.8516 11.656 4.8516 2.2227-0.003906 4.4258-0.44531 6.4805-1.3008l72.312-27.57c6.4766-1.9805 10.777-8.0938 10.777-15.453v-120.02c0.011719-7.8555 2.543-15.504 7.2148-21.816 0.042968-0.0625 0.089844-0.12109 0.13281-0.18359l128.69-181.29c3.668-5.0977 4.1719-11.82 1.3008-17.406-2.8281-5.5156-8.5117-8.9766-14.707-8.9648z"
-                      />
-                    </svg>
+                  <div class="filter-icon icon center-x center-y">
                   </div>
                 </div>
               </div>
@@ -71,18 +57,7 @@
             <div class="center-area">
               <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
                 <div class="center-area">
-                  <div class="icon center-x center-y">
-                    <svg
-                      enable-background="new 0 0 492 492"
-                      version="1.1"
-                      viewBox="0 0 492 492"
-                      xml:space="preserve"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="m484.13 104.48-16.116-16.116c-5.064-5.068-11.816-7.856-19.024-7.856s-13.964 2.788-19.028 7.856l-226.45 226.45-141.48-141.49c-5.064-5.06-11.82-7.852-19.028-7.852-7.204 0-13.956 2.792-19.024 7.852l-16.12 16.112c-5.068 5.076-7.852 11.836-7.852 19.036 0 7.204 2.784 13.96 7.852 19.028l159.74 159.74c0.212 0.3 0.436 0.58 0.696 0.836l16.12 15.852c5.064 5.048 11.82 7.572 19.084 7.572h0.084c7.212 0 13.968-2.524 19.024-7.572l16.124-15.992c0.26-0.256 0.48-0.468 0.612-0.684l244.78-244.76c10.5-10.476 10.5-27.52 4e-3 -38.008z"
-                      />
-                    </svg>
+                  <div class="confirm-icon icon center-x center-y">
                   </div>
                 </div>
               </div>
@@ -93,7 +68,7 @@
         <div
           id="industries"
           class="singlebox"
-          v-bind:class="{active: currentSinglebox === 'industries'}"
+          v-bind:class="{active: currentSinglebox === 'industries', shift: lastBoxes.includes('industries')}"
         >
           <div class="select-list">
             <div
@@ -111,7 +86,7 @@
             </div>
           </div>
         </div>
-        <div id="sectors" class="singlebox" v-bind:class="{active: currentSinglebox === 'sectors'}">
+        <div id="sectors" class="singlebox" v-bind:class="{active: currentSinglebox === 'sectors', shift: lastBoxes.includes('sectors')}">
           <div class="select-list">
             <div
               class="select-item center-area"
@@ -124,7 +99,7 @@
             </div>
           </div>
         </div>
-        <div id="results" class="singlebox" v-bind:class="{active: currentSinglebox === 'results'}">
+        <div id="results" class="singlebox" v-bind:class="{active: currentSinglebox === 'results', shift: lastBoxes.includes('results')}">
           <div class="select-list">
             <div class="select-item center-area" v-if="results.length === 0">
               <div class="select-item-label center-y">No results.</div>
@@ -177,18 +152,7 @@
           <div class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
-                <div class="icon center-x center-y">
-                  <svg
-                    enable-background="new 0 0 384 384"
-                    version="1.1"
-                    viewBox="0 0 384 384"
-                    xml:space="preserve"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m353.19 252.05c-23.51 0-46.594-3.677-68.469-10.906-10.719-3.656-23.896-0.302-30.438 6.417l-43.177 32.594c-50.073-26.729-80.917-57.563-107.28-107.26l31.635-42.052c8.219-8.208 11.167-20.198 7.635-31.448-7.26-21.99-10.948-45.063-10.948-68.583 1e-3 -16.991-13.822-30.814-30.812-30.814h-70.52c-16.99 0-30.813 13.823-30.813 30.813 0 194.75 158.44 353.19 353.19 353.19 16.99 0 30.813-13.823 30.813-30.813v-70.323c-1e-3 -16.989-13.824-30.812-30.813-30.812z"
-                    />
-                  </svg>
+                <div class="phone-icon icon center-x center-y">
                 </div>
               </div>
             </div>
@@ -197,21 +161,7 @@
           <div class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
-                <div class="icon center-x center-y">
-                  <svg
-                    enable-background="new 0 0 512 512"
-                    version="1.1"
-                    viewBox="0 0 512 512"
-                    xml:space="preserve"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m10.688 95.156c70.27 59.511 193.57 164.21 229.81 196.85 4.865 4.406 10.083 6.646 15.5 6.646 5.406 0 10.615-2.219 15.469-6.604 36.271-32.677 159.57-137.38 229.84-196.9 4.375-3.698 5.042-10.198 1.5-14.719-8.188-10.447-20.396-16.437-33.48-16.437h-426.67c-13.083 0-25.292 5.99-33.479 16.438-3.542 4.52-2.875 11.02 1.5 14.718z"
-                    />
-                    <path
-                      d="m505.81 127.41c-3.781-1.76-8.229-1.146-11.375 1.542-77.928 66.062-177.39 150.74-208.68 178.94-17.563 15.854-41.938 15.854-59.542-0.021-33.354-30.052-145.04-125-208.66-178.92-3.167-2.688-7.625-3.281-11.375-1.542-3.77 1.751-6.187 5.522-6.187 9.678v268.25c0 23.532 19.135 42.667 42.667 42.667h426.67c23.531 0 42.666-19.135 42.666-42.667v-268.25c0-4.156-2.417-7.937-6.187-9.677z"
-                    />
-                  </svg>
+                <div class="mail-icon icon center-x center-y">
                 </div>
               </div>
             </div>
@@ -220,18 +170,7 @@
           <div class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
-                <div class="icon center-x center-y">
-                  <svg
-                    enable-background="new 0 0 512 512"
-                    version="1.1"
-                    viewBox="0 0 512 512"
-                    xml:space="preserve"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m256 0c-105.88 0-192 86.135-192 192 0 141.65 177.15 310 184.69 317.1 2.062 1.927 4.687 2.896 7.312 2.896s5.25-0.969 7.313-2.896c7.541-7.104 184.69-175.46 184.69-317.1 0-105.86-86.125-192-192-192zm0 298.67c-58.813 0-106.67-47.854-106.67-106.67s47.855-106.67 106.67-106.67 106.67 47.855 106.67 106.67-47.854 106.67-106.67 106.67z"
-                    />
-                  </svg>
+                <div class="pin-icon icon center-x center-y">
                 </div>
               </div>
             </div>
@@ -1065,7 +1004,7 @@ body {
 
 .title-header {
   transform: translate(-45px);
-  transition: all 0.15s ease-in-out;
+  transition: all 0.1s ease;
 }
 
 .title-header.active {
@@ -1075,7 +1014,7 @@ body {
 
 .nav-back {
   opacity: 0;
-  transition: opacity 0.15s linear;
+  transition: opacity 0.1s linear;
 }
 
 .title-header.active .nav-back {
@@ -1087,11 +1026,13 @@ body {
   height: 34px;
   width: 0;
   opacity: 0;
-  transition: width 0.15s ease-out;
+  transition: width 0.1s ease;
+  background-color: #eeeeee;
   border: 2px solid rgba(0, 0, 0, 0.2);
   border-right: none;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
+  padding-left: 10px;
 }
 
 .search-bar.active {
@@ -1102,7 +1043,7 @@ body {
 .search-button.active {
   height: 36px;
   border: 2px solid rgba(0, 0, 0, 0.2);
-  border-left: 1px solid rgba(0, 0, 0, 0.2);
+  border-left: none;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   margin-left: 0;
@@ -1118,7 +1059,7 @@ body {
   width: 100%;
   box-sizing: border-box;
   background-color: white;
-  transition: all 0.15s ease-in-out;
+  transition: all 0.1s ease;
 }
 
 #industries {
@@ -1135,7 +1076,8 @@ body {
 
 #selection {
   z-index: 130;
-  padding: 0 30px;
+  padding: 0 20px 0 30px;
+  font-size: medium;
 }
 
 #selection .row {
@@ -1159,6 +1101,10 @@ body {
 
 .select-list > .select-item:hover {
   background: #eeeeee;
+}
+
+.select-list > .select-item:active {
+  opacity: 0.5;                                                                                                                                     
 }
 
 .select-item > .icon {
@@ -1257,6 +1203,7 @@ a {
 .button .icon {
   height: 60%;
   width: 60%;
+  background-position: center;
 }
 
 .navbar .button .icon {
@@ -1316,7 +1263,12 @@ a {
 
 .singlebox.active {
   transform: translate(0%) !important;
-  opacity: 100 !important;
+  opacity: 1 !important;
+}
+
+.singlebox.shift {
+  transform: translate(-100%) !important;
+  opacity: 0 !important;
 }
 
 .active {
@@ -1337,8 +1289,16 @@ a {
   height: 55px;
 }
 
+.search-icon {
+  background-image: url('assets/icons/search.svg');
+}
+
 .filter-icon {
   background-image: url("assets/icons/filter.svg");
+}
+
+.confirm-icon {
+  background-image: url("assets/icons/confirm.svg");
 }
 
 .center-icon {
@@ -1351,5 +1311,17 @@ a {
 
 .linkedin-icon {
   background-image: url("assets/icons/linkedin.png");
+}
+
+.phone-icon {
+  background-image: url("assets/icons/phone.svg");
+}
+
+.mail-icon {
+  background-image: url("assets/icons/mail.svg");
+}
+
+.pin-icon {
+  background-image: url("assets/icons/pin.svg");
 }
 </style>
