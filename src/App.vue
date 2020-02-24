@@ -36,14 +36,12 @@
                 @click="toggleSearchbar()"
               >
                 <div class="center-area">
-                  <div class="search-icon icon center-x center-y">
-                  </div>
+                  <div class="search-icon icon center-x center-y"></div>
                 </div>
               </div>
               <div class="inline-block button rounded center-y" @click="showFilters()">
                 <div class="center-area">
-                  <div class="filter-icon icon center-x center-y">
-                  </div>
+                  <div class="filter-icon icon center-x center-y"></div>
                 </div>
               </div>
             </div>
@@ -57,8 +55,7 @@
             <div class="center-area">
               <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
                 <div class="center-area">
-                  <div class="confirm-icon icon center-x center-y">
-                  </div>
+                  <div class="confirm-icon icon center-x center-y"></div>
                 </div>
               </div>
             </div>
@@ -78,15 +75,19 @@
               @click="industrieSelected(industrie.id)"
             >
               <div
-                class="center-y icon rounded primary-bg"
-                v-bind:style="{'background': 'url(' + industrie.icon + ') no-repeat center', 'background-size': '65%'}"
+                class="industrie-icon icon center-y rounded primary-bg"
+                v-bind:style="{'background-image': 'url(' + industrie.icon + ')'}"
               ></div>
               <div class="select-item-label center-y">{{ industrie.name }}</div>
               <div class="center-y icon forward-icon"></div>
             </div>
           </div>
         </div>
-        <div id="sectors" class="singlebox" v-bind:class="{active: currentSinglebox === 'sectors', shift: lastBoxes.includes('sectors')}">
+        <div
+          id="sectors"
+          class="singlebox"
+          v-bind:class="{active: currentSinglebox === 'sectors', shift: lastBoxes.includes('sectors')}"
+        >
           <div class="select-list">
             <div
               class="select-item center-area"
@@ -99,7 +100,11 @@
             </div>
           </div>
         </div>
-        <div id="results" class="singlebox" v-bind:class="{active: currentSinglebox === 'results', shift: lastBoxes.includes('results')}">
+        <div
+          id="results"
+          class="singlebox"
+          v-bind:class="{active: currentSinglebox === 'results', shift: lastBoxes.includes('results')}"
+        >
           <div class="select-list">
             <div class="select-item center-area" v-if="results.length === 0">
               <div class="select-item-label center-y">No results.</div>
@@ -112,7 +117,7 @@
             >
               <div
                 class="center-y icon rounded primary-bg"
-                v-bind:style="{'background': 'url(' + point.logo + ')', 'background-size': 'contain'}"
+                v-bind:style="{'background-image': 'url(' + point.logo + ')'}"
               ></div>
               <div class="select-item-label center-y">{{ point.name }}</div>
               <div class="center-y icon forward-icon"></div>
@@ -128,16 +133,22 @@
             <div class="links">
               <div class="social">
                 <!-- <div class="center-y icon rounded instagram"></div> -->
-                <div
-                  class="center-y icon rounded facebook-icon clickable"
-                  v-if="selection.facebook"
-                  @click="window.open(selection.facebook)"
-                ></div>
-                <div
-                  class="center-y icon rounded linkedin-icon clickable"
-                  v-if="selection.linkedin"
-                  @click="window.open(selection.linkedin)"
-                ></div>
+                  <a
+                    class="icon"
+                    v-if="selection.facebook"
+                    v-bind:href="selection.facebook"
+                  >
+                    <div class="icon rounded facebook-icon">
+                    </div>
+                  </a>
+                  <a
+                    class="icon"
+                    v-if="selection.linkedin"
+                    v-bind:href="selection.linkedin"
+                  >
+                    <div class="icon rounded linkedin-icon">
+                    </div>
+                  </a>
               </div>
               <div class="website">
                 <a v-bind:href="selection.website">{{ selection.website }}</a>
@@ -152,8 +163,7 @@
           <div class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
-                <div class="phone-icon icon center-x center-y">
-                </div>
+                <div class="phone-icon icon center-x center-y"></div>
               </div>
             </div>
             <div class="phone-number center-y">{{ selection.phone }}</div>
@@ -161,8 +171,7 @@
           <div class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
-                <div class="mail-icon icon center-x center-y">
-                </div>
+                <div class="mail-icon icon center-x center-y"></div>
               </div>
             </div>
             <div class="mail center-y">{{ selection.mail }}</div>
@@ -170,8 +179,7 @@
           <div class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
-                <div class="pin-icon icon center-x center-y">
-                </div>
+                <div class="pin-icon icon center-x center-y"></div>
               </div>
             </div>
             <div class="address center-y">{{ selection.address }}</div>
@@ -211,11 +219,7 @@
       </div>
     </div>
 
-    <!-- <img id="h" /> -->
-
     <div>
-      <!-- <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script> -->
-
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
       <link
         rel="stylesheet"
@@ -225,9 +229,6 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
       />
-      <!-- <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script> -->
-
-      <!-- <script src="https://unpkg.com/merge-images"></script> -->
     </div>
   </div>
 </template>
@@ -235,8 +236,6 @@
 <script>
 import * as L from "leaflet";
 require("leaflet.markercluster");
-
-// import mergeImages from "merge-images";
 
 export default {
   data() {
@@ -260,8 +259,6 @@ export default {
       titleHeaderIsActive: false,
       searchIsActive: false,
       filterIsActive: false
-
-      // path: ""
     };
   },
   props: {
@@ -422,8 +419,8 @@ export default {
           logo: require("@/assets/logos/unibz.png"),
           description:
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-          linkedin: "linkedin",
-          facebook: "facebook",
+          linkedin: "linkedin.com",
+          facebook: "facebook.com",
           website: "jdsajsd",
           phone: "38923820",
           mail: "shsaas@kjdfjds.co",
@@ -511,22 +508,6 @@ export default {
     this.renderFilters();
   },
   methods: {
-    activate(id) {
-      const el = document.getElementById(id).classList;
-
-      if (!el.contains("active")) {
-        el.toggle("active");
-      }
-    },
-
-    deactivate(id) {
-      const el = document.getElementById(id).classList;
-
-      if (el.contains("active")) {
-        el.toggle("active");
-      }
-    },
-
     searching() {
       var b = this.searchValue.toLowerCase();
       this.results = this.points.filter(function(point) {
@@ -549,15 +530,12 @@ export default {
       this.titleHeaderIsActive = true;
 
       this.searchIsActive = true;
-      // this.activate("search-button");
-      // this.activate("search-bar");
       this.$refs["search-bar"].focus();
 
       this.initFilters();
       this.showActivePoints();
       this.search = true;
 
-      // this.activateSinglebox("results");
       this.lastBoxes = ["industries"];
       this.lastBoxesTitle = ["industries"];
       this.currentSinglebox = "results";
@@ -567,21 +545,14 @@ export default {
     resetSearchbar() {
       if (this.search) {
         this.searchIsActive = false;
-        // this.deactivate("search-button");
-        // this.deactivate("search-bar");
         this.searchValue = "";
         this.search = false;
-
         this.backToStart();
-        return;
       }
     },
 
     showFilters() {
-      // document.getElementById("filters").classList.toggle("active");
-      // document.getElementById("nav-filters").classList.toggle("active");
       this.filterIsActive = !this.filterIsActive;
-      // document.getElementById("nav").classList.toggle("active");
     },
 
     centerMap() {
@@ -589,22 +560,15 @@ export default {
     },
 
     backToStart() {
-      // if (this.currentSinglebox !== "industries") {
-      //   this.stepBack();
-      //   this.backToStart();
-      // } else {
-      //   this.currentSinglebox = "industries";
-      //   // this.deactivate("title-header");
-      // }
-
-      this.currentSinglebox = "industries";
-      this.lastBoxes = [];
-      this.lastBoxesTitle = [];
+      if (this.currentSinglebox !== "industries") {
+        this.stepBack();
+        this.backToStart();
+      } else {
+        return;
+      }
     },
 
     stepBack() {
-      // this.deactivate(this.currentSinglebox);
-
       if (this.search) {
         this.search = false;
         this.searchIsActive = false;
@@ -634,73 +598,9 @@ export default {
           // }
           break;
       }
-      // if (this.lastBoxes.includes("sectors")) {
-      //   let i = this.lastBoxes.indexOf("sectors");
-      //   const industrie = this.industries.find(
-      //     industrie => industrie.id === this.filters.industries[0]
-      //   );
-      //   this.filters = [this.lastBoxesTitle[i]];
-      // }
-      // if (this.lastBoxes.includes("industries")) {
-      //   let i = this.lastBoxes.indexOf("industries");
-      //   this.filters = [this.lastBoxesTitle[i]];
-      // }
 
       this.currentSingleboxTitle = this.lastBoxesTitle.pop();
       this.currentSinglebox = this.lastBoxes.pop();
-
-      /*
-
-      switch (this.currentSinglebox) {
-        case "selection":
-          this.centerMap();
-
-          if (this.search) {
-            this.toggleSearchbar();
-          } else if (
-            document.getElementById("results").classList.contains("active")
-          ) {
-            this.currentSingleboxTitle = this.filters.sectors[0];
-            this.currentSinglebox = "results";
-          } else if (
-            document.getElementById("sectors").classList.contains("active")
-          ) {
-            const industrie = this.industries.find(
-              industrie => industrie.id === this.filters.industries[0]
-            );
-            this.currentSingleboxTitle = industrie.name;
-            this.currentSinglebox = "sectors";
-          } else {
-            this.currentSinglebox = "industries";
-          }
-
-          break;
-
-        case "results":
-          var industrie = this.industries.find(
-            industrie => industrie.id === this.filters.industries[0]
-          );
-          this.currentSingleboxTitle = industrie.name;
-          this.filters.sectors = industrie.sectors;
-
-          this.resetSearchbar();
-          this.currentSinglebox = "sectors";
-          break;
-
-        case "sectors":
-          this.currentSingleboxTitle = "Industries";
-          this.initFilters();
-
-          this.resetSearchbar();
-          // this.deactivate("title-header");
-          this.currentSinglebox = "industries";
-          break;
-
-        default:
-          this.resetSearchbar();
-          break;
-      }
-      */
 
       this.activateAllPoints();
       this.renderFilters();
@@ -708,22 +608,14 @@ export default {
 
     pointSelected(id) {
       const point = this.points.find(point => point.id === id);
-
-      // this.activate("title-header");
-
-      // this.deactivate("search-button");
-      // this.deactivate("search-bar");
-
       this.activateSinglebox("selection", point.name);
       this.selection = point;
 
       this.map.flyTo(point.coords, 16);
-      // Todo: change icon to selection
     },
 
     sectorSelected(sectorId) {
       this.activateSinglebox("results", sectorId);
-      // this.currentSingleboxTitle = sectorId;
 
       this.filters.sectors = [sectorId];
       this.renderFilters();
@@ -737,10 +629,7 @@ export default {
         industrie => industrie.id === industrieId
       );
 
-      // this.activate("title-header");
       this.activateSinglebox("sectors", industrie.name);
-      // this.currentSingleboxTitle = industrie.name;
-
       this.industries.forEach(i => {
         if (i.id !== industrieId) {
           i.active = false;
@@ -923,11 +812,6 @@ export default {
 </script>
 
 <style>
-/* #h {
-  height: 300px;
-  width: 180px;
-} */
-
 /* INIT */
 
 html,
@@ -1104,7 +988,7 @@ body {
 }
 
 .select-list > .select-item:active {
-  opacity: 0.5;                                                                                                                                     
+  opacity: 0.5;
 }
 
 .select-item > .icon {
@@ -1183,6 +1067,10 @@ a {
   color: black;
   text-decoration: none;
   border-bottom: 0.5px lightgray solid;
+}
+
+a.icon {
+  border: none;
 }
 
 .icon {
@@ -1282,15 +1170,21 @@ a {
   margin-right: 15px !important;
 }
 
+.select-item > .industrie-icon {
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .select-item > .forward-icon {
   background-image: url("assets/icons/right.svg");
   margin-left: auto !important;
   background-position: right;
-  height: 55px;
+  height: 40px;
 }
 
 .search-icon {
-  background-image: url('assets/icons/search.svg');
+  background-image: url("assets/icons/search.svg");
 }
 
 .filter-icon {
