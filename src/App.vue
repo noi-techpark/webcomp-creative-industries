@@ -2,33 +2,36 @@
   <div>
     <div id="app" class="container">
       <div id="map" ref="map" class="map"></div>
-      <div id="center-button" class="inline-block button white-bg rounded" @click="centerMap()">
+      <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
         <div class="center-area">
           <div class="center-icon icon center-x center-y"></div>
         </div>
       </div>
-      <div id="logo"></div>
+      <div class="logo bottom-left"></div>
       <div id="omnibox" class="margined shadowed rounded">
-        <div id="nav" class="navbar active">
+        <div class="navbar" v-bind:class="{ active: !filterIsActive}">
           <div class="row">
-            <div id="title-header" class="center-area fill">
+            <div
+              class="title-header center-area fill"
+              v-bind:class="{active: currentSinglebox !== 'industries' || search}"
+            >
               <div
-                id="nav-back"
-                class="inline-block center-y icon back-icon clickable"
+                class="nav-back inline-block center-y icon back-icon clickable"
                 @click="stepBack()"
               ></div>
-              <div id="nav-title" class="inline-block center-y title">Industries</div>
+              <div class="title inline-block center-y title">{{ currentSingleboxTitle }}</div>
             </div>
             <div class="center-area">
               <input
-                id="search-bar"
-                class="inline-block center-y rounded"
+                ref="search-bar"
+                class="search-bar inline-block center-y rounded"
+                v-bind:class="{active: searchIsActive}"
                 type="text"
                 v-model="searchValue"
               />
               <div
-                id="search-button"
-                class="inline-block button rounded center-y"
+                class="search-button inline-block button rounded center-y"
+                v-bind:class="{active: searchIsActive}"
                 @click="toggleSearchbar()"
               >
                 <div class="center-area">
@@ -46,11 +49,7 @@
                   </div>
                 </div>
               </div>
-              <div
-                id="filter-button"
-                class="inline-block button primary-bg rounded center-y"
-                @click="showFilters()"
-              >
+              <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
                 <div class="center-area">
                   <div class="icon center-x center-y">
                     <svg version="1.1" viewBox="-5 0 394 394" xmlns="http://www.w3.org/2000/svg">
@@ -64,7 +63,7 @@
             </div>
           </div>
         </div>
-        <div id="nav-filters" class="navbar">
+        <div class="nav-filters navbar" v-bind:class="{active: filterIsActive}">
           <div class="row">
             <div class="center-area fill">
               <div class="inline-block center-y title">Filter</div>
@@ -91,7 +90,11 @@
           </div>
         </div>
 
-        <div id="industries" class="singlebox active">
+        <div
+          id="industries"
+          class="singlebox"
+          v-bind:class="{active: currentSinglebox === 'industries'}"
+        >
           <div class="select-list">
             <div
               class="select-item center-area"
@@ -108,7 +111,7 @@
             </div>
           </div>
         </div>
-        <div id="sectors" class="singlebox">
+        <div id="sectors" class="singlebox" v-bind:class="{active: currentSinglebox === 'sectors'}">
           <div class="select-list">
             <div
               class="select-item center-area"
@@ -121,7 +124,7 @@
             </div>
           </div>
         </div>
-        <div id="results" class="singlebox">
+        <div id="results" class="singlebox" v-bind:class="{active: currentSinglebox === 'results'}">
           <div class="select-list">
             <div class="select-item center-area" v-if="results.length === 0">
               <div class="select-item-label center-y">No results.</div>
@@ -137,10 +140,15 @@
                 v-bind:style="{'background': 'url(' + point.logo + ')', 'background-size': 'contain'}"
               ></div>
               <div class="select-item-label center-y">{{ point.name }}</div>
+              <div class="center-y icon forward-icon"></div>
             </div>
           </div>
         </div>
-        <div id="selection" class="singlebox">
+        <div
+          id="selection"
+          class="singlebox"
+          v-bind:class="{active: currentSinglebox === 'selection'}"
+        >
           <div class="row">
             <div class="links">
               <div class="social">
@@ -230,10 +238,10 @@
             <div class="address center-y">{{ selection.address }}</div>
           </div>
         </div>
-        <div id="filters" class="singlebox">
+        <div id="filters" class="singlebox" v-bind:class="{active: filterIsActive}">
           <div class="filter-class">
             <div class="title">Type:</div>
-            <div class="form-check" v-for="activity in activities" :key="activity">
+            <div class="form-check" v-for="activity in activities" :key="activity.id">
               <label class="form-check-label">
                 <input
                   class="form-check-input"
@@ -297,7 +305,6 @@ export default {
       searchValue: "",
       markers: [],
       tileLayer: null,
-      singlebox: "industries",
       filters: {
         industries: [],
         sectors: [],
@@ -305,7 +312,15 @@ export default {
       },
       results: [],
       selection: "",
+
       search: false,
+      lastBoxes: [],
+      lastBoxesTitle: [],
+      currentSinglebox: "industries",
+      currentSingleboxTitle: "industries",
+      titleHeaderIsActive: false,
+      searchIsActive: false,
+      filterIsActive: false
 
       // path: ""
     };
@@ -551,43 +566,12 @@ export default {
     }
   },
   mounted() {
-    /*
-    this.path = require("@/assets/icons/industries/00.svg");
-    this.getIconURL("src/assets/icons/industries/01.svg");
-
-    fetch('./src/assets/markers/pin.svg').then(icon =>
-    this.marker = L.icon({
-      iconUrl: require("@/assets/markers/pin.svg"),
-      iconSize: [18, 30], // size of the icon
-      iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-    })
-    );
-    */
-
     this.initMap();
     this.initMarkers();
     this.initFilters();
     this.renderFilters();
   },
   methods: {
-    /*
-    getIconURL() {
-      // var x = '@/assets/icons/industries/00.svg';
-      mergeImages([
-        { src: require("@/assets/markers/pin.svg"), width: 185, height: 300 },
-        {
-          src: require("@/assets/icons/industries/00.svg"),
-          width: 100,
-          height: 100,
-          x: 42,
-          y: 50
-        }
-      ]).then(b64 => (document.getElementById("h").src = b64));
-
-      return document.getElementById("h").src;
-    },
-    */
-
     activate(id) {
       const el = document.getElementById(id).classList;
 
@@ -623,25 +607,29 @@ export default {
     },
 
     toggleSearchbar() {
+      this.titleHeaderIsActive = true;
 
-      this.activate("title-header");
-
-      this.activate("search-button");
-      this.activate("search-bar");
-      document.getElementById("search-bar").focus();
+      this.searchIsActive = true;
+      // this.activate("search-button");
+      // this.activate("search-bar");
+      this.$refs["search-bar"].focus();
 
       this.initFilters();
       this.showActivePoints();
       this.search = true;
 
-      this.activateSinglebox("results");
-      document.getElementById("nav-title").innerHTML = "";
+      // this.activateSinglebox("results");
+      this.lastBoxes = ["industries"];
+      this.lastBoxesTitle = ["industries"];
+      this.currentSinglebox = "results";
+      this.currentSingleboxTitle = "";
     },
 
     resetSearchbar() {
       if (this.search) {
-        this.deactivate("search-button");
-        this.deactivate("search-bar");
+        this.searchIsActive = false;
+        // this.deactivate("search-button");
+        // this.deactivate("search-bar");
         this.searchValue = "";
         this.search = false;
 
@@ -651,9 +639,10 @@ export default {
     },
 
     showFilters() {
-      document.getElementById("filters").classList.toggle("active");
-      document.getElementById("nav-filters").classList.toggle("active");
-      document.getElementById("nav").classList.toggle("active");
+      // document.getElementById("filters").classList.toggle("active");
+      // document.getElementById("nav-filters").classList.toggle("active");
+      this.filterIsActive = !this.filterIsActive;
+      // document.getElementById("nav").classList.toggle("active");
     },
 
     centerMap() {
@@ -661,19 +650,69 @@ export default {
     },
 
     backToStart() {
-      if (this.singlebox !== "industries") {
-        this.stepBack();
-        this.backToStart();
-      } else {
-        this.singlebox = "industries";
-        this.deactivate("title-header");
-      }
+      // if (this.currentSinglebox !== "industries") {
+      //   this.stepBack();
+      //   this.backToStart();
+      // } else {
+      //   this.currentSinglebox = "industries";
+      //   // this.deactivate("title-header");
+      // }
+
+      this.currentSinglebox = "industries";
+      this.lastBoxes = [];
+      this.lastBoxesTitle = [];
     },
 
     stepBack() {
-      this.deactivate(this.singlebox);
+      // this.deactivate(this.currentSinglebox);
 
-      switch (this.singlebox) {
+      if (this.search) {
+        this.search = false;
+        this.searchIsActive = false;
+      }
+
+      switch (this.currentSinglebox) {
+        case "sectors":
+          this.filters.industries = [];
+          this.industries.forEach(industrie => {
+            this.filters.industries.push(industrie.id);
+          });
+        /* falls through */
+        case "results":
+          this.filters.sectors = [];
+          this.filters.industries.forEach(industrieId => {
+            var industrie = this.industries.find(
+              industrie => industrie.id === industrieId
+            );
+            industrie.sectors.forEach(sector => {
+              this.filters.sectors.push(sector);
+            });
+          });
+          break;
+        case "selection":
+          this.centerMap();
+          // if (this.search) {
+          // }
+          break;
+      }
+      // if (this.lastBoxes.includes("sectors")) {
+      //   let i = this.lastBoxes.indexOf("sectors");
+      //   const industrie = this.industries.find(
+      //     industrie => industrie.id === this.filters.industries[0]
+      //   );
+      //   this.filters = [this.lastBoxesTitle[i]];
+      // }
+      // if (this.lastBoxes.includes("industries")) {
+      //   let i = this.lastBoxes.indexOf("industries");
+      //   this.filters = [this.lastBoxesTitle[i]];
+      // }
+
+      this.currentSingleboxTitle = this.lastBoxesTitle.pop();
+      this.currentSinglebox = this.lastBoxes.pop();
+
+      /*
+
+      switch (this.currentSinglebox) {
         case "selection":
           this.centerMap();
 
@@ -682,20 +721,18 @@ export default {
           } else if (
             document.getElementById("results").classList.contains("active")
           ) {
-            document.getElementById(
-              "nav-title"
-            ).innerHTML = this.filters.sectors[0];
-            this.singlebox = "results";
+            this.currentSingleboxTitle = this.filters.sectors[0];
+            this.currentSinglebox = "results";
           } else if (
             document.getElementById("sectors").classList.contains("active")
           ) {
             const industrie = this.industries.find(
               industrie => industrie.id === this.filters.industries[0]
             );
-            document.getElementById("nav-title").innerHTML = industrie.name;
-            this.singlebox = "sectors";
+            this.currentSingleboxTitle = industrie.name;
+            this.currentSinglebox = "sectors";
           } else {
-            this.singlebox = "industries";
+            this.currentSinglebox = "industries";
           }
 
           break;
@@ -704,26 +741,27 @@ export default {
           var industrie = this.industries.find(
             industrie => industrie.id === this.filters.industries[0]
           );
-          document.getElementById("nav-title").innerHTML = industrie.name;
+          this.currentSingleboxTitle = industrie.name;
           this.filters.sectors = industrie.sectors;
 
           this.resetSearchbar();
-          this.singlebox = "sectors";
+          this.currentSinglebox = "sectors";
           break;
 
         case "sectors":
-          document.getElementById("nav-title").innerHTML = "Industries";
+          this.currentSingleboxTitle = "Industries";
           this.initFilters();
 
           this.resetSearchbar();
-          this.deactivate("title-header");
-          this.singlebox = "industries";
+          // this.deactivate("title-header");
+          this.currentSinglebox = "industries";
           break;
 
         default:
           this.resetSearchbar();
           break;
       }
+      */
 
       this.activateAllPoints();
       this.renderFilters();
@@ -732,13 +770,12 @@ export default {
     pointSelected(id) {
       const point = this.points.find(point => point.id === id);
 
-      this.activate("title-header");
+      // this.activate("title-header");
 
-      this.deactivate("search-button");
-      this.deactivate("search-bar");
+      // this.deactivate("search-button");
+      // this.deactivate("search-bar");
 
-      this.activateSinglebox("selection");
-      document.getElementById("nav-title").innerHTML = point.name;
+      this.activateSinglebox("selection", point.name);
       this.selection = point;
 
       this.map.flyTo(point.coords, 16);
@@ -746,8 +783,8 @@ export default {
     },
 
     sectorSelected(sectorId) {
-      this.activateSinglebox("results");
-      document.getElementById("nav-title").innerHTML = sectorId;
+      this.activateSinglebox("results", sectorId);
+      // this.currentSingleboxTitle = sectorId;
 
       this.filters.sectors = [sectorId];
       this.renderFilters();
@@ -761,9 +798,9 @@ export default {
         industrie => industrie.id === industrieId
       );
 
-      this.activate("title-header");
-      this.activateSinglebox("sectors");
-      document.getElementById("nav-title").innerHTML = industrie.name;
+      // this.activate("title-header");
+      this.activateSinglebox("sectors", industrie.name);
+      // this.currentSingleboxTitle = industrie.name;
 
       this.industries.forEach(i => {
         if (i.id !== industrieId) {
@@ -774,6 +811,7 @@ export default {
         this.industrieChanged(i.id, i.active);
       });
 
+      this.filters.industries = [industrieId];
       this.filters.sectors = industrie.sectors;
 
       this.searching();
@@ -811,9 +849,11 @@ export default {
       this.searching();
     },
 
-    activateSinglebox(id) {
-      this.activate(id);
-      this.singlebox = id;
+    activateSinglebox(id, title) {
+      this.lastBoxes.push(this.currentSinglebox);
+      this.lastBoxesTitle.push(this.currentSingleboxTitle);
+      this.currentSinglebox = id;
+      this.currentSingleboxTitle = title;
     },
 
     activateAllPoints() {
@@ -976,18 +1016,21 @@ body {
   z-index: 0;
 }
 
-#center-button {
+.center-button {
   position: absolute;
-  height: 30px;
-  width: 30px;
+  height: 30px !important;
+  width: 30px !important;
   bottom: 120px;
   right: 30px;
   border: 2px solid rgba(0, 0, 0, 0.2);
 }
 
-#logo {
+.logo {
   background-image: url("assets/icons/idm.svg");
   background-repeat: no-repeat;
+}
+
+.logo.bottom-left {
   position: absolute;
   height: 45px;
   width: 120px;
@@ -1012,30 +1055,34 @@ body {
   padding: 0 30px;
 }
 
+.navbar .title {
+  text-transform: capitalize;
+}
+
 #navbar-filters {
   position: absolute;
 }
 
-#title-header {
+.title-header {
   transform: translate(-45px);
   transition: all 0.15s ease-in-out;
 }
 
-#title-header.active {
+.title-header.active {
   display: flex !important;
   transform: translate(0);
 }
 
-#nav-back {
+.nav-back {
   opacity: 0;
   transition: opacity 0.15s linear;
 }
 
-#title-header.active #nav-back {
+.title-header.active .nav-back {
   opacity: 100;
 }
 
-#search-bar {
+.search-bar {
   /* display: none; */
   height: 34px;
   width: 0;
@@ -1047,12 +1094,12 @@ body {
   border-bottom-right-radius: 0 !important;
 }
 
-#search-bar.active {
+.search-bar.active {
   width: 160px;
   opacity: 100;
 }
 
-#search-button.active {
+.search-button.active {
   height: 36px;
   border: 2px solid rgba(0, 0, 0, 0.2);
   border-left: 1px solid rgba(0, 0, 0, 0.2);
