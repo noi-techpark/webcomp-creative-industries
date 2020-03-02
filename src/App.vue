@@ -196,6 +196,7 @@
                   v-model="activity.active"
                   @change="activityChanged(activity.id, activity.active)"
                 />
+                <span></span>
                 {{ activity.name }}
               </label>
             </div>
@@ -211,6 +212,7 @@
                   v-model="industrie.active"
                   @change="industrieChanged(industrie.id, industrie.active)"
                 />
+                <span></span>
                 {{ industrie.name }}
               </label>
             </div>
@@ -232,6 +234,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import * as L from "leaflet";
@@ -570,8 +573,12 @@ export default {
 
     stepBack() {
       if (this.search) {
-        this.search = false;
-        this.searchIsActive = false;
+        if (this.currentSinglebox === "selection") {
+          this.searchIsActive = true;
+        } else {
+          this.search = false;
+          this.searchIsActive = false;
+        }
       }
 
       switch (this.currentSinglebox) {
@@ -607,6 +614,8 @@ export default {
     },
 
     pointSelected(id) {
+      this.searchIsActive = false;
+
       const point = this.points.find(point => point.id === id);
       this.activateSinglebox("selection", point.name);
       this.selection = point;
@@ -907,13 +916,15 @@ body {
 
 .search-bar {
   /* display: none; */
-  height: 34px;
+  /* height: 34px; */
+  height: 38px;
   width: 0;
   opacity: 0;
   transition: width 0.1s ease;
   background-color: #eeeeee;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-right: none;
+  border: none;
+  /* border: 1px solid rgba(0, 0, 0, 0.2);
+  border-right: none; */
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   padding-left: 10px;
@@ -925,9 +936,10 @@ body {
 }
 
 .search-button.active {
-  height: 36px;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-left: none;
+  /* height: 36px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-left: none; */
+  border: none;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   margin-left: 0;
@@ -960,7 +972,7 @@ body {
 
 #selection {
   z-index: 130;
-  padding: 0 20px 0 30px;
+  padding: 0 18px 0 30px;
   font-size: medium;
 }
 
@@ -975,6 +987,27 @@ body {
 
 .filter-class {
   margin-top: 30px;
+}
+
+.form-check {
+  margin-top: 3px;
+}
+
+.form-check input {
+  display: none;
+}
+
+.form-check span {
+  width: 0.65rem;
+  height: 0.65rem;
+  display: inline-block;
+  background: #eeeeee;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.form-check input:checked + span {
+  background: #a9bf00;
 }
 
 .select-list > .select-item {
@@ -998,7 +1031,7 @@ body {
 }
 
 .leaflet-bar {
-  border-radius: 10px;
+  border-radius: 10px !important;
 }
 
 .leaflet-control-zoom.leaflet-bar.leaflet-control {
@@ -1008,13 +1041,13 @@ body {
 }
 
 .leaflet-touch .leaflet-bar a:first-child {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
 }
 
 .leaflet-touch .leaflet-bar a:last-child {
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
 }
 
 /* STYLE */
@@ -1037,6 +1070,10 @@ body {
 
 .rounded {
   border-radius: 10px;
+}
+
+.social .icon.rounded {
+  border-radius: 5px;
 }
 
 .center-area {
@@ -1074,8 +1111,8 @@ a.icon {
 }
 
 .icon {
-  height: 30px;
-  width: 30px;
+  height: 25px;
+  width: 25px;
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -1089,14 +1126,18 @@ a.icon {
 }
 
 .button .icon {
-  height: 60%;
-  width: 60%;
+  height: 55%;
+  width: 55%;
   background-position: center;
 }
 
 .navbar .button .icon {
   fill: #707173;
   opacity: 40%;
+}
+
+.navbar .button.primary-bg .icon {
+  opacity: 1;
 }
 
 .row {
