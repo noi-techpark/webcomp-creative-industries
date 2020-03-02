@@ -440,7 +440,7 @@ export default {
           description: "Lorem Ipsum lorot sit amet",
           linkedin: "",
           facebook: "",
-          website: "jdsajsd",
+          website: "nada.com",
           phone: "",
           mail: "",
           active: false
@@ -456,7 +456,7 @@ export default {
           description: "Lorem Ipsum lorot sit amet",
           linkedin: "",
           facebook: "",
-          website: "jdsajsd",
+          website: "xyz.abc",
           phone: "",
           mail: "",
           active: false
@@ -472,7 +472,7 @@ export default {
           description: "Lorem Ipsum lorot sit amet",
           linkedin: "",
           facebook: "",
-          website: "jdsajsd",
+          website: "abc.com",
           phone: "",
           mail: "",
           active: false
@@ -483,7 +483,8 @@ export default {
           industrie: 1,
           sector: "Software Production",
           activity: 1,
-          coords: [46.478827, 11.332528]
+          coords: [46.478827, 11.332528],
+          active: false
         },
         {
           id: 6,
@@ -491,7 +492,8 @@ export default {
           industrie: 1,
           sector: "Software Production",
           activity: 0,
-          coords: [46.458827, 11.332528]
+          coords: [46.458827, 11.332528],
+          active: false
         },
         {
           id: 7,
@@ -499,7 +501,8 @@ export default {
           industrie: 0,
           sector: "Private Uni",
           activity: 2,
-          coords: [46.488827, 11.332528]
+          coords: [46.488827, 11.332528],
+          active: false
         }
       ]
     }
