@@ -930,7 +930,7 @@ body {
   border-right: none; */
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
-  padding-left: 10px;
+  padding-left: 13px;
 }
 
 .search-bar.active {
@@ -990,6 +990,10 @@ body {
 
 .filter-class {
   margin-top: 30px;
+}
+
+.filter-class .title {
+  margin-bottom: 15px;
 }
 
 .form-check {
@@ -1212,6 +1216,10 @@ a.icon {
 .back-icon {
   background-image: url("assets/icons/left.svg");
   margin-right: 15px !important;
+}
+
+.back-icon:active {
+  opacity: 0.5 !important;
 }
 
 .select-item > .industrie-icon {
