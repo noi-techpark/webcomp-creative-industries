@@ -1,2 +1,0 @@
-"webcomp-build": "npm run build -- --target wc --inline-vue --name creative-industries-map",
-"webcomp-test": "cd dist && live-server --port=8080 --entry-file=./index.html"
