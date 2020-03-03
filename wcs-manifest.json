@@ -1,0 +1,28 @@
+{
+    "title": "Webcomponent Creative Industries",
+    "description": "A webcomponent to display the entities located in South Tyrol and working in the Creative Industries on a map.",
+    "descriptionAbstract": "A webcomponent for creative industries map",
+    "license": "AGPL-3.0",
+    "repositoryUrl": "https://github.com/noi-techpark/webcomp-creative-industries",
+    "authors": [
+      {
+        "name": "FlashBeing",
+        "email": "info@flashbeing.com",
+        "organization": "FlashBeing s.r.l.",
+        "organizationUrl": "https://flashbeing.com/company"
+      }
+    ],
+    "image": null,
+    "searchTags": [],
+    "dist": {
+      "basePath": "dist",
+      "files": [
+        "app.min.js"
+      ]
+    },
+    "configuration": {
+      "tagName": "webcomponent-creative-industries",
+      "options": []
+    }
+  }
+  

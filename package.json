@@ -1,9 +1,9 @@
 {
-  "name": "webcomp-creative-temporary",
+  "name": "webcomp-creative-industries",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "start": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -11,8 +11,7 @@
     "core-js": "^3.6.4",
     "leaflet": "^1.6.0",
     "leaflet.markercluster": "^1.4.1",
-    "merge-images": "^1.1.0",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11"  
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.2.0",
