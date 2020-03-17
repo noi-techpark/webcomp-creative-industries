@@ -210,29 +210,53 @@
         </div>
       </div>
     </div>
-
-    <div>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
-      />
-    </div>
   </div>
 </template>
 
 <script>
+import Vue from "vue";
+import VueI18n from "vue-i18n";
+Vue.use(VueI18n);
+
 import * as L from "leaflet";
 require("leaflet.markercluster");
 
+import "leaflet/dist/leaflet.css";
+require("leaflet/dist/leaflet.css");
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+
 export default {
   name: 'webcomp-creative-industries',
+  i18n: new VueI18n({
+    locale: "it",
+    messages: {
+      en: {
+          "industry": "Industry",
+          "industries": "Industries",
+          "type": "Type",
+          "filter": "Filter",
+          "search-placeholder": "Freelancers, Companies, ..."
+      },
+      de: {
+          "industry": "Industrie",
+          "industries": "Industrien",
+          "type": "Typ",
+          "filter": "Filter",
+          "search-placeholder": "Freelancers, Firmen, ..."
+      },
+      it: {
+          "industry": "Industria",
+          "industries": "Industrie",
+          "type": "Tipo",
+          "filter": "Filtra",
+          "search-placeholder": "Freelancer, Aziende, ..."
+      }
+    }
+  }),
   data() {
     return {
+      map: null,
       center: [46.643211, 11.365379],
       zoom: 9,
       searchValue: "",
@@ -257,7 +281,7 @@ export default {
     };
   },
   props: {
-    locale: { type: String, default: () => "it" },
+    locale: { type: String, default: () => "de" },
     activities: {
       type: Array,
       default: () => [
@@ -499,7 +523,6 @@ export default {
     }
   },
   mounted() {
-    this.$i18n.locale = "it";
     this.initMap();
     this.initMarkers();
     this.initFilters();
@@ -790,7 +813,7 @@ export default {
     },
 
     initMap() {
-      this.map = L.map("map", { zoomControl: false }).setView(
+      this.map = L.map(this.$refs.map, { zoomControl: false }).setView(
         this.center,
         this.zoom
       );
@@ -808,7 +831,7 @@ export default {
     }
   },
   watch: {
-    locale (val) {
+    locale: function(val) {
       this.$i18n.locale = val
     },
     searchValue: function() {
@@ -820,13 +843,6 @@ export default {
 
 <style>
 /* INIT */
-
-html,
-body {
-  font-size: large;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 .title {
   font-size: 1.3rem;
 }
@@ -837,6 +853,9 @@ body {
   position: relative;
   height: 700px;
   width: 1100px;
+
+  font-size: large;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 #map {
@@ -1101,7 +1120,10 @@ body {
 .inline-block {
   display: inline-block;
 }
-
++
+−
+Leaflet | © OpenStreetMap, © CARTO
+Industrie
 a {
   color: black;
   text-decoration: none;
@@ -1135,7 +1157,7 @@ a.icon {
 
 .navbar .button .icon {
   fill: #707173;
-  opacity: 40%;
+  opacity: 0.4;
 }
 
 .navbar .button.primary-bg .icon {
@@ -1185,7 +1207,7 @@ a.icon {
 
 .contact .icon {
   fill: white;
-  opacity: 90%;
+  opacity: 0.9;
 }
 
 .clickable {
