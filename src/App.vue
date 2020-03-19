@@ -222,30 +222,30 @@ import * as L from "leaflet";
 import "leaflet.markercluster";
 
 export default {
-  name: 'webcomp-creative-industries',
-  i18n: new VueI18n({ 
+  name: "webcomp-creative-industries",
+  i18n: new VueI18n({
     locale: "en",
     messages: {
       en: {
-          "industry": "Industry",
-          "industries": "Industries",
-          "type": "Type",
-          "filter": "Filter",
-          "search-placeholder": "Freelancers, Companies, ..."
+        industry: "Industry",
+        industries: "Industries",
+        type: "Type",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Companies, ..."
       },
       de: {
-          "industry": "Industrie",
-          "industries": "Industrien",
-          "type": "Typ",
-          "filter": "Filter",
-          "search-placeholder": "Freelancers, Firmen, ..."
+        industry: "Industrie",
+        industries: "Industrien",
+        type: "Typ",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Firmen, ..."
       },
       it: {
-          "industry": "Industria",
-          "industries": "Industrie",
-          "type": "Tipo",
-          "filter": "Filtra",
-          "search-placeholder": "Freelancer, Aziende, ..."
+        industry: "Industria",
+        industries: "Industrie",
+        type: "Tipo",
+        filter: "Filtra",
+        "search-placeholder": "Freelancer, Aziende, ..."
       }
     }
   }),
@@ -269,10 +269,10 @@ export default {
       lastBoxes: [],
       lastBoxesTitle: [],
       currentSinglebox: "industries",
-      currentSingleboxTitle: this.$t('industries'),
+      currentSingleboxTitle: this.$t("industries"),
       titleHeaderIsActive: false,
       searchIsActive: false,
-      filterIsActive: false,
+      filterIsActive: false
     };
   },
   props: {
@@ -554,7 +554,7 @@ export default {
       this.search = true;
 
       this.lastBoxes = ["industries"];
-      this.lastBoxesTitle = [this.$t('industries')];
+      this.lastBoxesTitle = [this.$t("industries")];
       this.currentSinglebox = "results";
       this.currentSingleboxTitle = "";
     },
@@ -822,11 +822,16 @@ export default {
       );
 
       this.tileLayer.addTo(this.map);
+      setTimeout(() => {
+        var resizeEvent = window.document.createEvent("UIEvents");
+        resizeEvent.initUIEvent("resize", true, false, window, 0);
+        window.dispatchEvent(resizeEvent);
+      }, 100);
     }
   },
   watch: {
     locale: function(val) {
-      this.$i18n.locale = val
+      this.$i18n.locale = val;
     },
     searchValue: function() {
       this.searching();
@@ -836,24 +841,22 @@ export default {
 </script>
 
 <style>
+@import "../node_modules/leaflet/dist/leaflet.css";
+@import "../node_modules/leaflet.markercluster/dist/MarkerCluster.css";
+@import "../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
 
+/* Temporary */
+#app {
+  height: 700px;
+  width: 1100px;
+}
 
-@import '@/node_modules/leaflet/dist/leaflet.css';
-@import '@/node_modules/leaflet.markercluster/dist/MarkerCluster.css';
-@import '@/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css';
-
-
-/* INIT */
 .title {
   font-size: 1.3rem;
 }
 
-/* CUSTOM */
-
 #app {
   position: relative;
-  height: 700px;
-  width: 1100px;
 
   font-size: large;
   font-family: Arial, Helvetica, sans-serif;
@@ -1121,11 +1124,8 @@ export default {
 .inline-block {
   display: inline-block;
 }
-+
-−
-Leaflet | © OpenStreetMap, © CARTO
-Industrie
-a {
++ − Leaflet|© OpenStreetMap,
+© CARTO Industrie a {
   color: black;
   text-decoration: none;
   border-bottom: 0.5px lightgray solid;
