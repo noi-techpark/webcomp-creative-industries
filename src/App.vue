@@ -219,17 +219,12 @@ import VueI18n from "vue-i18n";
 Vue.use(VueI18n);
 
 import * as L from "leaflet";
-require("leaflet.markercluster");
-
-import "leaflet/dist/leaflet.css";
-require("leaflet/dist/leaflet.css");
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster";
 
 export default {
   name: 'webcomp-creative-industries',
-  i18n: new VueI18n({
-    locale: "it",
+  i18n: new VueI18n({ 
+    locale: "en",
     messages: {
       en: {
           "industry": "Industry",
@@ -523,6 +518,7 @@ export default {
     }
   },
   mounted() {
+    this.$i18n.locale = this.locale;
     this.initMap();
     this.initMarkers();
     this.initFilters();
@@ -619,8 +615,6 @@ export default {
           break;
         case "selection":
           this.centerMap();
-          // if (this.search) {
-          // }
           break;
       }
 
@@ -842,6 +836,13 @@ export default {
 </script>
 
 <style>
+
+
+@import '@/node_modules/leaflet/dist/leaflet.css';
+@import '@/node_modules/leaflet.markercluster/dist/MarkerCluster.css';
+@import '@/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css';
+
+
 /* INIT */
 .title {
   font-size: 1.3rem;
