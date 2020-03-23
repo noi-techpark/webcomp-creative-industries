@@ -1,8 +1,3 @@
-
-    - wcs-manifest.json:
-        - Adjust the general parts like title, description, ...
-        - Adjust the configuration part with all possible configuration options (https://webcomponents.opendatahub.bz.it/getting-started)
-
 # wembcomp-creative-industries
 
 This project will display the entities located in South Tyrol and working in the Creative Industries on a map.
