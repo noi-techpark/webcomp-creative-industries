@@ -11,33 +11,28 @@ This project will display the entities located in South Tyrol and working in the
 
 - [Usage](#usage)
 - [Gettings started](#getting-started)
-- [Tests and linting](#tests-and-linting)
+- [Linting](#linting)
 - [Deployment](#deployment)
 - [Docker environment](#docker-environment)
 - [Information](#information)
 
 ## Usage
 
-ToDo: Include the webcompscript file `dist/webcomp-boilerplate.min.js` in your HTML and define the web component like this:
+Include the webcompscript file `sit/webcomp-creative-industries.js` in your HTML and define the web component like this:
 
 ```html
-<webcomp-boilerplate xxx="test" yyy="2"></webcomp-boilerplate>
+<webcomp-creative-industries locale="en"></webcomp-creative-industries>
 ```
 
 ### Attributes
 
-#### xxxx
+#### locale
 
 The description of the parameter xxx.
 
 Type: string
-Options: "test", "123"
+Options: "en", "de", "it"
 
-#### yyy
-
-The description of the parameter yyy.
-
-Type: int
 
 ## Getting started
 
@@ -88,13 +83,11 @@ npm run start
 
 The application will be served and can be accessed at [http://localhost:8080](http://localhost:8080).
 
-## Tests and linting
+## Linting
 
-The tests and the linting can be executed with the following commands:
+Linting can be executed with the following commands:
 
-ToDo:
 ```bash
-npm run test
 npm run lint
 ```
 
@@ -103,7 +96,7 @@ npm run lint
 To create the distributable files, execute the following command:
 
 ```bash
-npm run build
+npm run build:wc
 ```
 
 ## Docker environment
@@ -149,14 +142,14 @@ docker-compose run --rm app /bin/bash -c "..."
 Some examples are:
 
 ```bash
-docker-compose run --rm app /bin/bash -c "npm run test"
+docker-compose run --rm app /bin/bash -c "npm run start"
 ```
 
 ## Information
 
 ### Support
 
-ToDo: For support, please contact [info@opendatahub.bz.it](mailto:info@opendatahub.bz.it).
+For support, please contact [info@opendatahub.bz.it](mailto:info@opendatahub.bz.it).
 
 ### Contributing
 
