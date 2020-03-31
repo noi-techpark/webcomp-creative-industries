@@ -22,7 +22,17 @@
     },
     "configuration": {
       "tagName": "webcomponent-creative-industries",
-      "options": []
+      "options": [
+        {
+          "key": "language_translation",
+          "type": "select",
+          "label": "Language",
+          "required": false,
+          "options": {
+            "values": ["en", "de", "it"],
+            "default": "en"
+          }
+        },]
     }
   }
   

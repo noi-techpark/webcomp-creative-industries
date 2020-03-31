@@ -8,7 +8,7 @@
         </div>
       </div>
       <div class="logo bottom-left"></div>
-      <div id="omnibox" class="margined shadowed rounded">
+      <div id="omnibox" class="margined shadowed rounded" v-bind:class="{expanded: menuActive}">
         <div class="navbar" v-bind:class="{ active: !filterIsActive}">
           <div class="row">
             <div
@@ -27,7 +27,7 @@
                 class="search-bar inline-block center-y rounded"
                 v-bind:class="{active: searchIsActive}"
                 type="text"
-                placeholder="Freelancers, Companies, ..."
+                :placeholder="$t('search-placeholder')"
                 v-model="searchValue"
               />
               <div
@@ -50,7 +50,7 @@
         <div class="nav-filters navbar" v-bind:class="{active: filterIsActive}">
           <div class="row">
             <div class="center-area fill">
-              <div class="inline-block center-y title">Filter</div>
+              <div class="inline-block center-y title">{{ $t('filter') }}</div>
             </div>
             <div class="center-area">
               <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
@@ -133,22 +133,12 @@
             <div class="links">
               <div class="social">
                 <!-- <div class="center-y icon rounded instagram"></div> -->
-                  <a
-                    class="icon"
-                    v-if="selection.facebook"
-                    v-bind:href="selection.facebook"
-                  >
-                    <div class="icon rounded facebook-icon">
-                    </div>
-                  </a>
-                  <a
-                    class="icon"
-                    v-if="selection.linkedin"
-                    v-bind:href="selection.linkedin"
-                  >
-                    <div class="icon rounded linkedin-icon">
-                    </div>
-                  </a>
+                <a class="icon" v-if="selection.facebook" v-bind:href="selection.facebook">
+                  <div class="icon rounded facebook-icon"></div>
+                </a>
+                <a class="icon" v-if="selection.linkedin" v-bind:href="selection.linkedin">
+                  <div class="icon rounded linkedin-icon"></div>
+                </a>
               </div>
               <div class="website">
                 <a v-bind:href="selection.website">{{ selection.website }}</a>
@@ -187,7 +177,7 @@
         </div>
         <div id="filters" class="singlebox" v-bind:class="{active: filterIsActive}">
           <div class="filter-class">
-            <div class="title">Type:</div>
+            <div class="title">{{ $t('type') }}:</div>
             <div class="form-check" v-for="activity in activities" :key="activity.id">
               <label class="form-check-label">
                 <input
@@ -203,7 +193,7 @@
           </div>
 
           <div class="filter-class" v-if="search">
-            <div class="title">Industry:</div>
+            <div class="title">{{ $t('industry')}}:</div>
             <div class="form-check" v-for="industrie in industries" :key="industrie.id">
               <label class="form-check-label">
                 <input
@@ -218,31 +208,54 @@
             </div>
           </div>
         </div>
+        <div class="expand-menu clickable center-area" @click="toggleMenu()"><div class="icon down-icon center-x center-y"></div></div>
       </div>
-    </div>
-
-    <div>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
-      />
     </div>
   </div>
 </template>
 
-
 <script>
+import Vue from "vue";
+import VueI18n from "vue-i18n";
+Vue.use(VueI18n);
+
 import * as L from "leaflet";
-require("leaflet.markercluster");
+import "leaflet.markercluster";
 
 export default {
+  name: "webcomp-creative-industries",
+  i18n: new VueI18n({
+    locale: "en",
+    messages: {
+      en: {
+        industry: "Industry",
+        industries: "Industries",
+        type: "Type",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Companies, ..."
+      },
+      de: {
+        industry: "Industrie",
+        industries: "Industrien",
+        type: "Typ",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Firmen, ..."
+      },
+      it: {
+        industry: "Industria",
+        industries: "Industrie",
+        type: "Tipo",
+        filter: "Filtra",
+        "search-placeholder": "Freelancer, Aziende, ..."
+      }
+    }
+  }),
   data() {
     return {
+      menuActive: false,
+      map: null,
+      center: [46.643211, 11.365379],
+      zoom: 9,
       searchValue: "",
       markers: [],
       tileLayer: null,
@@ -258,15 +271,14 @@ export default {
       lastBoxes: [],
       lastBoxesTitle: [],
       currentSinglebox: "industries",
-      currentSingleboxTitle: "industries",
+      currentSingleboxTitle: "",
       titleHeaderIsActive: false,
       searchIsActive: false,
       filterIsActive: false
     };
   },
   props: {
-    center: { type: Array, default: () => [46.643211, 11.365379] },
-    zoom: { type: Number, default: 9 },
+    locale: { type: String, default: () => "de" },
     activities: {
       type: Array,
       default: () => [
@@ -508,12 +520,17 @@ export default {
     }
   },
   mounted() {
+    this.$i18n.locale = this.locale;
+    this.currentSingleboxTitle = this.$t('industries');
     this.initMap();
     this.initMarkers();
     this.initFilters();
     this.renderFilters();
   },
   methods: {
+    toggleMenu() {
+      this.menuActive = !this.menuActive;
+    },
     searching() {
       var b = this.searchValue.toLowerCase();
       this.results = this.points.filter(function(point) {
@@ -533,6 +550,7 @@ export default {
     },
 
     toggleSearchbar() {
+      this.menuActive = true;
       this.titleHeaderIsActive = true;
 
       this.searchIsActive = true;
@@ -543,7 +561,7 @@ export default {
       this.search = true;
 
       this.lastBoxes = ["industries"];
-      this.lastBoxesTitle = ["industries"];
+      this.lastBoxesTitle = [this.$t("industries")];
       this.currentSinglebox = "results";
       this.currentSingleboxTitle = "";
     },
@@ -558,6 +576,9 @@ export default {
     },
 
     showFilters() {
+      if (!this.filterIsActive) {
+        this.menuActive = true;
+      }
       this.filterIsActive = !this.filterIsActive;
     },
 
@@ -604,8 +625,6 @@ export default {
           break;
         case "selection":
           this.centerMap();
-          // if (this.search) {
-          // }
           break;
       }
 
@@ -798,7 +817,7 @@ export default {
     },
 
     initMap() {
-      this.map = L.map("map", { zoomControl: false }).setView(
+      this.map = L.map(this.$refs.map, { zoomControl: false }).setView(
         this.center,
         this.zoom
       );
@@ -813,9 +832,17 @@ export default {
       );
 
       this.tileLayer.addTo(this.map);
+      setTimeout(() => {
+        var resizeEvent = window.document.createEvent("UIEvents");
+        resizeEvent.initUIEvent("resize", true, false, window, 0);
+        window.dispatchEvent(resizeEvent);
+      }, 100);
     }
   },
   watch: {
+    locale: function(val) {
+      this.$i18n.locale = val;
+    },
     searchValue: function() {
       this.searching();
     }
@@ -824,450 +851,9 @@ export default {
 </script>
 
 <style>
-/* INIT */
-
-html,
-body {
-  font-size: large;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.title {
-  font-size: 1.3rem;
-}
-
-/* CUSTOM */
-
-#app {
-  position: relative;
-  height: 700px;
-  width: 1100px;
-}
-
-#map {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  z-index: 0;
-}
-
-.center-button {
-  position: absolute;
-  height: 30px !important;
-  width: 30px !important;
-  bottom: 120px;
-  right: 30px;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-}
-
-.logo {
-  background-image: url("assets/icons/idm.svg");
-  background-repeat: no-repeat;
-}
-
-.logo.bottom-left {
-  position: absolute;
-  height: 45px;
-  width: 120px;
-  z-index: 20;
-  bottom: 30px;
-  left: 30px;
-}
-
-#omnibox {
-  position: absolute;
-  top: 0;
-  z-index: 20;
-  width: 400px;
-  height: 65%;
-  background: white;
-  overflow: hidden;
-}
-
-.navbar {
-  display: none;
-  height: 75px;
-  padding: 0 30px;
-}
-
-.navbar .title {
-  text-transform: capitalize;
-}
-
-#navbar-filters {
-  position: absolute;
-}
-
-.title-header {
-  transform: translate(-45px);
-  transition: all 0.1s ease;
-}
-
-.title-header.active {
-  display: flex !important;
-  transform: translate(0);
-}
-
-.nav-back {
-  opacity: 0;
-  transition: opacity 0.1s linear;
-}
-
-.title-header.active .nav-back {
-  opacity: 100;
-}
-
-.search-bar {
-  /* display: none; */
-  /* height: 34px; */
-  height: 38px;
-  width: 0;
-  opacity: 0;
-  transition: width 0.1s ease;
-  background-color: #eeeeee;
-  border: none;
-  /* border: 1px solid rgba(0, 0, 0, 0.2);
-  border-right: none; */
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  padding-left: 13px;
-}
-
-.search-bar.active {
-  width: 160px;
-  opacity: 100;
-}
-
-.search-button.active {
-  /* height: 36px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-left: none; */
-  border: none;
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-  margin-left: 0;
-}
-
-#omnibox .singlebox {
-  /* display: none; */
-  position: absolute;
-  transform: translate(100%);
-  opacity: 0;
-  overflow-y: scroll;
-  height: calc(100% - 75px);
-  width: 100%;
-  box-sizing: border-box;
-  background-color: white;
-  transition: all 0.1s ease;
-}
-
-#industries {
-  z-index: 100;
-}
-
-#sectors {
-  z-index: 110;
-}
-
-#results {
-  z-index: 120;
-}
-
-#selection {
-  z-index: 130;
-  padding: 0 18px 0 30px;
-  font-size: medium;
-}
-
-#selection .row {
-  margin: 25px 0;
-}
-
-#filters {
-  z-index: 200;
-  margin: 0 30px;
-}
-
-.filter-class {
-  margin-top: 30px;
-}
-
-.filter-class .title {
-  margin-bottom: 15px;
-}
-
-.form-check {
-  margin-top: 3px;
-}
-
-.form-check input {
-  display: none;
-}
-
-.form-check span {
-  width: 0.65rem;
-  height: 0.65rem;
-  display: inline-block;
-  background: #eeeeee;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-}
-
-.form-check input:checked + span {
-  background: #a9bf00;
-}
-
-.select-list > .select-item {
-  height: 75px;
-  padding: 0 15px 0 30px;
-  cursor: pointer;
-}
-
-.select-list > .select-item:hover {
-  background: #eeeeee;
-}
-
-.select-list > .select-item:active {
-  opacity: 0.5;
-}
-
-.select-item > .icon {
-  height: 50px;
-  width: 50px;
-  margin-right: 15px !important;
-}
-
-.leaflet-bar {
-  border-radius: 10px !important;
-}
-
-.leaflet-control-zoom.leaflet-bar.leaflet-control {
-  /* box-shadow: rgba(50, 50, 50, 0.75) 1px 0px 15px 0px; */
-  bottom: 20px;
-  right: 20px;
-}
-
-.leaflet-touch .leaflet-bar a:first-child {
-  border-top-left-radius: 10px !important;
-  border-top-right-radius: 10px !important;
-}
-
-.leaflet-touch .leaflet-bar a:last-child {
-  border-bottom-left-radius: 10px !important;
-  border-bottom-right-radius: 10px !important;
-}
-
-/* STYLE */
-
-.primary-bg {
-  background-color: #a9bf00 !important;
-}
-
-.white-bg {
-  background-color: white !important;
-}
-
-.margined {
-  margin: 30px;
-}
-
-.shadowed {
-  box-shadow: rgba(50, 50, 50, 0.75) 1px 0px 15px 0px;
-}
-
-.rounded {
-  border-radius: 10px;
-}
-
-.social .icon.rounded {
-  border-radius: 5px;
-}
-
-.center-area {
-  display: flex;
-  flex: auto;
-  height: 100%;
-}
-
-.center-area .center-y {
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-.center-area .center-x {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.fill {
-  width: 100%;
-}
-
-.inline-block {
-  display: inline-block;
-}
-
-a {
-  color: black;
-  text-decoration: none;
-  border-bottom: 0.5px lightgray solid;
-}
-
-a.icon {
-  border: none;
-}
-
-.icon {
-  height: 25px;
-  width: 25px;
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-.button {
-  height: 40px;
-  width: 40px;
-  margin-left: 15px;
-  background-color: #eeeeee;
-  cursor: pointer;
-}
-
-.button .icon {
-  height: 55%;
-  width: 55%;
-  background-position: center;
-}
-
-.navbar .button .icon {
-  fill: #707173;
-  opacity: 40%;
-}
-
-.navbar .button.primary-bg .icon {
-  opacity: 1;
-}
-
-.row {
-  height: 100px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.links {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.social {
-  display: flex;
-}
-
-.social > :first-child {
-  margin-right: 15px;
-}
-
-.logo {
-  background-size: contain;
-  width: 100px;
-}
-
-.description {
-  margin-top: 15px;
-  margin-bottom: 30px;
-}
-
-.contact {
-  height: 40px;
-  margin: 15px 0;
-}
-
-.contact > .button {
-  margin-right: 15px;
-  margin-left: 0px;
-  cursor: auto;
-}
-
-.contact .icon {
-  fill: white;
-  opacity: 90%;
-}
-
-.clickable {
-  cursor: pointer;
-}
-
-.singlebox.active {
-  transform: translate(0%) !important;
-  opacity: 1 !important;
-}
-
-.singlebox.shift {
-  transform: translate(-100%) !important;
-  opacity: 0 !important;
-}
-
-.active {
-  display: block !important;
-}
-
-/* ICONS */
-
-.back-icon {
-  background-image: url("assets/icons/left.svg");
-  margin-right: 15px !important;
-}
-
-.back-icon:active {
-  opacity: 0.5 !important;
-}
-
-.select-item > .industrie-icon {
-  background-size: 60%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.select-item > .forward-icon {
-  background-image: url("assets/icons/right.svg");
-  margin-left: auto !important;
-  background-position: right;
-  height: 40px;
-}
-
-.search-icon {
-  background-image: url("assets/icons/search.svg");
-}
-
-.filter-icon {
-  background-image: url("assets/icons/filter.svg");
-}
-
-.confirm-icon {
-  background-image: url("assets/icons/confirm.svg");
-}
-
-.center-icon {
-  background-image: url("assets/icons/center-map.svg");
-}
-
-.facebook-icon {
-  background-image: url("assets/icons/facebook.jpeg");
-}
-
-.linkedin-icon {
-  background-image: url("assets/icons/linkedin.png");
-}
-
-.phone-icon {
-  background-image: url("assets/icons/phone.svg");
-}
-
-.mail-icon {
-  background-image: url("assets/icons/mail.svg");
-}
-
-.pin-icon {
-  background-image: url("assets/icons/pin.svg");
-}
+@import "../node_modules/leaflet/dist/leaflet.css";
+@import "../node_modules/leaflet.markercluster/dist/MarkerCluster.css";
+@import "../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
+@import "assets/css/style.css";
+@import "assets/css/responsive.css";
 </style>

@@ -1,0 +1,45 @@
+#omnibox .expand-menu {
+  visibility: hidden;
+}
+
+@media (max-width: 1199px) {
+  #omnibox {
+    height: 125px;
+    transition: height .2s ease;
+  }
+
+  #omnibox .expand-menu {
+    visibility: visible;
+    height: 50px;
+    z-index: 900;
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 9px);
+    background-image: linear-gradient(rgba(255, 255, 255, 0), rgb(255, 255, 255));
+  }
+
+  #omnibox.expanded {
+    height: 65%;
+  }
+
+  #omnibox .expand-menu .icon {
+    transition: transform .2s ease;
+  }
+
+  #omnibox.expanded .expand-menu .icon {
+      transform: scaleY(-1);
+  }
+
+  #omnibox .singlebox .select-list, #filters .filter-class:last-child {
+      margin-bottom: 50px;
+  }
+}
+
+@media (max-width: 500px) {
+  #omnibox {
+    width: calc(100% - 60px);
+  }
+  #omnibox .navbar .search-bar.active {
+      width: 130px;
+  }
+}
