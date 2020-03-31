@@ -34,7 +34,7 @@
     "tagName": "webcomp-creative-industries",
     "options": [
       {
-        "key": "language_translation",
+        "key": "locale",
         "type": "select",
         "label": "Language",
         "required": false,
