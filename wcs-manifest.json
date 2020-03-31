@@ -31,7 +31,7 @@
     ]
   },
   "configuration": {
-    "tagName": "webcomponent-creative-industries",
+    "tagName": "webcomp-creative-industries",
     "options": [
       {
         "key": "language_translation",
