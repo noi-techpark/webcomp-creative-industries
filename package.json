@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "vue-cli-service serve",
-    "build:wc": "vue-cli-service build --target wc --name webcomp-creative-industries src/App.vue",
+    "build:wc": "vue-cli-service build --target wc --name webcomp-creative-industries src/App.vue --inline-vue",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

@@ -228,30 +228,32 @@ export default {
     locale: "en",
     messages: {
       en: {
-        industry: "Industry",
-        industries: "Industries",
-        type: "Type",
-        filter: "Filter",
+        "industry": "Industry",
+        "industries": "Industries",
+        "type": "Type",
+        "filter": "Filter",
         "search-placeholder": "Freelancers, Companies, ..."
       },
       de: {
-        industry: "Industrie",
-        industries: "Industrien",
-        type: "Typ",
-        filter: "Filter",
+        "industry": "Industrie",
+        "industries": "Industrien",
+        "type": "Typ",
+        "filter": "Filter",
         "search-placeholder": "Freelancers, Firmen, ..."
       },
       it: {
-        industry: "Industria",
-        industries: "Industrie",
-        type: "Tipo",
-        filter: "Filtra",
+        "industry": "Industria",
+        "industries": "Industrie",
+        "type": "Tipo",
+        "filter": "Filtra",
         "search-placeholder": "Freelancer, Aziende, ..."
       }
     }
   }),
   data() {
     return {
+      publicPath: "/public/",
+
       menuActive: false,
       map: null,
       center: [46.643211, 11.365379],
@@ -274,14 +276,9 @@ export default {
       currentSingleboxTitle: "",
       titleHeaderIsActive: false,
       searchIsActive: false,
-      filterIsActive: false
-    };
-  },
-  props: {
-    locale: { type: String, default: () => "de" },
-    activities: {
-      type: Array,
-      default: () => [
+      filterIsActive: false,
+
+      activities: [
         {
           id: 0,
           name: "Freelancer",
@@ -297,19 +294,16 @@ export default {
           name: "Entity",
           active: false
         }
-      ]
-    },
-    industries: {
-      type: Array,
-      default: () => [
+      ],
+    industries: [
         {
           id: 0,
           name: "Architecture",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/00.svg"),
+          icon: require("@/assets/icons/industries/00.png"),
           marker: L.icon({
-            iconUrl: require("@/assets/markers/00.svg"),
+            iconUrl: require("@/assets/markers/00.png"),
             iconSize: [18.5, 30], // size of the icon
             iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
           })
@@ -319,9 +313,9 @@ export default {
           name: "Software Production",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/01.svg"),
+          icon: require("@/assets/icons/industries/01.png"),
           marker: L.icon({
-            iconUrl: require("@/assets/markers/01.svg"),
+            iconUrl: require("@/assets/markers/01.png"),
             iconSize: [18.5, 30], // size of the icon
             iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
           })
@@ -331,9 +325,9 @@ export default {
           name: "Design",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/02.svg"),
+          icon: require("@/assets/icons/industries/02.png"),
           marker: L.icon({
-            iconUrl: require("@/assets/markers/02.svg"),
+            iconUrl: require("@/assets/markers/02.png"),
             iconSize: [18.5, 30], // size of the icon
             iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
           })
@@ -343,66 +337,114 @@ export default {
           name: "Editoria & Stampa",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/03.svg")
+          icon: require("@/assets/icons/industries/03.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/03.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 4,
           name: "Visual Arts",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/04.svg")
+          icon: require("@/assets/icons/industries/04.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/04.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 5,
           name: "Video Production",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/05.svg")
+          icon: require("@/assets/icons/industries/05.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/05.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 6,
           name: "Radio & TV",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/06.svg")
+          icon: require("@/assets/icons/industries/06.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/06.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 7,
           name: "Music",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/07.svg")
+          icon: require("@/assets/icons/industries/07.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/07.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 8,
           name: "Performing Arts",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/08.svg")
+          icon: require("@/assets/icons/industries/08.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/08.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 9,
           name: "",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/09.svg")
+          icon: require("@/assets/icons/industries/09.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/09.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 10,
           name: "Education",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/10.svg")
+          icon: require("@/assets/icons/industries/10.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/10.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         },
         {
           id: 11,
           name: "Advertising",
           sectors: [],
           active: false,
-          icon: require("@/assets/icons/industries/11.svg")
+          icon: require("@/assets/icons/industries/11.png"),
+          marker: L.icon({
+            iconUrl: require("@/assets/markers/11.png"),
+            iconSize: [18.5, 30], // size of the icon
+            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+          })
         }
       ]
-    },
+    };
+  },
+  props: {
+    locale: { type: String, default: () => "en" },
     points: {
       type: Array,
       default: () => [
