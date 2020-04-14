@@ -1,6 +1,6 @@
 # webcomp-creative-industries
 
-This project will display the entities located in South Tyrol and working in the Creative Industries on a map.
+This project will display a map with the entities located in South Tyrol and working in the Creative Industries.
 
 ## Table of contents
 
