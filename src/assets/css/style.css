@@ -33,7 +33,7 @@
   }
   
   .logo {
-    background-image: url("../icons/idm.svg");
+    background-image: url("../icons/idm.png");
     background-repeat: no-repeat;
   }
   
@@ -386,12 +386,12 @@
   /* ICONS */
   
   .back-icon {
-    background-image: url("../icons/left.svg");
+    background-image: url("../icons/left.png");
     margin-right: 15px !important;
   }
 
   .down-icon {
-    background-image: url("../icons/down.svg");
+    background-image: url("../icons/down.png");
   }
   
   .back-icon:active {
@@ -405,30 +405,30 @@
   }
   
   .select-item > .forward-icon {
-    background-image: url("../icons/right.svg");
+    background-image: url("../icons/right.png");
     margin-left: auto !important;
     background-position: right;
     height: 40px;
   }
   
   .search-icon {
-    background-image: url("../icons/search.svg");
+    background-image: url("../icons/search.png");
   }
   
   .filter-icon {
-    background-image: url("../icons/filter.svg");
+    background-image: url("../icons/filter.png");
   }
   
   .confirm-icon {
-    background-image: url("../icons/confirm.svg");
+    background-image: url("../icons/confirm.png");
   }
   
   .center-icon {
-    background-image: url("../icons/center-map.svg");
+    background-image: url("../icons/center-map.png");
   }
   
   .facebook-icon {
-    background-image: url("../icons/facebook.jpeg");
+    background-image: url("../icons/facebook.png");
   }
   
   .linkedin-icon {
@@ -436,13 +436,13 @@
   }
   
   .phone-icon {
-    background-image: url("../icons/phone.svg");
+    background-image: url("../icons/phone.png");
   }
   
   .mail-icon {
-    background-image: url("../icons/mail.svg");
+    background-image: url("../icons/mail.png");
   }
   
   .pin-icon {
-    background-image: url("../icons/pin.svg");
+    background-image: url("../icons/pin.png");
   }
