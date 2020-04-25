@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="app" class="container">
+    <div id="app" ref="app" class="container" onresize="setResponsive()">
       <div id="map" ref="map" class="map"></div>
       <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
         <div class="center-area">
@@ -222,6 +222,8 @@ Vue.use(VueI18n);
 import * as L from "leaflet";
 import "leaflet.markercluster";
 
+import { getPoints } from "./api/fetcher";
+
 export default {
   name: "webcomp-creative-industries",
   i18n: new VueI18n({
@@ -291,6 +293,11 @@ export default {
         },
         {
           id: 2,
+          name: "Association",
+          active: false
+        },
+        {
+          id: 3,
           name: "Entity",
           active: false
         }
@@ -406,7 +413,7 @@ export default {
         },
         {
           id: 9,
-          name: "",
+          name: "Artigianato artistico",
           sectors: [],
           active: false,
           icon: require("@/assets/icons/industries/09.png"),
@@ -418,18 +425,6 @@ export default {
         },
         {
           id: 10,
-          name: "Education",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/10.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/10.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 11,
           name: "Advertising",
           sectors: [],
           active: false,
@@ -444,132 +439,23 @@ export default {
     };
   },
   props: {
-    locale: { type: String, default: () => "en" },
-    points: {
-      type: Array,
-      default: () => [
-        {
-          id: 0,
-          name: "Bozen",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          address: "Piazza Universita', 39100 Bolzano (BZ)",
-          coords: [46.49067, 11.33982],
-          logo: require("@/assets/logos/flashbeing.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "jdsajsd",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 1,
-          name: "Brixen",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          address: "Via Volta",
-          coords: [46.71503, 11.65598],
-          logo: require("@/assets/logos/unibz.png"),
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-          linkedin: "linkedin.com",
-          facebook: "facebook.com",
-          website: "jdsajsd",
-          phone: "38923820",
-          mail: "shsaas@kjdfjds.co",
-          active: false
-        },
-        {
-          id: 2,
-          name: "Bruneck",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          coords: [46.79942, 11.93429],
-          logo: require("@/assets/logos/unibz.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "nada.com",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 3,
-          name: "Claudiana",
-          industrie: 0,
-          sector: "Private Uni",
-          activity: 2,
-          coords: [46.499657, 11.31319],
-          logo: require("@/assets/logos/unibz.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "xyz.abc",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 4,
-          name: "FlashBeing",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 1,
-          coords: [46.488827, 11.332528],
-          logo: require("@/assets/logos/flashbeing.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "abc.com",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 5,
-          name: "Free Software Lab",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 1,
-          coords: [46.478827, 11.332528],
-          active: false
-        },
-        {
-          id: 6,
-          name: "Tizio",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 0,
-          coords: [46.458827, 11.332528],
-          active: false
-        },
-        {
-          id: 7,
-          name: "Test",
-          industrie: 0,
-          sector: "Private Uni",
-          activity: 2,
-          coords: [46.488827, 11.332528],
-          active: false
-        }
-      ]
-    }
+    locale: { type: String, default: () => "en" }
   },
   mounted() {
+    this.points = getPoints("/");
     this.$i18n.locale = this.locale;
     this.currentSingleboxTitle = this.$t('industries');
     this.initMap();
     this.initMarkers();
     this.initFilters();
     this.renderFilters();
+    this.setResponsive();
   },
   methods: {
+    setResponsive() {
+      var w = this.$refs["app"].clientWidth;
+      console.log(w);
+    },
     toggleMenu() {
       this.menuActive = !this.menuActive;
     },
