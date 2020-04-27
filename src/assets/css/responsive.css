@@ -5,7 +5,7 @@
 @media (max-width: 1199px) {
   #omnibox {
     height: 125px;
-    transition: height .2s ease;
+    transition: height 0.2s ease;
   }
 
   #omnibox .expand-menu {
@@ -23,16 +23,49 @@
   }
 
   #omnibox .expand-menu .icon {
-    transition: transform .2s ease;
+    transition: transform 0.2s ease;
   }
 
   #omnibox.expanded .expand-menu .icon {
-      transform: scaleY(-1);
+    transform: scaleY(-1);
   }
 
-  #omnibox .singlebox .select-list, #filters .filter-class:last-child {
-      margin-bottom: 50px;
+  #omnibox .singlebox .select-list,
+  #filters .filter-class:last-child {
+    margin-bottom: 50px;
   }
+}
+
+#app.medium #omnibox {
+  height: 125px;
+  transition: height 0.2s ease;
+}
+
+#app.medium #omnibox .expand-menu {
+  visibility: visible;
+  height: 50px;
+  z-index: 900;
+  position: absolute;
+  bottom: 0;
+  width: calc(100% - 9px);
+  background-image: linear-gradient(rgba(255, 255, 255, 0), rgb(255, 255, 255));
+}
+
+#app.medium #omnibox.expanded {
+  height: 65%;
+}
+
+#app.medium #omnibox .expand-menu .icon {
+  transition: transform 0.2s ease;
+}
+
+#app.medium #omnibox.expanded .expand-menu .icon {
+  transform: scaleY(-1);
+}
+
+#app.medium #omnibox .singlebox .select-list,
+#app.medium #filters .filter-class:last-child {
+  margin-bottom: 50px;
 }
 
 @media (max-width: 500px) {
@@ -40,6 +73,14 @@
     width: calc(100% - 60px);
   }
   #omnibox .navbar .search-bar.active {
-      width: 130px;
+    width: 130px;
   }
+}
+
+#app.small #omnibox {
+  width: calc(100% - 60px);
+}
+
+#app.small #omnibox .navbar .search-bar.active {
+  width: 130px;
 }

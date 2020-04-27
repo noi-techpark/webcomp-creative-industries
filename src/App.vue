@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="app" ref="app" class="container" onresize="setResponsive()">
+    <div id="app" ref="app" class="container" v-bind:class="appWidth" v-on:resize="setResponsive()">
       <div id="map" ref="map" class="map"></div>
       <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
         <div class="center-area">
@@ -256,6 +256,7 @@ export default {
     return {
       publicPath: "/public/",
 
+      appWidth: "",
       menuActive: false,
       map: null,
       center: [46.643211, 11.365379],
@@ -450,11 +451,25 @@ export default {
     this.initFilters();
     this.renderFilters();
     this.setResponsive();
+    var self = this;
+    window.addEventListener('resize', function() {
+      self.setResponsive();
+    });
+    console.log(self);
   },
   methods: {
     setResponsive() {
-      var w = this.$refs["app"].clientWidth;
+      var app = this.$refs["app"]
+      var w = app.clientWidth;
       console.log(w);
+
+      if (w <= 500) {
+        this.appWidth = "small";
+      } else if (w <= 1199) {
+        this.appWidth = "medium";
+      } else {
+        this.appWidth = "large";
+      }
     },
     toggleMenu() {
       this.menuActive = !this.menuActive;
