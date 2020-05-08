@@ -1,130 +1,128 @@
 import config from "./config";
 import axios from "axios";
 
-export function getPoints(path, parameters) {
-    var data = axios.get(config.API_BASE_URL + path, {
-            parameters: parameters
-        })
-        .then(function (response) {
-            console.log(response.data)
-            return response.data;
-        })
-        .catch(function (error) {
-            console.log(error);
-            throw error;
-        });
-    data = [
-        {
-          id: 0,
-          name: "Bozen",
-          industrie: 2,
-          sector: "UniBz",
-          activity: 2,
-          address: "Piazza Universita', 39100 Bolzano (BZ)",
-          coords: [46.49067, 11.33982],
-          logo: require("@/assets/logos/flashbeing.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          instagram: "",
-          website: "jdsajsd",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 1,
-          name: "Brixen",
-          industrie: 2,
-          sector: "UniBz",
-          activity: 2,
-          address: "Via Volta",
-          coords: [46.71503, 11.65598],
-          logo: require("@/assets/logos/unibz.png"),
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-          linkedin: "linkedin.com",
-          facebook: "facebook.com",
-          website: "jdsajsd",
-          phone: "38923820",
-          mail: "shsaas@kjdfjds.co",
-          active: false
-        },
-        {
-          id: 2,
-          name: "Bruneck",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          coords: [46.79942, 11.93429],
-          logo: require("@/assets/logos/unibz.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "nada.com",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 3,
-          name: "Claudiana",
-          industrie: 0,
-          sector: "Private Uni",
-          activity: 2,
-          coords: [46.499657, 11.31319],
-          logo: require("@/assets/logos/unibz.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "xyz.abc",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 4,
-          name: "FlashBeing",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 1,
-          coords: [46.488827, 11.332528],
-          logo: require("@/assets/logos/flashbeing.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "abc.com",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 5,
-          name: "Free Software Lab",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 1,
-          coords: [46.478827, 11.332528],
-          active: false
-        },
-        {
-          id: 6,
-          name: "Tizio",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 0,
-          coords: [46.458827, 11.332528],
-          active: false
-        },
-        {
-          id: 7,
-          name: "Test",
-          industrie: 0,
-          sector: "Private Uni",
-          activity: 2,
-          coords: [46.488827, 11.332528],
-          active: false
-        }
-      ];
-      return data;
+export function getPoints(language, path, parameters) {
+  return axios.get(config.API_BASE_URL + path, {
+    parameters: parameters
+  })
+    .then(function (response) {
+      console.log("data fetched")
+      return generatePoints(response.data, language);
+    })
+    .catch(function (error) {
+      console.log(error);
+      throw error;
+    });
+}
+
+function generatePoints(res, language) {
+  var points = [];
+
+  res.data.forEach((el, i) => {
+    if (el.smetadata.online == true) {
+      var point = parsePointData(i, el);
+
+      switch (language) {
+        case "en":
+          point.sector = point.sectorEn;
+          point.description = point.descriptionEn;
+          break;
+        case "de":
+          point.sector = point.sectorDe;
+          point.description = point.descriptionDe;
+          break;
+        case "it":
+          point.sector = point.sectorIt;
+          point.description = point.descriptionIt;
+          break;
+      }
+
+      points.push(point);
+    }
+  });
+
+  return points;
+}
+
+function parsePointData(index, element) {
+  var meta = element.smetadata
+
+  var industryId
+  var activityTypeId
+
+  switch (meta.industry.trim().toLowerCase()) {
+    case "architecture":
+      industryId = 0;
+      break;
+    case "software & games":
+      industryId = 1;
+      break;
+    case "design":
+      industryId = 2;
+      break;
+    case "publishing & press":
+      industryId = 3;
+      break;
+    case "visual arts":
+      industryId = 4;
+      break;
+    case "film & video":
+      industryId = 5;
+      break;
+    case "radio & tv":
+      industryId = 6;
+      break;
+    case "music":
+      industryId = 7;
+      break;
+    case "performing arts":
+      industryId = 8;
+      break;
+    case "handicraft":
+      industryId = 9;
+      break;
+    case "advertising":
+      industryId = 10;
+      break;
+    default:
+      industryId = 10;
+      console.log("ERROR IN INDUSTRY NAME:" + meta.industry);
+  }
+
+  switch (meta.legal_form.trim().toLowerCase()) {
+    case "freelance":
+      activityTypeId = 0;
+      break;
+    case "company":
+      activityTypeId = 1;
+      break;
+    case "association":
+      activityTypeId = 2;
+      break;
+    case "entity":
+      activityTypeId = 3;
+      break;
+  }
+
+  return {
+    id: index,
+    name: meta.name,
+    industrie: industryId,
+    sectorEn: meta.sector.en,
+    sectorDe: meta.sector.de,
+    sectorIt: meta.sector.it,
+    activity: activityTypeId,
+    coords: [element.scoordinate.y, element.scoordinate.x],
+    logo: require("@/assets/logos/flashbeing.png"),
+    descriptionEn: meta.description.en,
+    descriptionDe: meta.description.de,
+    descriptionIt: meta.description.it,
+    facebook: meta.fb,
+    instagram: meta.ig,
+    linkedin: meta.linkedin,
+    website: meta.website,
+    phone: meta.phone_number,
+    mail: meta.email,
+    active: true
+  }
 }

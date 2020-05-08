@@ -86,6 +86,21 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "00ee":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+var test = {};
+
+test[TO_STRING_TAG] = 'z';
+
+module.exports = String(test) === '[object z]';
+
+
+/***/ }),
+
 /***/ "02f6":
 /***/ (function(module, exports) {
 
@@ -119,6 +134,35 @@ module.exports = function (fn, that, length) {
   return function (/* ...args */) {
     return fn.apply(that, arguments);
   };
+};
+
+
+/***/ }),
+
+/***/ "057f":
+/***/ (function(module, exports, __webpack_require__) {
+
+var toIndexedObject = __webpack_require__("fc6a");
+var nativeGetOwnPropertyNames = __webpack_require__("241c").f;
+
+var toString = {}.toString;
+
+var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
+  ? Object.getOwnPropertyNames(window) : [];
+
+var getWindowNames = function (it) {
+  try {
+    return nativeGetOwnPropertyNames(it);
+  } catch (error) {
+    return windowNames.slice();
+  }
+};
+
+// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+module.exports.f = function getOwnPropertyNames(it) {
+  return windowNames && toString.call(it) == '[object Window]'
+    ? getWindowNames(it)
+    : nativeGetOwnPropertyNames(toIndexedObject(it));
 };
 
 
@@ -354,10 +398,11 @@ var ___CSS_LOADER_URL_IMPORT_5___ = __webpack_require__("02f6");
 var ___CSS_LOADER_URL_IMPORT_6___ = __webpack_require__("11bf");
 var ___CSS_LOADER_URL_IMPORT_7___ = __webpack_require__("b3b7");
 var ___CSS_LOADER_URL_IMPORT_8___ = __webpack_require__("4440");
-var ___CSS_LOADER_URL_IMPORT_9___ = __webpack_require__("ea71");
-var ___CSS_LOADER_URL_IMPORT_10___ = __webpack_require__("7f32");
-var ___CSS_LOADER_URL_IMPORT_11___ = __webpack_require__("d557");
-var ___CSS_LOADER_URL_IMPORT_12___ = __webpack_require__("078f");
+var ___CSS_LOADER_URL_IMPORT_9___ = __webpack_require__("b069");
+var ___CSS_LOADER_URL_IMPORT_10___ = __webpack_require__("ea71");
+var ___CSS_LOADER_URL_IMPORT_11___ = __webpack_require__("7f32");
+var ___CSS_LOADER_URL_IMPORT_12___ = __webpack_require__("d557");
+var ___CSS_LOADER_URL_IMPORT_13___ = __webpack_require__("078f");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_0___);
 var ___CSS_LOADER_URL_REPLACEMENT_1___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_1___);
@@ -372,8 +417,9 @@ var ___CSS_LOADER_URL_REPLACEMENT_9___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_
 var ___CSS_LOADER_URL_REPLACEMENT_10___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_10___);
 var ___CSS_LOADER_URL_REPLACEMENT_11___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_11___);
 var ___CSS_LOADER_URL_REPLACEMENT_12___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_12___);
+var ___CSS_LOADER_URL_REPLACEMENT_13___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_13___);
 // Module
-exports.push([module.i, ".title{font-size:1.3rem}#app{position:relative;font-size:large;font-family:Arial,Helvetica,sans-serif}#map{position:absolute;height:100%;width:100%;z-index:0}.center-button{position:absolute;height:30px!important;width:30px!important;bottom:120px;right:30px;border:2px solid rgba(0,0,0,.2)}.logo{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");background-repeat:no-repeat}.logo.bottom-left{height:45px;width:120px;bottom:30px;left:30px}#omnibox,.logo.bottom-left{position:absolute;z-index:20}#omnibox{top:0;width:400px;height:65%;background:#fff;overflow:hidden}.navbar{display:none;height:75px;padding:0 30px}.navbar .title{text-transform:capitalize}#navbar-filters{position:absolute}.title-header{-webkit-transform:translate(-45px);transform:translate(-45px);-webkit-transition:all .1s ease;transition:all .1s ease}.title-header.active{display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-transform:translate(0);transform:translate(0)}.nav-back{opacity:0;-webkit-transition:opacity .1s linear;transition:opacity .1s linear}.title-header.active .nav-back{opacity:1}.search-bar{height:38px;width:0;opacity:0;-webkit-transition:width .1s ease;transition:width .1s ease;background-color:#eee;border:none;border-top-right-radius:0!important;border-bottom-right-radius:0!important;padding-left:13px}.search-bar.active{width:160px;opacity:1}.search-button.active{border:none;border-top-left-radius:0!important;border-bottom-left-radius:0!important;margin-left:0}#omnibox .singlebox{position:absolute;-webkit-transform:translate(100%);transform:translate(100%);opacity:0;overflow-y:scroll;height:calc(100% - 75px);width:100%;-webkit-box-sizing:border-box;box-sizing:border-box;background-color:#fff;-webkit-transition:all .1s ease;transition:all .1s ease}#industries{z-index:100}#sectors{z-index:110}#results{z-index:120}#selection{z-index:130;padding:0 18px 0 30px;font-size:medium}#selection .row{margin:25px 0}#filters{z-index:200;margin:0 30px}.filter-class{margin-top:30px}.filter-class .title{margin-bottom:15px}.form-check{margin-top:3px}.form-check input{display:none}.form-check span{width:.65rem;height:.65rem;display:inline-block;background:#eee;border:2px solid rgba(0,0,0,.2);border-radius:2px}.form-check input:checked+span{background:#a9bf00}.select-list>.select-item{height:75px;padding:0 15px 0 30px;cursor:pointer}.select-list>.select-item:hover{background:#eee}.select-list>.select-item:active{opacity:.5}.select-item>.icon{height:50px;width:50px;margin-right:15px!important}.leaflet-bar{border-radius:10px!important}.leaflet-control-zoom.leaflet-bar.leaflet-control{bottom:20px;right:20px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:10px!important;border-top-right-radius:10px!important}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:10px!important;border-bottom-right-radius:10px!important}.primary-bg{background-color:#a9bf00!important}.white-bg{background-color:#fff!important}.margined{margin:30px}.shadowed{-webkit-box-shadow:rgba(50,50,50,.75) 1px 0 15px 0;box-shadow:1px 0 15px 0 rgba(50,50,50,.75)}.rounded{border-radius:10px}.social .icon.rounded{border-radius:5px}.center-area{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:1;-ms-flex:auto;flex:auto;height:100%}.center-area .center-y{margin-top:auto;margin-bottom:auto}.center-area .center-x{margin-left:auto;margin-right:auto}.fill{width:100%}.inline-block{display:inline-block}+− Leaflet|© OpenStreetMap,© CARTO Industrie a{color:#000;text-decoration:none;border-bottom:.5px solid #d3d3d3}a.icon{border:none}.icon{height:25px;width:25px;background-size:contain;background-repeat:no-repeat}.button{height:40px;width:40px;margin-left:15px;background-color:#eee;cursor:pointer}.button .icon{height:55%;width:55%;background-position:50%}.navbar .button .icon{fill:#707173;opacity:.4}.navbar .button.primary-bg .icon{opacity:1}.row{height:100px}.links,.row{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.links{-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column}.social{display:-webkit-box;display:-ms-flexbox;display:flex}.social>:first-child{margin-right:15px}.logo{background-size:contain;width:100px}.description{margin-top:15px;margin-bottom:30px}.contact{height:40px;margin:15px 0}.contact>.button{margin-right:15px;margin-left:0;cursor:auto}.contact .icon{fill:#fff;opacity:.9}.clickable{cursor:pointer}.singlebox.active{-webkit-transform:translate(0)!important;transform:translate(0)!important;opacity:1!important}.singlebox.shift{-webkit-transform:translate(-100%)!important;transform:translate(-100%)!important;opacity:0!important}.active{display:block!important}.back-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");margin-right:15px!important}.down-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ")}.back-icon:active{opacity:.5!important}.select-item>.industrie-icon{background-size:60%;background-repeat:no-repeat;background-position:50%}.select-item>.forward-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_3___ + ");margin-left:auto!important;background-position:100%;height:40px}.search-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_4___ + ")}.filter-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_5___ + ")}.confirm-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_6___ + ")}.center-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_7___ + ")}.facebook-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_8___ + ")}.linkedin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_9___ + ")}.phone-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_10___ + ")}.mail-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_11___ + ")}.pin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_12___ + ")}", ""]);
+exports.push([module.i, ".title{font-size:1.3rem}#app{position:relative;font-size:large;font-family:Arial,Helvetica,sans-serif}#app,#map{width:100%;height:100%}#map{position:absolute;z-index:0}.center-button{position:absolute;height:30px!important;width:30px!important;bottom:120px;right:30px;border:2px solid rgba(0,0,0,.2)}.logo{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");background-repeat:no-repeat}.logo.bottom-left{height:45px;width:120px;bottom:30px;left:30px}#omnibox,.logo.bottom-left{position:absolute;z-index:20}#omnibox{top:0;width:400px;height:65%;background:#fff;overflow:hidden}.navbar{display:none;height:75px;padding:0 30px}.navbar .title{text-transform:capitalize;max-width:175px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}#navbar-filters{position:absolute}.title-header{-webkit-transform:translate(-45px);transform:translate(-45px);-webkit-transition:all .1s ease;transition:all .1s ease}.title-header.active{display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-transform:translate(0);transform:translate(0)}.nav-back{opacity:0;-webkit-transition:opacity .1s linear;transition:opacity .1s linear}.title-header.active .nav-back{opacity:1}.search-bar{height:38px;width:0;opacity:0;-webkit-transition:width .1s ease;transition:width .1s ease;background-color:#eee;border:none;border-top-right-radius:0!important;border-bottom-right-radius:0!important;padding-left:13px}.search-bar.active{width:160px;opacity:1}.search-button.active{border:none;border-top-left-radius:0!important;border-bottom-left-radius:0!important;margin-left:0}#omnibox .singlebox{position:absolute;-webkit-transform:translate(100%);transform:translate(100%);opacity:0;overflow-y:scroll;height:calc(100% - 75px);width:100%;-webkit-box-sizing:border-box;box-sizing:border-box;background-color:#fff;-webkit-transition:all .1s ease;transition:all .1s ease}#industries{z-index:100}#sectors{z-index:110}#results{z-index:120}#selection{z-index:130;padding:0 18px 0 30px;font-size:medium}#selection .row{margin:25px 0}#filters{z-index:200;margin:0 30px}.filter-class{margin-top:30px}.filter-class .title{margin-bottom:15px}.form-check{margin-top:3px}.form-check input{display:none}.form-check span{width:.65rem;height:.65rem;display:inline-block;background:#eee;border:2px solid rgba(0,0,0,.2);border-radius:2px}.form-check input:checked+span{background:#a9bf00}.select-list>.select-item{height:75px;padding:0 15px 0 30px;cursor:pointer}.select-list>.select-item:hover{background:#eee}.select-list>.select-item:active{opacity:.5}.select-item>.icon{height:50px;width:50px;margin-right:15px!important}.leaflet-bar{border-radius:10px!important}.leaflet-control-zoom.leaflet-bar.leaflet-control{bottom:20px;right:20px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:10px!important;border-top-right-radius:10px!important}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:10px!important;border-bottom-right-radius:10px!important}.primary-bg{background-color:#a9bf00!important}.white-bg{background-color:#fff!important}.margined{margin:30px}.shadowed{-webkit-box-shadow:rgba(50,50,50,.75) 1px 0 15px 0;box-shadow:1px 0 15px 0 rgba(50,50,50,.75)}.rounded{border-radius:10px}.social .icon.rounded{border-radius:5px}.center-area{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:1;-ms-flex:auto;flex:auto;height:100%}.center-area .center-y{margin-top:auto;margin-bottom:auto}.center-area .center-x{margin-left:auto;margin-right:auto}.fill{width:100%}.inline-block{display:inline-block}+− Leaflet|© OpenStreetMap,© CARTO Industrie a{color:#000;text-decoration:none;border-bottom:.5px solid #d3d3d3}a{color:rgba(50,50,50,.75);text-decoration:none}a.icon{border:none}.icon{height:25px;width:25px;background-size:contain;background-repeat:no-repeat}.button{height:40px;width:40px;margin-left:15px;background-color:#eee;cursor:pointer}.button .icon{height:55%;width:55%;background-position:50%}.navbar .button .icon{fill:#707173;opacity:.4}.navbar .button.primary-bg .icon{opacity:1}.row{height:100px}.links,.row{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.links{-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column}.social{display:-webkit-box;display:-ms-flexbox;display:flex}.social>:first-child{margin-right:15px}.logo{background-size:contain;width:100px}.description{margin-top:15px;margin-bottom:30px}.contact{height:40px;margin:15px 0}.contact>.button{margin-right:15px;margin-left:0;cursor:auto}.contact .icon{fill:#fff;opacity:.9}.clickable{cursor:pointer}.singlebox.active{-webkit-transform:translate(0)!important;transform:translate(0)!important;opacity:1!important}.singlebox.shift{-webkit-transform:translate(-100%)!important;transform:translate(-100%)!important;opacity:0!important}.active{display:block!important}.back-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");margin-right:15px!important}.down-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ")}.back-icon:active{opacity:.5!important}.select-item>.industrie-icon{background-size:60%;background-repeat:no-repeat;background-position:50%}.select-item>.forward-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_3___ + ");margin-left:auto!important;background-position:100%;height:40px}.search-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_4___ + ")}.filter-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_5___ + ")}.confirm-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_6___ + ")}.center-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_7___ + ")}.facebook-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_8___ + ")}.instagram-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_9___ + ")}.linkedin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_10___ + ")}.phone-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_11___ + ")}.mail-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_12___ + ")}.pin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_13___ + ")}", ""]);
 // Exports
 module.exports = exports;
 
@@ -459,6 +505,18 @@ module.exports = (!STRICT_METHOD || !USES_TO_LENGTH) ? function forEach(callback
 
 /***/ }),
 
+/***/ "19aa":
+/***/ (function(module, exports) {
+
+module.exports = function (it, Constructor, name) {
+  if (!(it instanceof Constructor)) {
+    throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
+  } return it;
+};
+
+
+/***/ }),
+
 /***/ "1be4":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -477,6 +535,61 @@ module.exports = function (it) {
     throw TypeError(String(it) + ' is not a function');
   } return it;
 };
+
+
+/***/ }),
+
+/***/ "1c7e":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var SAFE_CLOSING = false;
+
+try {
+  var called = 0;
+  var iteratorWithReturn = {
+    next: function () {
+      return { done: !!called++ };
+    },
+    'return': function () {
+      SAFE_CLOSING = true;
+    }
+  };
+  iteratorWithReturn[ITERATOR] = function () {
+    return this;
+  };
+  // eslint-disable-next-line no-throw-literal
+  Array.from(iteratorWithReturn, function () { throw 2; });
+} catch (error) { /* empty */ }
+
+module.exports = function (exec, SKIP_CLOSING) {
+  if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+  var ITERATION_SUPPORT = false;
+  try {
+    var object = {};
+    object[ITERATOR] = function () {
+      return {
+        next: function () {
+          return { done: ITERATION_SUPPORT = true };
+        }
+      };
+    };
+    exec(object);
+  } catch (error) { /* empty */ }
+  return ITERATION_SUPPORT;
+};
+
+
+/***/ }),
+
+/***/ "1cdc":
+/***/ (function(module, exports, __webpack_require__) {
+
+var userAgent = __webpack_require__("342f");
+
+module.exports = /(iphone|ipod|ipad).*applewebkit/i.test(userAgent);
 
 
 /***/ }),
@@ -589,6 +702,56 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_vue_style_loader_index_js_ref_6_oneOf_1_0_node_modules_css_loader_dist_cjs_js_ref_6_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_2_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css_shadow__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_ref_6_oneOf_1_0_node_modules_css_loader_dist_cjs_js_ref_6_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_2_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css_shadow__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_ref_6_oneOf_1_0_node_modules_css_loader_dist_cjs_js_ref_6_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_2_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css_shadow__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_vue_style_loader_index_js_ref_6_oneOf_1_0_node_modules_css_loader_dist_cjs_js_ref_6_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_2_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css_shadow__WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_node_modules_vue_style_loader_index_js_ref_6_oneOf_1_0_node_modules_css_loader_dist_cjs_js_ref_6_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_2_node_modules_postcss_loader_src_index_js_ref_6_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css_shadow__WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "2266":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+var isArrayIteratorMethod = __webpack_require__("e95a");
+var toLength = __webpack_require__("50c4");
+var bind = __webpack_require__("0366");
+var getIteratorMethod = __webpack_require__("35a1");
+var callWithSafeIterationClosing = __webpack_require__("9bdd");
+
+var Result = function (stopped, result) {
+  this.stopped = stopped;
+  this.result = result;
+};
+
+var iterate = module.exports = function (iterable, fn, that, AS_ENTRIES, IS_ITERATOR) {
+  var boundFunction = bind(fn, that, AS_ENTRIES ? 2 : 1);
+  var iterator, iterFn, index, length, result, next, step;
+
+  if (IS_ITERATOR) {
+    iterator = iterable;
+  } else {
+    iterFn = getIteratorMethod(iterable);
+    if (typeof iterFn != 'function') throw TypeError('Target is not iterable');
+    // optimisation for array iterators
+    if (isArrayIteratorMethod(iterFn)) {
+      for (index = 0, length = toLength(iterable.length); length > index; index++) {
+        result = AS_ENTRIES
+          ? boundFunction(anObject(step = iterable[index])[0], step[1])
+          : boundFunction(iterable[index]);
+        if (result && result instanceof Result) return result;
+      } return new Result(false);
+    }
+    iterator = iterFn.call(iterable);
+  }
+
+  next = iterator.next;
+  while (!(step = next.call(iterator)).done) {
+    result = callWithSafeIterationClosing(iterator, boundFunction, step.value, AS_ENTRIES);
+    if (typeof result == 'object' && result && result instanceof Result) return result;
+  } return new Result(false);
+};
+
+iterate.stop = function (result) {
+  return new Result(true, result);
+};
+
 
 /***/ }),
 
@@ -3624,6 +3787,33 @@ exports.MarkerCluster = MarkerCluster;
 
 })));
 //# sourceMappingURL=leaflet.markercluster-src.js.map
+
+
+/***/ }),
+
+/***/ "2626":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var getBuiltIn = __webpack_require__("d066");
+var definePropertyModule = __webpack_require__("9bf2");
+var wellKnownSymbol = __webpack_require__("b622");
+var DESCRIPTORS = __webpack_require__("83ab");
+
+var SPECIES = wellKnownSymbol('species');
+
+module.exports = function (CONSTRUCTOR_NAME) {
+  var Constructor = getBuiltIn(CONSTRUCTOR_NAME);
+  var defineProperty = definePropertyModule.f;
+
+  if (DESCRIPTORS && Constructor && !Constructor[SPECIES]) {
+    defineProperty(Constructor, SPECIES, {
+      configurable: true,
+      get: function () { return this; }
+    });
+  }
+};
 
 
 /***/ }),
@@ -11498,6 +11688,114 @@ if (inBrowser) {
 
 /***/ }),
 
+/***/ "2cf4":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+var fails = __webpack_require__("d039");
+var classof = __webpack_require__("c6b6");
+var bind = __webpack_require__("0366");
+var html = __webpack_require__("1be4");
+var createElement = __webpack_require__("cc12");
+var IS_IOS = __webpack_require__("1cdc");
+
+var location = global.location;
+var set = global.setImmediate;
+var clear = global.clearImmediate;
+var process = global.process;
+var MessageChannel = global.MessageChannel;
+var Dispatch = global.Dispatch;
+var counter = 0;
+var queue = {};
+var ONREADYSTATECHANGE = 'onreadystatechange';
+var defer, channel, port;
+
+var run = function (id) {
+  // eslint-disable-next-line no-prototype-builtins
+  if (queue.hasOwnProperty(id)) {
+    var fn = queue[id];
+    delete queue[id];
+    fn();
+  }
+};
+
+var runner = function (id) {
+  return function () {
+    run(id);
+  };
+};
+
+var listener = function (event) {
+  run(event.data);
+};
+
+var post = function (id) {
+  // old engines have not location.origin
+  global.postMessage(id + '', location.protocol + '//' + location.host);
+};
+
+// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
+if (!set || !clear) {
+  set = function setImmediate(fn) {
+    var args = [];
+    var i = 1;
+    while (arguments.length > i) args.push(arguments[i++]);
+    queue[++counter] = function () {
+      // eslint-disable-next-line no-new-func
+      (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
+    };
+    defer(counter);
+    return counter;
+  };
+  clear = function clearImmediate(id) {
+    delete queue[id];
+  };
+  // Node.js 0.8-
+  if (classof(process) == 'process') {
+    defer = function (id) {
+      process.nextTick(runner(id));
+    };
+  // Sphere (JS game engine) Dispatch API
+  } else if (Dispatch && Dispatch.now) {
+    defer = function (id) {
+      Dispatch.now(runner(id));
+    };
+  // Browsers with MessageChannel, includes WebWorkers
+  // except iOS - https://github.com/zloirock/core-js/issues/624
+  } else if (MessageChannel && !IS_IOS) {
+    channel = new MessageChannel();
+    port = channel.port2;
+    channel.port1.onmessage = listener;
+    defer = bind(port.postMessage, port, 1);
+  // Browsers with postMessage, skip WebWorkers
+  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
+  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts && !fails(post)) {
+    defer = post;
+    global.addEventListener('message', listener, false);
+  // IE8-
+  } else if (ONREADYSTATECHANGE in createElement('script')) {
+    defer = function (id) {
+      html.appendChild(createElement('script'))[ONREADYSTATECHANGE] = function () {
+        html.removeChild(this);
+        run(id);
+      };
+    };
+  // Rest old browsers
+  } else {
+    defer = function (id) {
+      setTimeout(runner(id), 0);
+    };
+  }
+}
+
+module.exports = {
+  set: set,
+  clear: clear
+};
+
+
+/***/ }),
+
 /***/ "2d00":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11670,6 +11968,24 @@ module.exports = exports;
 var getBuiltIn = __webpack_require__("d066");
 
 module.exports = getBuiltIn('navigator', 'userAgent') || '';
+
+
+/***/ }),
+
+/***/ "35a1":
+/***/ (function(module, exports, __webpack_require__) {
+
+var classof = __webpack_require__("f5df");
+var Iterators = __webpack_require__("3f8c");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var ITERATOR = wellKnownSymbol('iterator');
+
+module.exports = function (it) {
+  if (it != undefined) return it[ITERATOR]
+    || it['@@iterator']
+    || Iterators[classof(it)];
+};
 
 
 /***/ }),
@@ -11934,6 +12250,14 @@ module.exports = (
 
 /***/ }),
 
+/***/ "3f8c":
+/***/ (function(module, exports) {
+
+module.exports = {};
+
+
+/***/ }),
+
 /***/ "4160":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12063,6 +12387,21 @@ module.exports = function (key) {
 
 /***/ }),
 
+/***/ "44de":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+
+module.exports = function (a, b) {
+  var console = global.console;
+  if (console && console.error) {
+    arguments.length === 1 ? console.error(a) : console.error(a, b);
+  }
+};
+
+
+/***/ }),
+
 /***/ "44e7":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12122,6 +12461,26 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAABuCAYAAABr
 
 /***/ }),
 
+/***/ "4840":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+var aFunction = __webpack_require__("1c0b");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var SPECIES = wellKnownSymbol('species');
+
+// `SpeciesConstructor` abstract operation
+// https://tc39.github.io/ecma262/#sec-speciesconstructor
+module.exports = function (O, defaultConstructor) {
+  var C = anObject(O).constructor;
+  var S;
+  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction(S);
+};
+
+
+/***/ }),
+
 /***/ "4930":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12131,6 +12490,26 @@ module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
   // Chrome 38 Symbol has incorrect toString conversion
   // eslint-disable-next-line no-undef
   return !String(Symbol());
+});
+
+
+/***/ }),
+
+/***/ "498a":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var $trim = __webpack_require__("58a8").trim;
+var forcedStringTrimMethod = __webpack_require__("c8d2");
+
+// `String.prototype.trim` method
+// https://tc39.github.io/ecma262/#sec-string.prototype.trim
+$({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
+  trim: function trim() {
+    return $trim(this);
+  }
 });
 
 
@@ -12434,6 +12813,51 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
   var keys = getOwnPropertyNamesModule.f(anObject(it));
   var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
   return getOwnPropertySymbols ? keys.concat(getOwnPropertySymbols(it)) : keys;
+};
+
+
+/***/ }),
+
+/***/ "5899":
+/***/ (function(module, exports) {
+
+// a string of all valid unicode whitespaces
+// eslint-disable-next-line max-len
+module.exports = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+
+
+/***/ }),
+
+/***/ "58a8":
+/***/ (function(module, exports, __webpack_require__) {
+
+var requireObjectCoercible = __webpack_require__("1d80");
+var whitespaces = __webpack_require__("5899");
+
+var whitespace = '[' + whitespaces + ']';
+var ltrim = RegExp('^' + whitespace + whitespace + '*');
+var rtrim = RegExp(whitespace + whitespace + '*$');
+
+// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+var createMethod = function (TYPE) {
+  return function ($this) {
+    var string = String(requireObjectCoercible($this));
+    if (TYPE & 1) string = string.replace(ltrim, '');
+    if (TYPE & 2) string = string.replace(rtrim, '');
+    return string;
+  };
+};
+
+module.exports = {
+  // `String.prototype.{ trimLeft, trimStart }` methods
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
+  start: createMethod(1),
+  // `String.prototype.{ trimRight, trimEnd }` methods
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
+  end: createMethod(2),
+  // `String.prototype.trim` method
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trim
+  trim: createMethod(3)
 };
 
 
@@ -12849,12 +13273,12 @@ function normalizeComponent (
   }
 }
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"553d4d10-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/App.vue?vue&type=template&id=2945d063&shadow
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{ref:"app",staticClass:"container",class:_vm.appWidth,attrs:{"id":"app"},on:{"resize":function($event){return _vm.setResponsive()}}},[_c('div',{ref:"map",staticClass:"map",attrs:{"id":"map"}}),_c('div',{staticClass:"center-button inline-block button white-bg rounded",on:{"click":function($event){return _vm.centerMap()}}},[_vm._m(0)]),_c('div',{staticClass:"logo bottom-left"}),_c('div',{staticClass:"margined shadowed rounded",class:{expanded: _vm.menuActive},attrs:{"id":"omnibox"}},[_c('div',{staticClass:"navbar",class:{ active: !_vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"title-header center-area fill",class:{active: _vm.currentSinglebox !== 'industries' || _vm.search}},[_c('div',{staticClass:"nav-back inline-block center-y icon back-icon clickable",on:{"click":function($event){return _vm.stepBack()}}}),_c('div',{staticClass:"title inline-block center-y title"},[_vm._v(_vm._s(_vm.currentSingleboxTitle))])]),_c('div',{staticClass:"center-area"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.searchValue),expression:"searchValue"}],ref:"search-bar",staticClass:"search-bar inline-block center-y rounded",class:{active: _vm.searchIsActive},attrs:{"type":"text","placeholder":_vm.$t('search-placeholder')},domProps:{"value":(_vm.searchValue)},on:{"input":function($event){if($event.target.composing){ return; }_vm.searchValue=$event.target.value}}}),_c('div',{staticClass:"search-button inline-block button rounded center-y",class:{active: _vm.searchIsActive},on:{"click":function($event){return _vm.toggleSearchbar()}}},[_vm._m(1)]),_c('div',{staticClass:"inline-block button rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(2)])])])]),_c('div',{staticClass:"nav-filters navbar",class:{active: _vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"center-area fill"},[_c('div',{staticClass:"inline-block center-y title"},[_vm._v(_vm._s(_vm.$t('filter')))])]),_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"inline-block button primary-bg rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(3)])])])]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'industries', shift: _vm.lastBoxes.includes('industries')},attrs:{"id":"industries"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"select-item center-area",on:{"click":function($event){return _vm.industrieSelected(industrie.id)}}},[_c('div',{staticClass:"industrie-icon icon center-y rounded primary-bg",style:({'background-image': 'url(' + industrie.icon + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(industrie.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'sectors', shift: _vm.lastBoxes.includes('sectors')},attrs:{"id":"sectors"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.filters.sectors),function(sector){return _c('div',{key:sector,staticClass:"select-item center-area",on:{"click":function($event){return _vm.sectorSelected(sector)}}},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(sector))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'results', shift: _vm.lastBoxes.includes('results')},attrs:{"id":"results"}},[_c('div',{staticClass:"select-list"},[(_vm.results.length === 0)?_c('div',{staticClass:"select-item center-area"},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v("No results.")])]):_vm._e(),_vm._l((_vm.results),function(point){return _c('div',{key:point,staticClass:"select-item center-area",on:{"click":function($event){return _vm.pointSelected(point.id)}}},[_c('div',{staticClass:"center-y icon rounded primary-bg",style:({'background-image': 'url(' + point.logo + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(point.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])})],2)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'selection'},attrs:{"id":"selection"}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"links"},[_c('div',{staticClass:"social"},[(_vm.selection.facebook)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.facebook}},[_c('div',{staticClass:"icon rounded facebook-icon"})]):_vm._e(),(_vm.selection.linkedin)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.linkedin}},[_c('div',{staticClass:"icon rounded linkedin-icon"})]):_vm._e()]),_c('div',{staticClass:"website"},[_c('a',{attrs:{"href":_vm.selection.website}},[_vm._v(_vm._s(_vm.selection.website))])])]),_c('div',{staticClass:"logo rounded",style:({'background-image': 'url(' + _vm.selection.logo + ')'})})]),_c('div',{staticClass:"description"},[_vm._v(_vm._s(_vm.selection.description))]),_c('div',{staticClass:"contact center-area"},[_vm._m(4),_c('div',{staticClass:"phone-number center-y"},[_vm._v(_vm._s(_vm.selection.phone))])]),_c('div',{staticClass:"contact center-area"},[_vm._m(5),_c('div',{staticClass:"mail center-y"},[_vm._v(_vm._s(_vm.selection.mail))])]),_c('div',{staticClass:"contact center-area"},[_vm._m(6),_c('div',{staticClass:"address center-y"},[_vm._v(_vm._s(_vm.selection.address))])])]),_c('div',{staticClass:"singlebox",class:{active: _vm.filterIsActive},attrs:{"id":"filters"}},[_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('type'))+":")]),_vm._l((_vm.activities),function(activity){return _c('div',{key:activity.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(activity.active),expression:"activity.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(activity.active)?_vm._i(activity.active,null)>-1:(activity.active)},on:{"change":[function($event){var $$a=activity.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(activity, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(activity, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(activity, "active", $$c)}},function($event){return _vm.activityChanged(activity.id, activity.active)}]}}),_c('span'),_vm._v(" "+_vm._s(activity.name)+" ")])])})],2),(_vm.search)?_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('industry'))+":")]),_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(industrie.active),expression:"industrie.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(industrie.active)?_vm._i(industrie.active,null)>-1:(industrie.active)},on:{"change":[function($event){var $$a=industrie.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(industrie, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(industrie, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(industrie, "active", $$c)}},function($event){return _vm.industrieChanged(industrie.id, industrie.active)}]}}),_c('span'),_vm._v(" "+_vm._s(industrie.name)+" ")])])})],2):_vm._e()]),_c('div',{staticClass:"expand-menu clickable center-area",on:{"click":function($event){return _vm.toggleMenu()}}},[_c('div',{staticClass:"icon down-icon center-x center-y"})])])])])}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"553d4d10-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/App.vue?vue&type=template&id=74ad1050&shadow
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{ref:"app",staticClass:"container",class:_vm.appWidth,attrs:{"id":"app"},on:{"resize":function($event){return _vm.setResponsive()}}},[_c('div',{ref:"map",staticClass:"map",attrs:{"id":"map"}}),_c('div',{staticClass:"center-button inline-block button white-bg rounded",on:{"click":function($event){return _vm.centerMap()}}},[_vm._m(0)]),_c('div',{staticClass:"logo bottom-left"}),_c('div',{staticClass:"margined shadowed rounded",class:{expanded: _vm.menuActive},attrs:{"id":"omnibox"}},[_c('div',{staticClass:"navbar",class:{ active: !_vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"title-header center-area fill",class:{active: _vm.currentSinglebox !== 'industries' || _vm.search}},[_c('div',{staticClass:"nav-back inline-block center-y icon back-icon clickable",on:{"click":function($event){return _vm.stepBack()}}}),_c('div',{staticClass:"title inline-block center-y title"},[_vm._v(_vm._s(_vm.currentSingleboxTitle))])]),_c('div',{staticClass:"center-area"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.searchValue),expression:"searchValue"}],ref:"search-bar",staticClass:"search-bar inline-block center-y rounded",class:{active: _vm.searchIsActive},attrs:{"type":"text","placeholder":_vm.$t('search-placeholder')},domProps:{"value":(_vm.searchValue)},on:{"input":function($event){if($event.target.composing){ return; }_vm.searchValue=$event.target.value}}}),_c('div',{staticClass:"search-button inline-block button rounded center-y",class:{active: _vm.searchIsActive},on:{"click":function($event){return _vm.toggleSearchbar()}}},[_vm._m(1)]),_c('div',{staticClass:"inline-block button rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(2)])])])]),_c('div',{staticClass:"nav-filters navbar",class:{active: _vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"center-area fill"},[_c('div',{staticClass:"inline-block center-y title"},[_vm._v(_vm._s(_vm.$t('filter')))])]),_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"inline-block button primary-bg rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(3)])])])]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'industries', shift: _vm.lastBoxes.includes('industries')},attrs:{"id":"industries"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"select-item center-area",on:{"click":function($event){return _vm.industrieSelected(industrie.id)}}},[_c('div',{staticClass:"industrie-icon icon center-y rounded primary-bg",style:({'background-image': 'url(' + industrie.icon + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(industrie.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'sectors', shift: _vm.lastBoxes.includes('sectors')},attrs:{"id":"sectors"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.filters.sectors),function(sector){return _c('div',{key:sector,staticClass:"select-item center-area",on:{"click":function($event){return _vm.sectorSelected(sector)}}},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(sector))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'results', shift: _vm.lastBoxes.includes('results')},attrs:{"id":"results"}},[_c('div',{staticClass:"select-list"},[(_vm.results.length === 0)?_c('div',{staticClass:"select-item center-area"},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v("No results.")])]):_vm._e(),_vm._l((_vm.results),function(point){return _c('div',{key:point,staticClass:"select-item center-area",on:{"click":function($event){return _vm.pointSelected(point.id)}}},[_c('div',{staticClass:"center-y icon rounded primary-bg",style:({'background-image': 'url(' + point.logo + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(point.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])})],2)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'selection'},attrs:{"id":"selection"}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"links"},[_c('div',{staticClass:"social"},[(_vm.selection.instragram)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.instagram}},[_c('div',{staticClass:"icon rounded instagram-icon"})]):_vm._e(),(_vm.selection.facebook)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.facebook}},[_c('div',{staticClass:"icon rounded facebook-icon"})]):_vm._e(),(_vm.selection.linkedin)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.linkedin}},[_c('div',{staticClass:"icon rounded linkedin-icon"})]):_vm._e()]),_c('div',{staticClass:"website"},[_c('a',{attrs:{"href":_vm.selection.website}},[_vm._v(_vm._s(_vm.selection.website))])])]),_c('div',{staticClass:"logo rounded",style:({'background-image': 'url(' + _vm.selection.logo + ')'})})]),_c('div',{staticClass:"description"},[_vm._v(_vm._s(_vm.selection.description))]),(_vm.selection.phone)?_c('div',{staticClass:"contact center-area"},[_vm._m(4),_c('div',{staticClass:"phone-number center-y"},[_vm._v(_vm._s(_vm.selection.phone))])]):_vm._e(),(_vm.selection.mail)?_c('div',{staticClass:"contact center-area"},[_vm._m(5),_c('div',{staticClass:"mail center-y"},[_vm._v(_vm._s(_vm.selection.mail))])]):_vm._e(),(_vm.selection.address)?_c('div',{staticClass:"contact center-area"},[_vm._m(6),_c('div',{staticClass:"address center-y"},[_vm._v(_vm._s(_vm.selection.address))])]):_vm._e()]),_c('div',{staticClass:"singlebox",class:{active: _vm.filterIsActive},attrs:{"id":"filters"}},[_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('type'))+":")]),_vm._l((_vm.activities),function(activity){return _c('div',{key:activity.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(activity.active),expression:"activity.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(activity.active)?_vm._i(activity.active,null)>-1:(activity.active)},on:{"change":[function($event){var $$a=activity.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(activity, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(activity, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(activity, "active", $$c)}},function($event){return _vm.activityChanged(activity.id, activity.active)}]}}),_c('span'),_vm._v(" "+_vm._s(activity.name)+" ")])])})],2),(_vm.search)?_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('industry'))+":")]),_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(industrie.active),expression:"industrie.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(industrie.active)?_vm._i(industrie.active,null)>-1:(industrie.active)},on:{"change":[function($event){var $$a=industrie.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(industrie, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(industrie, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(industrie, "active", $$c)}},function($event){return _vm.industrieChanged(industrie.id, industrie.active)}]}}),_c('span'),_vm._v(" "+_vm._s(industrie.name)+" ")])])})],2):_vm._e()]),_c('div',{staticClass:"expand-menu clickable center-area",on:{"click":function($event){return _vm.toggleMenu()}}},[_c('div',{staticClass:"icon down-icon center-x center-y"})])])])])}
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"center-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"search-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"filter-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"confirm-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-y button rounded primary-bg"},[_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"phone-icon icon center-x center-y"})])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-y button rounded primary-bg"},[_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"mail-icon icon center-x center-y"})])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-y button rounded primary-bg"},[_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"pin-icon icon center-x center-y"})])])}]
 
 
-// CONCATENATED MODULE: ./src/App.vue?vue&type=template&id=2945d063&shadow
+// CONCATENATED MODULE: ./src/App.vue?vue&type=template&id=74ad1050&shadow
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.filter.js
 var es_array_filter = __webpack_require__("4de4");
@@ -12880,6 +13304,54 @@ var es_string_search = __webpack_require__("841c");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom-collections.for-each.js
 var web_dom_collections_for_each = __webpack_require__("159b");
 
+// EXTERNAL MODULE: ./node_modules/regenerator-runtime/runtime.js
+var runtime = __webpack_require__("96cf");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
+var es_object_to_string = __webpack_require__("d3b7");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.promise.js
+var es_promise = __webpack_require__("e6cf");
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
 // CONCATENATED MODULE: ./node_modules/vue-i18n/dist/vue-i18n.esm.js
 /*!
  * vue-i18n v8.15.5 
@@ -14770,9 +15242,18 @@ var leaflet_src = __webpack_require__("e11e");
 // EXTERNAL MODULE: ./node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js
 var leaflet_markercluster_src = __webpack_require__("2573");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.js
+var es_symbol = __webpack_require__("a4d3");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.description.js
+var es_symbol_description = __webpack_require__("e01a");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.trim.js
+var es_string_trim = __webpack_require__("498a");
+
 // CONCATENATED MODULE: ./src/api/config.js
 /* harmony default export */ var config = ({
-  API_BASE_URL: "https://mobility.api.opendatahub.bz.it/v2/api/flat/CreativeIndustry" //ToDo: integrate with pipeline
+  API_BASE_URL: "https://mobility.api.opendatahub.bz.it/v2/flat/CreativeIndustry" //ToDo: integrate with pipeline
 
 });
 // EXTERNAL MODULE: ./node_modules/axios/index.js
@@ -14782,121 +15263,166 @@ var axios_default = /*#__PURE__*/__webpack_require__.n(axios);
 // CONCATENATED MODULE: ./src/api/fetcher.js
 
 
-function getPoints(path, parameters) {
-  var data = axios_default.a.get(config.API_BASE_URL + path, {
+
+
+
+
+
+function getPoints(language, path, parameters) {
+  return axios_default.a.get(config.API_BASE_URL + path, {
     parameters: parameters
   }).then(function (response) {
-    console.log(response.data);
-    return response.data;
+    console.log("data fetched");
+    return generatePoints(response.data, language);
   }).catch(function (error) {
     console.log(error);
     throw error;
   });
-  data = [{
-    id: 0,
-    name: "Bozen",
-    industrie: 2,
-    sector: "UniBz",
-    activity: 2,
-    address: "Piazza Universita', 39100 Bolzano (BZ)",
-    coords: [46.49067, 11.33982],
-    logo: __webpack_require__("273d"),
-    description: "Lorem Ipsum lorot sit amet",
-    linkedin: "",
-    facebook: "",
-    instagram: "",
-    website: "jdsajsd",
-    phone: "",
-    mail: "",
-    active: false
-  }, {
-    id: 1,
-    name: "Brixen",
-    industrie: 2,
-    sector: "UniBz",
-    activity: 2,
-    address: "Via Volta",
-    coords: [46.71503, 11.65598],
-    logo: __webpack_require__("7fd1"),
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    linkedin: "linkedin.com",
-    facebook: "facebook.com",
-    website: "jdsajsd",
-    phone: "38923820",
-    mail: "shsaas@kjdfjds.co",
-    active: false
-  }, {
-    id: 2,
-    name: "Bruneck",
-    industrie: 0,
-    sector: "UniBz",
-    activity: 2,
-    coords: [46.79942, 11.93429],
-    logo: __webpack_require__("7fd1"),
-    description: "Lorem Ipsum lorot sit amet",
-    linkedin: "",
-    facebook: "",
-    website: "nada.com",
-    phone: "",
-    mail: "",
-    active: false
-  }, {
-    id: 3,
-    name: "Claudiana",
-    industrie: 0,
-    sector: "Private Uni",
-    activity: 2,
-    coords: [46.499657, 11.31319],
-    logo: __webpack_require__("7fd1"),
-    description: "Lorem Ipsum lorot sit amet",
-    linkedin: "",
-    facebook: "",
-    website: "xyz.abc",
-    phone: "",
-    mail: "",
-    active: false
-  }, {
-    id: 4,
-    name: "FlashBeing",
-    industrie: 1,
-    sector: "Software Production",
-    activity: 1,
-    coords: [46.488827, 11.332528],
-    logo: __webpack_require__("273d"),
-    description: "Lorem Ipsum lorot sit amet",
-    linkedin: "",
-    facebook: "",
-    website: "abc.com",
-    phone: "",
-    mail: "",
-    active: false
-  }, {
-    id: 5,
-    name: "Free Software Lab",
-    industrie: 1,
-    sector: "Software Production",
-    activity: 1,
-    coords: [46.478827, 11.332528],
-    active: false
-  }, {
-    id: 6,
-    name: "Tizio",
-    industrie: 1,
-    sector: "Software Production",
-    activity: 0,
-    coords: [46.458827, 11.332528],
-    active: false
-  }, {
-    id: 7,
-    name: "Test",
-    industrie: 0,
-    sector: "Private Uni",
-    activity: 2,
-    coords: [46.488827, 11.332528],
-    active: false
-  }];
-  return data;
 }
+
+function generatePoints(res, language) {
+  var points = [];
+  res.data.forEach((el, i) => {
+    if (el.smetadata.online == true) {
+      var point = parsePointData(i, el);
+
+      switch (language) {
+        case "en":
+          point.sector = point.sectorEn;
+          point.description = point.descriptionEn;
+          break;
+
+        case "de":
+          point.sector = point.sectorDe;
+          point.description = point.descriptionDe;
+          break;
+
+        case "it":
+          point.sector = point.sectorIt;
+          point.description = point.descriptionIt;
+          break;
+      }
+
+      points.push(point);
+    }
+  });
+  return points;
+}
+
+function parsePointData(index, element) {
+  var meta = element.smetadata;
+  var industryId;
+  var activityTypeId;
+
+  switch (meta.industry.trim().toLowerCase()) {
+    case "architecture":
+      industryId = 0;
+      break;
+
+    case "software & games":
+      industryId = 1;
+      break;
+
+    case "design":
+      industryId = 2;
+      break;
+
+    case "publishing & press":
+      industryId = 3;
+      break;
+
+    case "visual arts":
+      industryId = 4;
+      break;
+
+    case "film & video":
+      industryId = 5;
+      break;
+
+    case "radio & tv":
+      industryId = 6;
+      break;
+
+    case "music":
+      industryId = 7;
+      break;
+
+    case "performing arts":
+      industryId = 8;
+      break;
+
+    case "handicraft":
+      industryId = 9;
+      break;
+
+    case "advertising":
+      industryId = 10;
+      break;
+
+    default:
+      industryId = 10;
+      console.log("ERROR IN INDUSTRY NAME:" + meta.industry);
+  }
+
+  switch (meta.legal_form.trim().toLowerCase()) {
+    case "freelance":
+      activityTypeId = 0;
+      break;
+
+    case "company":
+      activityTypeId = 1;
+      break;
+
+    case "association":
+      activityTypeId = 2;
+      break;
+
+    case "entity":
+      activityTypeId = 3;
+      break;
+  }
+
+  return {
+    id: index,
+    name: meta.name,
+    industrie: industryId,
+    sectorEn: meta.sector.en,
+    sectorDe: meta.sector.de,
+    sectorIt: meta.sector.it,
+    activity: activityTypeId,
+    coords: [element.scoordinate.y, element.scoordinate.x],
+    logo: __webpack_require__("273d"),
+    descriptionEn: meta.description.en,
+    descriptionDe: meta.description.de,
+    descriptionIt: meta.description.it,
+    facebook: meta.fb,
+    instagram: meta.ig,
+    linkedin: meta.linkedin,
+    website: meta.website,
+    phone: meta.phone_number,
+    mail: meta.email,
+    active: true
+  };
+}
+/*
+Buongiorno a tutti!
+
+
+Ho appena fatto una pull request. Gli ultimi problemi che sono rimasti irrisolti sono:
+
+    attualmente nell'API le coordinate sono invertite, rispetto agli standard del sistema cartesiano. Cioe', avete mappato la longitudine all'asse y e la latitudine all'asse x.
+    Per il momento anche il component e' impostato cosi'; sarebbe da fixare, in modo tale che i futuri collaboratori non facciano confusione.
+    nelle righe attive, ovvero con `online: true`, non sono impostate correttamente tutte le industrie: piu' precisamente, c'e' un'industria indicata con `
+    Rimane aperto il discorso logo. Per ora e' impostato il logo di FlashBeing come placeholder.
+
+Per il resto dovrebbe essere tutto apposto e funzionante.
+
+Rimango a disposizione per domande e chiarimenti.
+
+
+Auguro a tutti una buona giornata :)
+
+*/
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/App.vue?vue&type=script&lang=js&shadow
 
 
@@ -14906,6 +15432,13 @@ function getPoints(path, parameters) {
 
 
 
+
+
+//
+//
+//
+//
+//
 //
 //
 //
@@ -15134,25 +15667,70 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
     locale: "en",
     messages: {
       en: {
-        "industry": "Industry",
-        "industries": "Industries",
-        "type": "Type",
-        "filter": "Filter",
-        "search-placeholder": "Freelancers, Companies, ..."
+        industry: "Industry",
+        industries: "Industries",
+        type: "Type",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Companies, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architecture",
+        music: "Music",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Advertising",
+        handicraft: "Handicraft",
+        press: "Publishing & Press",
+        "performing-arts": "Performing Arts",
+        "visual-arts": "Visual Arts",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Company",
+        association: "Association",
+        entity: "Public entity"
       },
       de: {
-        "industry": "Industrie",
-        "industries": "Industrien",
-        "type": "Typ",
-        "filter": "Filter",
-        "search-placeholder": "Freelancers, Firmen, ..."
+        industry: "Industrie",
+        industries: "Industrien",
+        type: "Typ",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Firmen, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architektur",
+        music: "Musik",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Werbung",
+        handicraft: "Kunsthandwerk",
+        press: "Buch, Verlangswesen & Presse",
+        "performing-arts": "Darstellende Kunst",
+        "visual-arts": "Bildende Kunst",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Firma",
+        association: "Verband",
+        entity: "Öffentliche Einrichtung"
       },
       it: {
-        "industry": "Industria",
-        "industries": "Industrie",
-        "type": "Tipo",
-        "filter": "Filtra",
-        "search-placeholder": "Freelancer, Aziende, ..."
+        industry: "Industria",
+        industries: "Industrie",
+        type: "Tipo",
+        filter: "Filtra",
+        "search-placeholder": "Freelancer, Aziende, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architettura",
+        music: "Musica",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Pubblicità",
+        handicraft: "Artigianato artistico",
+        press: "Editoria & Stampa",
+        "performing-arts": "Arti performative",
+        "visual-arts": "Arti visive",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Azienda",
+        association: "Associazione",
+        entity: "Ente pubblico"
       }
     }
   }),
@@ -15183,167 +15761,9 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
       titleHeaderIsActive: false,
       searchIsActive: false,
       filterIsActive: false,
-      activities: [{
-        id: 0,
-        name: "Freelancer",
-        active: false
-      }, {
-        id: 1,
-        name: "Company",
-        active: false
-      }, {
-        id: 2,
-        name: "Association",
-        active: false
-      }, {
-        id: 3,
-        name: "Entity",
-        active: false
-      }],
-      industries: [{
-        id: 0,
-        name: "Architecture",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("256a"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("4ea8"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 1,
-        name: "Software Production",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("2915"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("5c33"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 2,
-        name: "Design",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("81d4"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("46b4"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 3,
-        name: "Editoria & Stampa",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("a726"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("6615"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 4,
-        name: "Visual Arts",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("2882"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("b82e"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 5,
-        name: "Video Production",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("af71"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("4376"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 6,
-        name: "Radio & TV",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("a0a7"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("8558"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 7,
-        name: "Music",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("1084"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("c838"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 8,
-        name: "Performing Arts",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("eace"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("5bfd"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 9,
-        name: "Artigianato artistico",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("6d87"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("e804"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 10,
-        name: "Advertising",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("c319"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("24f2"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }]
+      activities: [],
+      industries: [],
+      points: []
     };
   },
 
@@ -15354,27 +15774,217 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
     }
   },
 
-  mounted() {
-    this.points = getPoints("/");
+  beforeMount() {
     this.$i18n.locale = this.locale;
-    this.currentSingleboxTitle = this.$t('industries');
-    this.initMap();
-    this.initMarkers();
-    this.initFilters();
-    this.renderFilters();
-    this.setResponsive();
-    var self = this;
-    window.addEventListener('resize', function () {
-      self.setResponsive();
-    });
-    console.log(self);
+    this.currentSingleboxTitle = this.$t("industries");
+    this.activities = [{
+      id: 0,
+      name: this.$t("freelancer"),
+      active: false
+    }, {
+      id: 1,
+      name: this.$t("company"),
+      active: false
+    }, {
+      id: 2,
+      name: this.$t("association"),
+      active: false
+    }, {
+      id: 3,
+      name: this.$t("entity"),
+      active: false
+    }];
+    this.industries = [{
+      id: 0,
+      name: this.$t("architecture"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("256a"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("4ea8"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 1,
+      name: this.$t("software-and-games"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("2915"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("5c33"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 2,
+      name: this.$t("design"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("81d4"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("46b4"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 3,
+      name: this.$t("press"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("a726"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("6615"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 4,
+      name: this.$t("visual-arts"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("2882"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("b82e"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 5,
+      name: this.$t("film-and-video"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("af71"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("4376"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 6,
+      name: this.$t("radio-and-tv"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("a0a7"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("8558"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 7,
+      name: this.$t("music"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("1084"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("c838"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 8,
+      name: this.$t("performing-arts"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("eace"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("5bfd"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 9,
+      name: this.$t("handicraft"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("6d87"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("e804"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 10,
+      name: this.$t("advertising"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("c319"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("24f2"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }];
+  },
+
+  mounted() {
+    var _this = this;
+
+    return _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee() {
+      var self;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return getPoints(_this.locale, "/");
+
+            case 2:
+              _this.points = _context.sent;
+
+              _this.initMap();
+
+              _this.initMarkers();
+
+              _this.initFilters();
+
+              _this.renderFilters();
+
+              _this.setResponsive();
+
+              self = _this;
+              window.addEventListener("resize", function () {
+                self.setResponsive();
+              });
+
+            case 10:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }))();
   },
 
   methods: {
     setResponsive() {
       var app = this.$refs["app"];
       var w = app.clientWidth;
-      console.log(w);
 
       if (w <= 500) {
         this.appWidth = "small";
@@ -15610,7 +16220,6 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
         var industrie = this.industries.find(industrie => industrie.id === point.industrie);
 
         if (!industrie.sectors.includes(point.sector)) {
-          console.log("Push " + point.sector + " for " + industrie.name);
           industrie.sectors.push(point.sector);
         }
 
@@ -15636,7 +16245,6 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
 
       this.points.forEach(point => {
         var industrie = this.industries.find(industrie => industrie.id === point.industrie);
-        console.log(industrie.name);
         point.leafletObject = leaflet_src["marker"](point.coords, {
           icon: industrie.marker,
           title: point.name
@@ -15938,6 +16546,24 @@ exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
 
+/***/ "746f":
+/***/ (function(module, exports, __webpack_require__) {
+
+var path = __webpack_require__("428f");
+var has = __webpack_require__("5135");
+var wrappedWellKnownSymbolModule = __webpack_require__("e538");
+var defineProperty = __webpack_require__("9bf2").f;
+
+module.exports = function (NAME) {
+  var Symbol = path.Symbol || (path.Symbol = {});
+  if (!has(Symbol, NAME)) defineProperty(Symbol, NAME, {
+    value: wrappedWellKnownSymbolModule.f(NAME)
+  });
+};
+
+
+/***/ }),
+
 /***/ "7839":
 /***/ (function(module, exports) {
 
@@ -16191,13 +16817,6 @@ var WeakMap = global.WeakMap;
 
 module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
 
-
-/***/ }),
-
-/***/ "7fd1":
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "img/unibz.b1f2bc7b.png";
 
 /***/ }),
 
@@ -16580,6 +17199,759 @@ module.exports = isForced;
 
 /***/ }),
 
+/***/ "96cf":
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  IteratorPrototype[iteratorSymbol] = function () {
+    return this;
+  };
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunctionPrototype[toStringTagSymbol] =
+    GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return Promise.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    return this;
+  };
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        // Note: ["return"] must be used for ES3 parsing compatibility.
+        if (delegate.iterator["return"]) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[toStringTagSymbol] = "Generator";
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+   true ? module.exports : undefined
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  Function("r", "regeneratorRuntime = r")(runtime);
+}
+
+
+/***/ }),
+
+/***/ "9bdd":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+
+// call something on iterator step with safe closing on error
+module.exports = function (iterator, fn, value, ENTRIES) {
+  try {
+    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+  // 7.4.6 IteratorClose(iterator, completion)
+  } catch (error) {
+    var returnMethod = iterator['return'];
+    if (returnMethod !== undefined) anObject(returnMethod.call(iterator));
+    throw error;
+  }
+};
+
+
+/***/ }),
+
 /***/ "9bf2":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16656,6 +18028,325 @@ exports.BROKEN_CARET = fails(function () {
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
+
+/***/ }),
+
+/***/ "a4d3":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var global = __webpack_require__("da84");
+var getBuiltIn = __webpack_require__("d066");
+var IS_PURE = __webpack_require__("c430");
+var DESCRIPTORS = __webpack_require__("83ab");
+var NATIVE_SYMBOL = __webpack_require__("4930");
+var USE_SYMBOL_AS_UID = __webpack_require__("fdbf");
+var fails = __webpack_require__("d039");
+var has = __webpack_require__("5135");
+var isArray = __webpack_require__("e8b5");
+var isObject = __webpack_require__("861d");
+var anObject = __webpack_require__("825a");
+var toObject = __webpack_require__("7b0b");
+var toIndexedObject = __webpack_require__("fc6a");
+var toPrimitive = __webpack_require__("c04e");
+var createPropertyDescriptor = __webpack_require__("5c6c");
+var nativeObjectCreate = __webpack_require__("7c73");
+var objectKeys = __webpack_require__("df75");
+var getOwnPropertyNamesModule = __webpack_require__("241c");
+var getOwnPropertyNamesExternal = __webpack_require__("057f");
+var getOwnPropertySymbolsModule = __webpack_require__("7418");
+var getOwnPropertyDescriptorModule = __webpack_require__("06cf");
+var definePropertyModule = __webpack_require__("9bf2");
+var propertyIsEnumerableModule = __webpack_require__("d1e7");
+var createNonEnumerableProperty = __webpack_require__("9112");
+var redefine = __webpack_require__("6eeb");
+var shared = __webpack_require__("5692");
+var sharedKey = __webpack_require__("f772");
+var hiddenKeys = __webpack_require__("d012");
+var uid = __webpack_require__("90e3");
+var wellKnownSymbol = __webpack_require__("b622");
+var wrappedWellKnownSymbolModule = __webpack_require__("e538");
+var defineWellKnownSymbol = __webpack_require__("746f");
+var setToStringTag = __webpack_require__("d44e");
+var InternalStateModule = __webpack_require__("69f3");
+var $forEach = __webpack_require__("b727").forEach;
+
+var HIDDEN = sharedKey('hidden');
+var SYMBOL = 'Symbol';
+var PROTOTYPE = 'prototype';
+var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
+var setInternalState = InternalStateModule.set;
+var getInternalState = InternalStateModule.getterFor(SYMBOL);
+var ObjectPrototype = Object[PROTOTYPE];
+var $Symbol = global.Symbol;
+var $stringify = getBuiltIn('JSON', 'stringify');
+var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
+var nativeDefineProperty = definePropertyModule.f;
+var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
+var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
+var AllSymbols = shared('symbols');
+var ObjectPrototypeSymbols = shared('op-symbols');
+var StringToSymbolRegistry = shared('string-to-symbol-registry');
+var SymbolToStringRegistry = shared('symbol-to-string-registry');
+var WellKnownSymbolsStore = shared('wks');
+var QObject = global.QObject;
+// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
+var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
+
+// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
+var setSymbolDescriptor = DESCRIPTORS && fails(function () {
+  return nativeObjectCreate(nativeDefineProperty({}, 'a', {
+    get: function () { return nativeDefineProperty(this, 'a', { value: 7 }).a; }
+  })).a != 7;
+}) ? function (O, P, Attributes) {
+  var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor(ObjectPrototype, P);
+  if (ObjectPrototypeDescriptor) delete ObjectPrototype[P];
+  nativeDefineProperty(O, P, Attributes);
+  if (ObjectPrototypeDescriptor && O !== ObjectPrototype) {
+    nativeDefineProperty(ObjectPrototype, P, ObjectPrototypeDescriptor);
+  }
+} : nativeDefineProperty;
+
+var wrap = function (tag, description) {
+  var symbol = AllSymbols[tag] = nativeObjectCreate($Symbol[PROTOTYPE]);
+  setInternalState(symbol, {
+    type: SYMBOL,
+    tag: tag,
+    description: description
+  });
+  if (!DESCRIPTORS) symbol.description = description;
+  return symbol;
+};
+
+var isSymbol = USE_SYMBOL_AS_UID ? function (it) {
+  return typeof it == 'symbol';
+} : function (it) {
+  return Object(it) instanceof $Symbol;
+};
+
+var $defineProperty = function defineProperty(O, P, Attributes) {
+  if (O === ObjectPrototype) $defineProperty(ObjectPrototypeSymbols, P, Attributes);
+  anObject(O);
+  var key = toPrimitive(P, true);
+  anObject(Attributes);
+  if (has(AllSymbols, key)) {
+    if (!Attributes.enumerable) {
+      if (!has(O, HIDDEN)) nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
+      O[HIDDEN][key] = true;
+    } else {
+      if (has(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
+      Attributes = nativeObjectCreate(Attributes, { enumerable: createPropertyDescriptor(0, false) });
+    } return setSymbolDescriptor(O, key, Attributes);
+  } return nativeDefineProperty(O, key, Attributes);
+};
+
+var $defineProperties = function defineProperties(O, Properties) {
+  anObject(O);
+  var properties = toIndexedObject(Properties);
+  var keys = objectKeys(properties).concat($getOwnPropertySymbols(properties));
+  $forEach(keys, function (key) {
+    if (!DESCRIPTORS || $propertyIsEnumerable.call(properties, key)) $defineProperty(O, key, properties[key]);
+  });
+  return O;
+};
+
+var $create = function create(O, Properties) {
+  return Properties === undefined ? nativeObjectCreate(O) : $defineProperties(nativeObjectCreate(O), Properties);
+};
+
+var $propertyIsEnumerable = function propertyIsEnumerable(V) {
+  var P = toPrimitive(V, true);
+  var enumerable = nativePropertyIsEnumerable.call(this, P);
+  if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P)) return false;
+  return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
+};
+
+var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
+  var it = toIndexedObject(O);
+  var key = toPrimitive(P, true);
+  if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key)) return;
+  var descriptor = nativeGetOwnPropertyDescriptor(it, key);
+  if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
+    descriptor.enumerable = true;
+  }
+  return descriptor;
+};
+
+var $getOwnPropertyNames = function getOwnPropertyNames(O) {
+  var names = nativeGetOwnPropertyNames(toIndexedObject(O));
+  var result = [];
+  $forEach(names, function (key) {
+    if (!has(AllSymbols, key) && !has(hiddenKeys, key)) result.push(key);
+  });
+  return result;
+};
+
+var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
+  var IS_OBJECT_PROTOTYPE = O === ObjectPrototype;
+  var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject(O));
+  var result = [];
+  $forEach(names, function (key) {
+    if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
+      result.push(AllSymbols[key]);
+    }
+  });
+  return result;
+};
+
+// `Symbol` constructor
+// https://tc39.github.io/ecma262/#sec-symbol-constructor
+if (!NATIVE_SYMBOL) {
+  $Symbol = function Symbol() {
+    if (this instanceof $Symbol) throw TypeError('Symbol is not a constructor');
+    var description = !arguments.length || arguments[0] === undefined ? undefined : String(arguments[0]);
+    var tag = uid(description);
+    var setter = function (value) {
+      if (this === ObjectPrototype) setter.call(ObjectPrototypeSymbols, value);
+      if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+      setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
+    };
+    if (DESCRIPTORS && USE_SETTER) setSymbolDescriptor(ObjectPrototype, tag, { configurable: true, set: setter });
+    return wrap(tag, description);
+  };
+
+  redefine($Symbol[PROTOTYPE], 'toString', function toString() {
+    return getInternalState(this).tag;
+  });
+
+  redefine($Symbol, 'withoutSetter', function (description) {
+    return wrap(uid(description), description);
+  });
+
+  propertyIsEnumerableModule.f = $propertyIsEnumerable;
+  definePropertyModule.f = $defineProperty;
+  getOwnPropertyDescriptorModule.f = $getOwnPropertyDescriptor;
+  getOwnPropertyNamesModule.f = getOwnPropertyNamesExternal.f = $getOwnPropertyNames;
+  getOwnPropertySymbolsModule.f = $getOwnPropertySymbols;
+
+  wrappedWellKnownSymbolModule.f = function (name) {
+    return wrap(wellKnownSymbol(name), name);
+  };
+
+  if (DESCRIPTORS) {
+    // https://github.com/tc39/proposal-Symbol-description
+    nativeDefineProperty($Symbol[PROTOTYPE], 'description', {
+      configurable: true,
+      get: function description() {
+        return getInternalState(this).description;
+      }
+    });
+    if (!IS_PURE) {
+      redefine(ObjectPrototype, 'propertyIsEnumerable', $propertyIsEnumerable, { unsafe: true });
+    }
+  }
+}
+
+$({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
+  Symbol: $Symbol
+});
+
+$forEach(objectKeys(WellKnownSymbolsStore), function (name) {
+  defineWellKnownSymbol(name);
+});
+
+$({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
+  // `Symbol.for` method
+  // https://tc39.github.io/ecma262/#sec-symbol.for
+  'for': function (key) {
+    var string = String(key);
+    if (has(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
+    var symbol = $Symbol(string);
+    StringToSymbolRegistry[string] = symbol;
+    SymbolToStringRegistry[symbol] = string;
+    return symbol;
+  },
+  // `Symbol.keyFor` method
+  // https://tc39.github.io/ecma262/#sec-symbol.keyfor
+  keyFor: function keyFor(sym) {
+    if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol');
+    if (has(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
+  },
+  useSetter: function () { USE_SETTER = true; },
+  useSimple: function () { USE_SETTER = false; }
+});
+
+$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS }, {
+  // `Object.create` method
+  // https://tc39.github.io/ecma262/#sec-object.create
+  create: $create,
+  // `Object.defineProperty` method
+  // https://tc39.github.io/ecma262/#sec-object.defineproperty
+  defineProperty: $defineProperty,
+  // `Object.defineProperties` method
+  // https://tc39.github.io/ecma262/#sec-object.defineproperties
+  defineProperties: $defineProperties,
+  // `Object.getOwnPropertyDescriptor` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptors
+  getOwnPropertyDescriptor: $getOwnPropertyDescriptor
+});
+
+$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL }, {
+  // `Object.getOwnPropertyNames` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertynames
+  getOwnPropertyNames: $getOwnPropertyNames,
+  // `Object.getOwnPropertySymbols` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertysymbols
+  getOwnPropertySymbols: $getOwnPropertySymbols
+});
+
+// Chrome 38 and 39 `Object.getOwnPropertySymbols` fails on primitives
+// https://bugs.chromium.org/p/v8/issues/detail?id=3443
+$({ target: 'Object', stat: true, forced: fails(function () { getOwnPropertySymbolsModule.f(1); }) }, {
+  getOwnPropertySymbols: function getOwnPropertySymbols(it) {
+    return getOwnPropertySymbolsModule.f(toObject(it));
+  }
+});
+
+// `JSON.stringify` method behavior with symbols
+// https://tc39.github.io/ecma262/#sec-json.stringify
+if ($stringify) {
+  var FORCED_JSON_STRINGIFY = !NATIVE_SYMBOL || fails(function () {
+    var symbol = $Symbol();
+    // MS Edge converts symbol values to JSON as {}
+    return $stringify([symbol]) != '[null]'
+      // WebKit converts symbol values to JSON as null
+      || $stringify({ a: symbol }) != '{}'
+      // V8 throws on boxed symbols
+      || $stringify(Object(symbol)) != '{}';
+  });
+
+  $({ target: 'JSON', stat: true, forced: FORCED_JSON_STRINGIFY }, {
+    // eslint-disable-next-line no-unused-vars
+    stringify: function stringify(it, replacer, space) {
+      var args = [it];
+      var index = 1;
+      var $replacer;
+      while (arguments.length > index) args.push(arguments[index++]);
+      $replacer = replacer;
+      if (!isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
+      if (!isArray(replacer)) replacer = function (key, value) {
+        if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+        if (!isSymbol(value)) return value;
+      };
+      args[1] = replacer;
+      return $stringify.apply(null, args);
+    }
+  });
+}
+
+// `Symbol.prototype[@@toPrimitive]` method
+// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@toprimitive
+if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
+  createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
+}
+// `Symbol.prototype[@@toStringTag]` property
+// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@tostringtag
+setToStringTag($Symbol, SYMBOL);
+
+hiddenKeys[HIDDEN] = true;
+
 
 /***/ }),
 
@@ -16798,6 +18489,30 @@ module.exports = function (METHOD_NAME, options) {
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAACWQAAAlkBPoZswQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAU3SURBVHic7d1diBVlHMfx7391M1mNXlZ7Memil1Wysm7cXiwiDbqprFaJrhJ8K6O71CjJoFSSFCxBKYKii1ULQ4wCu5BezIIgVBK1IGiVsBey1NzV/XUxR9t9nDnOnJ2dnbP7/1x55szM//H57dl5ZnafZ8E555xzzjnnnHPOOeecc845N3RZtTclXQZMA8YDzYW0qHi/Aj8D283s6EA3JjYQSa3AMuA+YFihLRo4ncDHwFIz2z1QjegViKQRwJvA7PC9IaQbeB1YbGaniy5+ttMljQI+Ae4suhEltQ14xMw6iyxqAJIagA+Bh2L26QK+Aw5X/j2YXABcDUwm/lvzW2Y2p9gmAZIW6FwnJC2VdEnhDSqYpLGSVkk6FdMPMwqof52ksWdeNEk6HDTiqKTb+7shZSPpAUn/Bn2xT9Lwfqo3VdLXlTqnJc1B0hMxXxWP9kcD6oGkhTH9MT3nGhMlfRRTpwNJ7cHGnXkWrzeShkk6EPTJ2pzOfaWk9ZK6YsKQFF3MbwmO25hH8XpVGep+EGye3JdzShot6WXgADAXSPwWOBwYF2zb15fig8QPweurajmJpEbgSaKb7CvSHNMAjAq2/VNL8UEmfIRyUZaDJVnlOrwHWE98GKeAz8KNDVkKufOTNAXYAWwGbkjYbTtwK9EnpxcPJCeSWiRtBHYCUxN22wXcY2bTzWxP3A79Mr4eSiQ1Ay8CT5Hcn/uBF4DNZqZq5/NAaiSpCVgIPE/yNeY3YBWwOu0zMQ8ko8pd+2yqj5yOAW8Ar2b9GYsHkoGkacBqYFLCLt3A+8AiMztcSw0PJJ2Rkr4E7qiyzxZgiZn16T7OA0mnieQwvgGeM7MdeRTyYW/t9gMzgda8wgD/hNTid+A1YI2Zncz75B5IeseBtcByM/urv4p4IOn8DbTUOnLKwq8h6ZwsIgzwQErHAykZD6RkPJCS8UBKxgMpGQ+kZDyQkvFASsYDKRkPpGQ8kJLxQErGAykZD6RkPJB0Rki6vIhCHkg6o4EfJa2QlOk34bPyQNJrAhYRBfOs+mneoQeSXTOwBtgjqU1SrgsseCC1ayGa/veVpKTpB5l5IOkcJ5rbEacV2CFpk6Tr+1rIA0nnuJm1Ag8STdwMGfAYsLcyyzbVfMI4HkgGZrYVuBGYR7SsU6iRaJbtwcqIbHTWGh5IRmbWZWYbgGuBxUS/RBeqeUTmgdTIzI6Z2UpgArCBaFZtaAzRiGy3pLY05/VA+sjMDpnZPOAmYFPCbhOAjZJ2Srqr2vk8kJyY2T4zm0k0j+SLhN1agc8lbU0ckcUst5HbmLpeSZoR9MmRjMebpFmSDiataSKpU9KncWud/Bmc7+L8/mt169Lg9R9ZDjYzmVk7MJHqI7L7w40NRCvF9XRzluKDVNgHh2o5SY8RWQuwnOgGszpJ7wSfmr2VT86QJGmkpI6gT1bmdO5xkt5W/Mp1kiQkPRyz/Zk8GlCPJL0S0x/VZt/WUmOSpG0xdQ4hqVHnLtjVqZTj5sFE0nxJ3UFf7FLOT3R71LtX0reVOt2S5p55oy0mrW5J70oKFzgbVBSNiKZI2pLQB3cX0IYJqjz/6rlu7zpgQcIxR4gubHF3o/WskWiZ2HBUdcYyM3upuOb0DqQReA+YVWQDSmwdsPB8q/fk7exoysy6gMeJVrc5UWQjSuYoMN/Mni46DEhejH88sIToGf+YQls0cDqAdmCFmWW6M8/T+f5cxTDgNuAaosUyLyyiUQU6AfwC/AR8PxCfCOecc84555xzzjnnnHPOOeec+99/+h2xzj3AgDIAAAAASUVORK5CYII="
+
+/***/ }),
+
+/***/ "b041":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var classof = __webpack_require__("f5df");
+
+// `Object.prototype.toString` method implementation
+// https://tc39.github.io/ecma262/#sec-object.prototype.tostring
+module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
+  return '[object ' + classof(this) + ']';
+};
+
+
+/***/ }),
+
+/***/ "b069":
+/***/ (function(module, exports) {
+
+module.exports = "data:image/png;base64,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"
 
 /***/ }),
 
@@ -16998,6 +18713,91 @@ module.exports = function xhrAdapter(config) {
     // Send the request
     request.send(requestData);
   });
+};
+
+
+/***/ }),
+
+/***/ "b575":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+var getOwnPropertyDescriptor = __webpack_require__("06cf").f;
+var classof = __webpack_require__("c6b6");
+var macrotask = __webpack_require__("2cf4").set;
+var IS_IOS = __webpack_require__("1cdc");
+
+var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+var process = global.process;
+var Promise = global.Promise;
+var IS_NODE = classof(process) == 'process';
+// Node.js 11 shows ExperimentalWarning on getting `queueMicrotask`
+var queueMicrotaskDescriptor = getOwnPropertyDescriptor(global, 'queueMicrotask');
+var queueMicrotask = queueMicrotaskDescriptor && queueMicrotaskDescriptor.value;
+
+var flush, head, last, notify, toggle, node, promise, then;
+
+// modern engines have queueMicrotask method
+if (!queueMicrotask) {
+  flush = function () {
+    var parent, fn;
+    if (IS_NODE && (parent = process.domain)) parent.exit();
+    while (head) {
+      fn = head.fn;
+      head = head.next;
+      try {
+        fn();
+      } catch (error) {
+        if (head) notify();
+        else last = undefined;
+        throw error;
+      }
+    } last = undefined;
+    if (parent) parent.enter();
+  };
+
+  // Node.js
+  if (IS_NODE) {
+    notify = function () {
+      process.nextTick(flush);
+    };
+  // browsers with MutationObserver, except iOS - https://github.com/zloirock/core-js/issues/339
+  } else if (MutationObserver && !IS_IOS) {
+    toggle = true;
+    node = document.createTextNode('');
+    new MutationObserver(flush).observe(node, { characterData: true });
+    notify = function () {
+      node.data = toggle = !toggle;
+    };
+  // environments with maybe non-completely correct, but existent Promise
+  } else if (Promise && Promise.resolve) {
+    // Promise.resolve without an argument throws an error in LG WebOS 2
+    promise = Promise.resolve(undefined);
+    then = promise.then;
+    notify = function () {
+      then.call(promise, flush);
+    };
+  // for other environments - macrotask based on:
+  // - setImmediate
+  // - MessageChannel
+  // - window.postMessag
+  // - onreadystatechange
+  // - setTimeout
+  } else {
+    notify = function () {
+      // strange IE + webpack dev server bug - use .call(global)
+      macrotask.call(global, flush);
+    };
+  }
+}
+
+module.exports = queueMicrotask || function (fn) {
+  var task = { fn: fn, next: undefined };
+  if (last) last.next = task;
+  if (!head) {
+    head = task;
+    notify();
+  } last = task;
 };
 
 
@@ -17705,6 +19505,25 @@ module.exports = g;
 
 /***/ }),
 
+/***/ "c8d2":
+/***/ (function(module, exports, __webpack_require__) {
+
+var fails = __webpack_require__("d039");
+var whitespaces = __webpack_require__("5899");
+
+var non = '\u200B\u0085\u180E';
+
+// check that a method works with the correct list
+// of whitespaces and has a correct name
+module.exports = function (METHOD_NAME) {
+  return fails(function () {
+    return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
+  });
+};
+
+
+/***/ }),
+
 /***/ "ca84":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17776,6 +19595,25 @@ module.exports = function (it) {
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
+
+/***/ }),
+
+/***/ "cdf9":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+var isObject = __webpack_require__("861d");
+var newPromiseCapability = __webpack_require__("f069");
+
+module.exports = function (C, x) {
+  anObject(C);
+  if (isObject(x) && x.constructor === C) return x;
+  var promiseCapability = newPromiseCapability.f(C);
+  var resolve = promiseCapability.resolve;
+  resolve(x);
+  return promiseCapability.promise;
+};
+
 
 /***/ }),
 
@@ -17914,6 +19752,40 @@ exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
   var descriptor = getOwnPropertyDescriptor(this, V);
   return !!descriptor && descriptor.enumerable;
 } : nativePropertyIsEnumerable;
+
+
+/***/ }),
+
+/***/ "d3b7":
+/***/ (function(module, exports, __webpack_require__) {
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var redefine = __webpack_require__("6eeb");
+var toString = __webpack_require__("b041");
+
+// `Object.prototype.toString` method
+// https://tc39.github.io/ecma262/#sec-object.prototype.tostring
+if (!TO_STRING_TAG_SUPPORT) {
+  redefine(Object.prototype, 'toString', toString, { unsafe: true });
+}
+
+
+/***/ }),
+
+/***/ "d44e":
+/***/ (function(module, exports, __webpack_require__) {
+
+var defineProperty = __webpack_require__("9bf2").f;
+var has = __webpack_require__("5135");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+
+module.exports = function (it, TAG, STATIC) {
+  if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
+    defineProperty(it, TO_STRING_TAG, { configurable: true, value: TAG });
+  }
+};
 
 
 /***/ }),
@@ -18449,6 +20321,64 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("4362")))
+
+/***/ }),
+
+/***/ "e01a":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+// `Symbol.prototype.description` getter
+// https://tc39.github.io/ecma262/#sec-symbol.prototype.description
+
+var $ = __webpack_require__("23e7");
+var DESCRIPTORS = __webpack_require__("83ab");
+var global = __webpack_require__("da84");
+var has = __webpack_require__("5135");
+var isObject = __webpack_require__("861d");
+var defineProperty = __webpack_require__("9bf2").f;
+var copyConstructorProperties = __webpack_require__("e893");
+
+var NativeSymbol = global.Symbol;
+
+if (DESCRIPTORS && typeof NativeSymbol == 'function' && (!('description' in NativeSymbol.prototype) ||
+  // Safari 12 bug
+  NativeSymbol().description !== undefined
+)) {
+  var EmptyStringDescriptionStore = {};
+  // wrap Symbol constructor for correct work with undefined description
+  var SymbolWrapper = function Symbol() {
+    var description = arguments.length < 1 || arguments[0] === undefined ? undefined : String(arguments[0]);
+    var result = this instanceof SymbolWrapper
+      ? new NativeSymbol(description)
+      // in Edge 13, String(Symbol(undefined)) === 'Symbol(undefined)'
+      : description === undefined ? NativeSymbol() : NativeSymbol(description);
+    if (description === '') EmptyStringDescriptionStore[result] = true;
+    return result;
+  };
+  copyConstructorProperties(SymbolWrapper, NativeSymbol);
+  var symbolPrototype = SymbolWrapper.prototype = NativeSymbol.prototype;
+  symbolPrototype.constructor = SymbolWrapper;
+
+  var symbolToString = symbolPrototype.toString;
+  var native = String(NativeSymbol('test')) == 'Symbol(test)';
+  var regexp = /^Symbol\((.*)\)[^)]+$/;
+  defineProperty(symbolPrototype, 'description', {
+    configurable: true,
+    get: function description() {
+      var symbol = isObject(this) ? this.valueOf() : this;
+      var string = symbolToString.call(symbol);
+      if (has(EmptyStringDescriptionStore, symbol)) return '';
+      var desc = native ? string.slice(7, -1) : string.replace(regexp, '$1');
+      return desc === '' ? undefined : desc;
+    }
+  });
+
+  $({ global: true, forced: true }, {
+    Symbol: SymbolWrapper
+  });
+}
+
 
 /***/ }),
 
@@ -32538,6 +34468,43 @@ window.L = exports;
 
 /***/ }),
 
+/***/ "e2cc":
+/***/ (function(module, exports, __webpack_require__) {
+
+var redefine = __webpack_require__("6eeb");
+
+module.exports = function (target, src, options) {
+  for (var key in src) redefine(target, key, src[key], options);
+  return target;
+};
+
+
+/***/ }),
+
+/***/ "e538":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+
+exports.f = wellKnownSymbol;
+
+
+/***/ }),
+
+/***/ "e667":
+/***/ (function(module, exports) {
+
+module.exports = function (exec) {
+  try {
+    return { error: false, value: exec() };
+  } catch (error) {
+    return { error: true, value: error };
+  }
+};
+
+
+/***/ }),
+
 /***/ "e683":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -32556,6 +34523,393 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
     : baseURL;
 };
+
+
+/***/ }),
+
+/***/ "e6cf":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var IS_PURE = __webpack_require__("c430");
+var global = __webpack_require__("da84");
+var getBuiltIn = __webpack_require__("d066");
+var NativePromise = __webpack_require__("fea9");
+var redefine = __webpack_require__("6eeb");
+var redefineAll = __webpack_require__("e2cc");
+var setToStringTag = __webpack_require__("d44e");
+var setSpecies = __webpack_require__("2626");
+var isObject = __webpack_require__("861d");
+var aFunction = __webpack_require__("1c0b");
+var anInstance = __webpack_require__("19aa");
+var classof = __webpack_require__("c6b6");
+var inspectSource = __webpack_require__("8925");
+var iterate = __webpack_require__("2266");
+var checkCorrectnessOfIteration = __webpack_require__("1c7e");
+var speciesConstructor = __webpack_require__("4840");
+var task = __webpack_require__("2cf4").set;
+var microtask = __webpack_require__("b575");
+var promiseResolve = __webpack_require__("cdf9");
+var hostReportErrors = __webpack_require__("44de");
+var newPromiseCapabilityModule = __webpack_require__("f069");
+var perform = __webpack_require__("e667");
+var InternalStateModule = __webpack_require__("69f3");
+var isForced = __webpack_require__("94ca");
+var wellKnownSymbol = __webpack_require__("b622");
+var V8_VERSION = __webpack_require__("2d00");
+
+var SPECIES = wellKnownSymbol('species');
+var PROMISE = 'Promise';
+var getInternalState = InternalStateModule.get;
+var setInternalState = InternalStateModule.set;
+var getInternalPromiseState = InternalStateModule.getterFor(PROMISE);
+var PromiseConstructor = NativePromise;
+var TypeError = global.TypeError;
+var document = global.document;
+var process = global.process;
+var $fetch = getBuiltIn('fetch');
+var newPromiseCapability = newPromiseCapabilityModule.f;
+var newGenericPromiseCapability = newPromiseCapability;
+var IS_NODE = classof(process) == 'process';
+var DISPATCH_EVENT = !!(document && document.createEvent && global.dispatchEvent);
+var UNHANDLED_REJECTION = 'unhandledrejection';
+var REJECTION_HANDLED = 'rejectionhandled';
+var PENDING = 0;
+var FULFILLED = 1;
+var REJECTED = 2;
+var HANDLED = 1;
+var UNHANDLED = 2;
+var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
+
+var FORCED = isForced(PROMISE, function () {
+  var GLOBAL_CORE_JS_PROMISE = inspectSource(PromiseConstructor) !== String(PromiseConstructor);
+  if (!GLOBAL_CORE_JS_PROMISE) {
+    // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
+    // We can't detect it synchronously, so just check versions
+    if (V8_VERSION === 66) return true;
+    // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
+    if (!IS_NODE && typeof PromiseRejectionEvent != 'function') return true;
+  }
+  // We need Promise#finally in the pure version for preventing prototype pollution
+  if (IS_PURE && !PromiseConstructor.prototype['finally']) return true;
+  // We can't use @@species feature detection in V8 since it causes
+  // deoptimization and performance degradation
+  // https://github.com/zloirock/core-js/issues/679
+  if (V8_VERSION >= 51 && /native code/.test(PromiseConstructor)) return false;
+  // Detect correctness of subclassing with @@species support
+  var promise = PromiseConstructor.resolve(1);
+  var FakePromise = function (exec) {
+    exec(function () { /* empty */ }, function () { /* empty */ });
+  };
+  var constructor = promise.constructor = {};
+  constructor[SPECIES] = FakePromise;
+  return !(promise.then(function () { /* empty */ }) instanceof FakePromise);
+});
+
+var INCORRECT_ITERATION = FORCED || !checkCorrectnessOfIteration(function (iterable) {
+  PromiseConstructor.all(iterable)['catch'](function () { /* empty */ });
+});
+
+// helpers
+var isThenable = function (it) {
+  var then;
+  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
+};
+
+var notify = function (promise, state, isReject) {
+  if (state.notified) return;
+  state.notified = true;
+  var chain = state.reactions;
+  microtask(function () {
+    var value = state.value;
+    var ok = state.state == FULFILLED;
+    var index = 0;
+    // variable length - can't use forEach
+    while (chain.length > index) {
+      var reaction = chain[index++];
+      var handler = ok ? reaction.ok : reaction.fail;
+      var resolve = reaction.resolve;
+      var reject = reaction.reject;
+      var domain = reaction.domain;
+      var result, then, exited;
+      try {
+        if (handler) {
+          if (!ok) {
+            if (state.rejection === UNHANDLED) onHandleUnhandled(promise, state);
+            state.rejection = HANDLED;
+          }
+          if (handler === true) result = value;
+          else {
+            if (domain) domain.enter();
+            result = handler(value); // can throw
+            if (domain) {
+              domain.exit();
+              exited = true;
+            }
+          }
+          if (result === reaction.promise) {
+            reject(TypeError('Promise-chain cycle'));
+          } else if (then = isThenable(result)) {
+            then.call(result, resolve, reject);
+          } else resolve(result);
+        } else reject(value);
+      } catch (error) {
+        if (domain && !exited) domain.exit();
+        reject(error);
+      }
+    }
+    state.reactions = [];
+    state.notified = false;
+    if (isReject && !state.rejection) onUnhandled(promise, state);
+  });
+};
+
+var dispatchEvent = function (name, promise, reason) {
+  var event, handler;
+  if (DISPATCH_EVENT) {
+    event = document.createEvent('Event');
+    event.promise = promise;
+    event.reason = reason;
+    event.initEvent(name, false, true);
+    global.dispatchEvent(event);
+  } else event = { promise: promise, reason: reason };
+  if (handler = global['on' + name]) handler(event);
+  else if (name === UNHANDLED_REJECTION) hostReportErrors('Unhandled promise rejection', reason);
+};
+
+var onUnhandled = function (promise, state) {
+  task.call(global, function () {
+    var value = state.value;
+    var IS_UNHANDLED = isUnhandled(state);
+    var result;
+    if (IS_UNHANDLED) {
+      result = perform(function () {
+        if (IS_NODE) {
+          process.emit('unhandledRejection', value, promise);
+        } else dispatchEvent(UNHANDLED_REJECTION, promise, value);
+      });
+      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
+      state.rejection = IS_NODE || isUnhandled(state) ? UNHANDLED : HANDLED;
+      if (result.error) throw result.value;
+    }
+  });
+};
+
+var isUnhandled = function (state) {
+  return state.rejection !== HANDLED && !state.parent;
+};
+
+var onHandleUnhandled = function (promise, state) {
+  task.call(global, function () {
+    if (IS_NODE) {
+      process.emit('rejectionHandled', promise);
+    } else dispatchEvent(REJECTION_HANDLED, promise, state.value);
+  });
+};
+
+var bind = function (fn, promise, state, unwrap) {
+  return function (value) {
+    fn(promise, state, value, unwrap);
+  };
+};
+
+var internalReject = function (promise, state, value, unwrap) {
+  if (state.done) return;
+  state.done = true;
+  if (unwrap) state = unwrap;
+  state.value = value;
+  state.state = REJECTED;
+  notify(promise, state, true);
+};
+
+var internalResolve = function (promise, state, value, unwrap) {
+  if (state.done) return;
+  state.done = true;
+  if (unwrap) state = unwrap;
+  try {
+    if (promise === value) throw TypeError("Promise can't be resolved itself");
+    var then = isThenable(value);
+    if (then) {
+      microtask(function () {
+        var wrapper = { done: false };
+        try {
+          then.call(value,
+            bind(internalResolve, promise, wrapper, state),
+            bind(internalReject, promise, wrapper, state)
+          );
+        } catch (error) {
+          internalReject(promise, wrapper, error, state);
+        }
+      });
+    } else {
+      state.value = value;
+      state.state = FULFILLED;
+      notify(promise, state, false);
+    }
+  } catch (error) {
+    internalReject(promise, { done: false }, error, state);
+  }
+};
+
+// constructor polyfill
+if (FORCED) {
+  // 25.4.3.1 Promise(executor)
+  PromiseConstructor = function Promise(executor) {
+    anInstance(this, PromiseConstructor, PROMISE);
+    aFunction(executor);
+    Internal.call(this);
+    var state = getInternalState(this);
+    try {
+      executor(bind(internalResolve, this, state), bind(internalReject, this, state));
+    } catch (error) {
+      internalReject(this, state, error);
+    }
+  };
+  // eslint-disable-next-line no-unused-vars
+  Internal = function Promise(executor) {
+    setInternalState(this, {
+      type: PROMISE,
+      done: false,
+      notified: false,
+      parent: false,
+      reactions: [],
+      rejection: false,
+      state: PENDING,
+      value: undefined
+    });
+  };
+  Internal.prototype = redefineAll(PromiseConstructor.prototype, {
+    // `Promise.prototype.then` method
+    // https://tc39.github.io/ecma262/#sec-promise.prototype.then
+    then: function then(onFulfilled, onRejected) {
+      var state = getInternalPromiseState(this);
+      var reaction = newPromiseCapability(speciesConstructor(this, PromiseConstructor));
+      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
+      reaction.fail = typeof onRejected == 'function' && onRejected;
+      reaction.domain = IS_NODE ? process.domain : undefined;
+      state.parent = true;
+      state.reactions.push(reaction);
+      if (state.state != PENDING) notify(this, state, false);
+      return reaction.promise;
+    },
+    // `Promise.prototype.catch` method
+    // https://tc39.github.io/ecma262/#sec-promise.prototype.catch
+    'catch': function (onRejected) {
+      return this.then(undefined, onRejected);
+    }
+  });
+  OwnPromiseCapability = function () {
+    var promise = new Internal();
+    var state = getInternalState(promise);
+    this.promise = promise;
+    this.resolve = bind(internalResolve, promise, state);
+    this.reject = bind(internalReject, promise, state);
+  };
+  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
+    return C === PromiseConstructor || C === PromiseWrapper
+      ? new OwnPromiseCapability(C)
+      : newGenericPromiseCapability(C);
+  };
+
+  if (!IS_PURE && typeof NativePromise == 'function') {
+    nativeThen = NativePromise.prototype.then;
+
+    // wrap native Promise#then for native async functions
+    redefine(NativePromise.prototype, 'then', function then(onFulfilled, onRejected) {
+      var that = this;
+      return new PromiseConstructor(function (resolve, reject) {
+        nativeThen.call(that, resolve, reject);
+      }).then(onFulfilled, onRejected);
+    // https://github.com/zloirock/core-js/issues/640
+    }, { unsafe: true });
+
+    // wrap fetch result
+    if (typeof $fetch == 'function') $({ global: true, enumerable: true, forced: true }, {
+      // eslint-disable-next-line no-unused-vars
+      fetch: function fetch(input /* , init */) {
+        return promiseResolve(PromiseConstructor, $fetch.apply(global, arguments));
+      }
+    });
+  }
+}
+
+$({ global: true, wrap: true, forced: FORCED }, {
+  Promise: PromiseConstructor
+});
+
+setToStringTag(PromiseConstructor, PROMISE, false, true);
+setSpecies(PROMISE);
+
+PromiseWrapper = getBuiltIn(PROMISE);
+
+// statics
+$({ target: PROMISE, stat: true, forced: FORCED }, {
+  // `Promise.reject` method
+  // https://tc39.github.io/ecma262/#sec-promise.reject
+  reject: function reject(r) {
+    var capability = newPromiseCapability(this);
+    capability.reject.call(undefined, r);
+    return capability.promise;
+  }
+});
+
+$({ target: PROMISE, stat: true, forced: IS_PURE || FORCED }, {
+  // `Promise.resolve` method
+  // https://tc39.github.io/ecma262/#sec-promise.resolve
+  resolve: function resolve(x) {
+    return promiseResolve(IS_PURE && this === PromiseWrapper ? PromiseConstructor : this, x);
+  }
+});
+
+$({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
+  // `Promise.all` method
+  // https://tc39.github.io/ecma262/#sec-promise.all
+  all: function all(iterable) {
+    var C = this;
+    var capability = newPromiseCapability(C);
+    var resolve = capability.resolve;
+    var reject = capability.reject;
+    var result = perform(function () {
+      var $promiseResolve = aFunction(C.resolve);
+      var values = [];
+      var counter = 0;
+      var remaining = 1;
+      iterate(iterable, function (promise) {
+        var index = counter++;
+        var alreadyCalled = false;
+        values.push(undefined);
+        remaining++;
+        $promiseResolve.call(C, promise).then(function (value) {
+          if (alreadyCalled) return;
+          alreadyCalled = true;
+          values[index] = value;
+          --remaining || resolve(values);
+        }, reject);
+      });
+      --remaining || resolve(values);
+    });
+    if (result.error) reject(result.value);
+    return capability.promise;
+  },
+  // `Promise.race` method
+  // https://tc39.github.io/ecma262/#sec-promise.race
+  race: function race(iterable) {
+    var C = this;
+    var capability = newPromiseCapability(C);
+    var reject = capability.reject;
+    var result = perform(function () {
+      var $promiseResolve = aFunction(C.resolve);
+      iterate(iterable, function (promise) {
+        $promiseResolve.call(C, promise).then(capability.resolve, reject);
+      });
+    });
+    if (result.error) reject(result.value);
+    return capability.promise;
+  }
+});
 
 
 /***/ }),
@@ -32602,6 +34956,23 @@ module.exports = Array.isArray || function isArray(arg) {
 
 /***/ }),
 
+/***/ "e95a":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+var Iterators = __webpack_require__("3f8c");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+module.exports = function (it) {
+  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+
+/***/ }),
+
 /***/ "ea71":
 /***/ (function(module, exports) {
 
@@ -32613,6 +34984,32 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADD
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
+
+/***/ }),
+
+/***/ "f069":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var aFunction = __webpack_require__("1c0b");
+
+var PromiseCapability = function (C) {
+  var resolve, reject;
+  this.promise = new C(function ($$resolve, $$reject) {
+    if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
+    resolve = $$resolve;
+    reject = $$reject;
+  });
+  this.resolve = aFunction(resolve);
+  this.reject = aFunction(reject);
+};
+
+// 25.4.1.5 NewPromiseCapability(C)
+module.exports.f = function (C) {
+  return new PromiseCapability(C);
+};
+
 
 /***/ }),
 
@@ -32630,6 +35027,39 @@ var add = __webpack_require__("35d6").default
 module.exports.__inject__ = function (shadowRoot) {
   add("fc0952da", content, shadowRoot)
 };
+
+/***/ }),
+
+/***/ "f5df":
+/***/ (function(module, exports, __webpack_require__) {
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var classofRaw = __webpack_require__("c6b6");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+// ES3 wrong here
+var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) == 'Arguments';
+
+// fallback for IE11 Script Access Denied error
+var tryGet = function (it, key) {
+  try {
+    return it[key];
+  } catch (error) { /* empty */ }
+};
+
+// getting tag from ES6+ `Object.prototype.toString`
+module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
+  var O, tag, result;
+  return it === undefined ? 'Undefined' : it === null ? 'Null'
+    // @@toStringTag case
+    : typeof (tag = tryGet(O = Object(it), TO_STRING_TAG)) == 'string' ? tag
+    // builtinTag case
+    : CORRECT_ARGUMENTS ? classofRaw(O)
+    // ES3 arguments fallback
+    : (result = classofRaw(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : result;
+};
+
 
 /***/ }),
 
@@ -32817,6 +35247,16 @@ module.exports = NATIVE_SYMBOL
   && !Symbol.sham
   // eslint-disable-next-line no-undef
   && typeof Symbol.iterator == 'symbol';
+
+
+/***/ }),
+
+/***/ "fea9":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+
+module.exports = global.Promise;
 
 
 /***/ })
