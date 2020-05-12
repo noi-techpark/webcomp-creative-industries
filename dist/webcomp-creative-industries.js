@@ -86,6 +86,21 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "00ee":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+var test = {};
+
+test[TO_STRING_TAG] = 'z';
+
+module.exports = String(test) === '[object z]';
+
+
+/***/ }),
+
 /***/ "02f6":
 /***/ (function(module, exports) {
 
@@ -119,6 +134,35 @@ module.exports = function (fn, that, length) {
   return function (/* ...args */) {
     return fn.apply(that, arguments);
   };
+};
+
+
+/***/ }),
+
+/***/ "057f":
+/***/ (function(module, exports, __webpack_require__) {
+
+var toIndexedObject = __webpack_require__("fc6a");
+var nativeGetOwnPropertyNames = __webpack_require__("241c").f;
+
+var toString = {}.toString;
+
+var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
+  ? Object.getOwnPropertyNames(window) : [];
+
+var getWindowNames = function (it) {
+  try {
+    return nativeGetOwnPropertyNames(it);
+  } catch (error) {
+    return windowNames.slice();
+  }
+};
+
+// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+module.exports.f = function getOwnPropertyNames(it) {
+  return windowNames && toString.call(it) == '[object Window]'
+    ? getWindowNames(it)
+    : nativeGetOwnPropertyNames(toIndexedObject(it));
 };
 
 
@@ -158,6 +202,108 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGoAAABqCAYAAABU
 
 /***/ }),
 
+/***/ "0a06":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+var buildURL = __webpack_require__("30b5");
+var InterceptorManager = __webpack_require__("f6b4");
+var dispatchRequest = __webpack_require__("5270");
+var mergeConfig = __webpack_require__("4a7b");
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+
 /***/ "0cfb":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -171,6 +317,41 @@ module.exports = !DESCRIPTORS && !fails(function () {
     get: function () { return 7; }
   }).a != 7;
 });
+
+
+/***/ }),
+
+/***/ "0df6":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
 
 
 /***/ }),
@@ -217,10 +398,11 @@ var ___CSS_LOADER_URL_IMPORT_5___ = __webpack_require__("02f6");
 var ___CSS_LOADER_URL_IMPORT_6___ = __webpack_require__("11bf");
 var ___CSS_LOADER_URL_IMPORT_7___ = __webpack_require__("b3b7");
 var ___CSS_LOADER_URL_IMPORT_8___ = __webpack_require__("4440");
-var ___CSS_LOADER_URL_IMPORT_9___ = __webpack_require__("ea71");
-var ___CSS_LOADER_URL_IMPORT_10___ = __webpack_require__("7f32");
-var ___CSS_LOADER_URL_IMPORT_11___ = __webpack_require__("d557");
-var ___CSS_LOADER_URL_IMPORT_12___ = __webpack_require__("078f");
+var ___CSS_LOADER_URL_IMPORT_9___ = __webpack_require__("b069");
+var ___CSS_LOADER_URL_IMPORT_10___ = __webpack_require__("ea71");
+var ___CSS_LOADER_URL_IMPORT_11___ = __webpack_require__("7f32");
+var ___CSS_LOADER_URL_IMPORT_12___ = __webpack_require__("d557");
+var ___CSS_LOADER_URL_IMPORT_13___ = __webpack_require__("078f");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_0___);
 var ___CSS_LOADER_URL_REPLACEMENT_1___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_1___);
@@ -235,8 +417,9 @@ var ___CSS_LOADER_URL_REPLACEMENT_9___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_
 var ___CSS_LOADER_URL_REPLACEMENT_10___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_10___);
 var ___CSS_LOADER_URL_REPLACEMENT_11___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_11___);
 var ___CSS_LOADER_URL_REPLACEMENT_12___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_12___);
+var ___CSS_LOADER_URL_REPLACEMENT_13___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_13___);
 // Module
-exports.push([module.i, "#app{height:700px;width:1100px}.title{font-size:1.3rem}#app{position:relative;font-size:large;font-family:Arial,Helvetica,sans-serif}#map{position:absolute;height:100%;width:100%;z-index:0}.center-button{position:absolute;height:30px!important;width:30px!important;bottom:120px;right:30px;border:2px solid rgba(0,0,0,.2)}.logo{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");background-repeat:no-repeat}.logo.bottom-left{height:45px;width:120px;bottom:30px;left:30px}#omnibox,.logo.bottom-left{position:absolute;z-index:20}#omnibox{top:0;width:400px;height:65%;background:#fff;overflow:hidden}.navbar{display:none;height:75px;padding:0 30px}.navbar .title{text-transform:capitalize}#navbar-filters{position:absolute}.title-header{-webkit-transform:translate(-45px);transform:translate(-45px);-webkit-transition:all .1s ease;transition:all .1s ease}.title-header.active{display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-transform:translate(0);transform:translate(0)}.nav-back{opacity:0;-webkit-transition:opacity .1s linear;transition:opacity .1s linear}.title-header.active .nav-back{opacity:1}.search-bar{height:38px;width:0;opacity:0;-webkit-transition:width .1s ease;transition:width .1s ease;background-color:#eee;border:none;border-top-right-radius:0!important;border-bottom-right-radius:0!important;padding-left:13px}.search-bar.active{width:160px;opacity:1}.search-button.active{border:none;border-top-left-radius:0!important;border-bottom-left-radius:0!important;margin-left:0}#omnibox .singlebox{position:absolute;-webkit-transform:translate(100%);transform:translate(100%);opacity:0;overflow-y:scroll;height:calc(100% - 75px);width:100%;-webkit-box-sizing:border-box;box-sizing:border-box;background-color:#fff;-webkit-transition:all .1s ease;transition:all .1s ease}#industries{z-index:100}#sectors{z-index:110}#results{z-index:120}#selection{z-index:130;padding:0 18px 0 30px;font-size:medium}#selection .row{margin:25px 0}#filters{z-index:200;margin:0 30px}.filter-class{margin-top:30px}.filter-class .title{margin-bottom:15px}.form-check{margin-top:3px}.form-check input{display:none}.form-check span{width:.65rem;height:.65rem;display:inline-block;background:#eee;border:2px solid rgba(0,0,0,.2);border-radius:2px}.form-check input:checked+span{background:#a9bf00}.select-list>.select-item{height:75px;padding:0 15px 0 30px;cursor:pointer}.select-list>.select-item:hover{background:#eee}.select-list>.select-item:active{opacity:.5}.select-item>.icon{height:50px;width:50px;margin-right:15px!important}.leaflet-bar{border-radius:10px!important}.leaflet-control-zoom.leaflet-bar.leaflet-control{bottom:20px;right:20px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:10px!important;border-top-right-radius:10px!important}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:10px!important;border-bottom-right-radius:10px!important}.primary-bg{background-color:#a9bf00!important}.white-bg{background-color:#fff!important}.margined{margin:30px}.shadowed{-webkit-box-shadow:rgba(50,50,50,.75) 1px 0 15px 0;box-shadow:1px 0 15px 0 rgba(50,50,50,.75)}.rounded{border-radius:10px}.social .icon.rounded{border-radius:5px}.center-area{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:1;-ms-flex:auto;flex:auto;height:100%}.center-area .center-y{margin-top:auto;margin-bottom:auto}.center-area .center-x{margin-left:auto;margin-right:auto}.fill{width:100%}.inline-block{display:inline-block}+− Leaflet|© OpenStreetMap,© CARTO Industrie a{color:#000;text-decoration:none;border-bottom:.5px solid #d3d3d3}a.icon{border:none}.icon{height:25px;width:25px;background-size:contain;background-repeat:no-repeat}.button{height:40px;width:40px;margin-left:15px;background-color:#eee;cursor:pointer}.button .icon{height:55%;width:55%;background-position:50%}.navbar .button .icon{fill:#707173;opacity:.4}.navbar .button.primary-bg .icon{opacity:1}.row{height:100px}.links,.row{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.links{-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column}.social{display:-webkit-box;display:-ms-flexbox;display:flex}.social>:first-child{margin-right:15px}.logo{background-size:contain;width:100px}.description{margin-top:15px;margin-bottom:30px}.contact{height:40px;margin:15px 0}.contact>.button{margin-right:15px;margin-left:0;cursor:auto}.contact .icon{fill:#fff;opacity:.9}.clickable{cursor:pointer}.singlebox.active{-webkit-transform:translate(0)!important;transform:translate(0)!important;opacity:1!important}.singlebox.shift{-webkit-transform:translate(-100%)!important;transform:translate(-100%)!important;opacity:0!important}.active{display:block!important}.back-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");margin-right:15px!important}.down-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ")}.back-icon:active{opacity:.5!important}.select-item>.industrie-icon{background-size:60%;background-repeat:no-repeat;background-position:50%}.select-item>.forward-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_3___ + ");margin-left:auto!important;background-position:100%;height:40px}.search-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_4___ + ")}.filter-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_5___ + ")}.confirm-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_6___ + ")}.center-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_7___ + ")}.facebook-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_8___ + ")}.linkedin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_9___ + ")}.phone-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_10___ + ")}.mail-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_11___ + ")}.pin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_12___ + ")}", ""]);
+exports.push([module.i, ".title{font-size:1.3rem}#app{position:relative;font-size:large;font-family:Arial,Helvetica,sans-serif}#app,#map{width:100%;height:100%}#map{position:absolute;z-index:0}.center-button{position:absolute;height:30px!important;width:30px!important;bottom:120px;right:30px;border:2px solid rgba(0,0,0,.2)}.logo{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");background-repeat:no-repeat}.logo.bottom-left{height:45px;width:120px;bottom:30px;left:30px}#omnibox,.logo.bottom-left{position:absolute;z-index:20}#omnibox{top:0;width:400px;height:65%;background:#fff;overflow:hidden}.navbar{display:none;height:75px;padding:0 30px}.navbar .title{text-transform:capitalize;max-width:175px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}#navbar-filters{position:absolute}.title-header{-webkit-transform:translate(-45px);transform:translate(-45px);-webkit-transition:all .1s ease;transition:all .1s ease}.title-header.active{display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-transform:translate(0);transform:translate(0)}.nav-back{opacity:0;-webkit-transition:opacity .1s linear;transition:opacity .1s linear}.title-header.active .nav-back{opacity:1}.search-bar{height:38px;width:0;opacity:0;-webkit-transition:width .1s ease;transition:width .1s ease;background-color:#eee;border:none;border-top-right-radius:0!important;border-bottom-right-radius:0!important;padding-left:13px}.search-bar.active{width:160px;opacity:1}.search-button.active{border:none;border-top-left-radius:0!important;border-bottom-left-radius:0!important;margin-left:0}#omnibox .singlebox{position:absolute;-webkit-transform:translate(100%);transform:translate(100%);opacity:0;overflow-y:scroll;height:calc(100% - 75px);width:100%;-webkit-box-sizing:border-box;box-sizing:border-box;background-color:#fff;-webkit-transition:all .1s ease;transition:all .1s ease}#industries{z-index:100}#sectors{z-index:110}#results{z-index:120}#selection{z-index:130;padding:0 18px 0 30px;font-size:medium}#selection .row{margin:25px 0}#filters{z-index:200;margin:0 30px}.filter-class{margin-top:30px}.filter-class .title{margin-bottom:15px}.form-check{margin-top:3px}.form-check input{display:none}.form-check span{width:.65rem;height:.65rem;display:inline-block;background:#eee;border:2px solid rgba(0,0,0,.2);border-radius:2px}.form-check input:checked+span{background:#a9bf00}.select-list>.select-item{height:75px;padding:0 15px 0 30px;cursor:pointer}.select-list>.select-item:hover{background:#eee}.select-list>.select-item:active{opacity:.5}.select-item>.icon{height:50px;width:50px;margin-right:15px!important}.leaflet-bar{border-radius:10px!important}.leaflet-control-zoom.leaflet-bar.leaflet-control{bottom:20px;right:20px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:10px!important;border-top-right-radius:10px!important}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:10px!important;border-bottom-right-radius:10px!important}.primary-bg{background-color:#a9bf00!important}.white-bg{background-color:#fff!important}.margined{margin:30px}.shadowed{-webkit-box-shadow:rgba(50,50,50,.75) 1px 0 15px 0;box-shadow:1px 0 15px 0 rgba(50,50,50,.75)}.rounded{border-radius:10px}.social .icon.rounded{border-radius:5px}.center-area{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:1;-ms-flex:auto;flex:auto;height:100%}.center-area .center-y{margin-top:auto;margin-bottom:auto}.center-area .center-x{margin-left:auto;margin-right:auto}.fill{width:100%}.inline-block{display:inline-block}+− Leaflet|© OpenStreetMap,© CARTO Industrie a{color:#000;text-decoration:none;border-bottom:.5px solid #d3d3d3}a{color:rgba(50,50,50,.75);text-decoration:none}a.icon{border:none}.icon{height:25px;width:25px;background-size:contain;background-repeat:no-repeat}.button{height:40px;width:40px;margin-left:15px;background-color:#eee;cursor:pointer}.button .icon{height:55%;width:55%;background-position:50%}.navbar .button .icon{fill:#707173;opacity:.4}.navbar .button.primary-bg .icon{opacity:1}.row{height:100px}.links,.row{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.links{-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column}.social{display:-webkit-box;display:-ms-flexbox;display:flex}.social>:first-child{margin-right:15px}.logo{background-size:contain;width:100px}.description{margin-top:15px;margin-bottom:30px}.contact{height:40px;margin:15px 0}.contact>.button{margin-right:15px;margin-left:0;cursor:auto}.contact .icon{fill:#fff;opacity:.9}.clickable{cursor:pointer}.singlebox.active{-webkit-transform:translate(0)!important;transform:translate(0)!important;opacity:1!important}.singlebox.shift{-webkit-transform:translate(-100%)!important;transform:translate(-100%)!important;opacity:0!important}.active{display:block!important}.back-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");margin-right:15px!important}.down-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ")}.back-icon:active{opacity:.5!important}.select-item>.industrie-icon{background-size:60%;background-repeat:no-repeat;background-position:50%}.select-item>.forward-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_3___ + ");margin-left:auto!important;background-position:100%;height:40px}.search-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_4___ + ")}.filter-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_5___ + ")}.confirm-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_6___ + ")}.center-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_7___ + ")}.facebook-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_8___ + ")}.instagram-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_9___ + ")}.linkedin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_10___ + ")}.phone-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_11___ + ")}.mail-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_12___ + ")}.pin-icon{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_13___ + ")}", ""]);
 // Exports
 module.exports = exports;
 
@@ -322,6 +505,18 @@ module.exports = (!STRICT_METHOD || !USES_TO_LENGTH) ? function forEach(callback
 
 /***/ }),
 
+/***/ "19aa":
+/***/ (function(module, exports) {
+
+module.exports = function (it, Constructor, name) {
+  if (!(it instanceof Constructor)) {
+    throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
+  } return it;
+};
+
+
+/***/ }),
+
 /***/ "1be4":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -339,6 +534,80 @@ module.exports = function (it) {
   if (typeof it != 'function') {
     throw TypeError(String(it) + ' is not a function');
   } return it;
+};
+
+
+/***/ }),
+
+/***/ "1c7e":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var SAFE_CLOSING = false;
+
+try {
+  var called = 0;
+  var iteratorWithReturn = {
+    next: function () {
+      return { done: !!called++ };
+    },
+    'return': function () {
+      SAFE_CLOSING = true;
+    }
+  };
+  iteratorWithReturn[ITERATOR] = function () {
+    return this;
+  };
+  // eslint-disable-next-line no-throw-literal
+  Array.from(iteratorWithReturn, function () { throw 2; });
+} catch (error) { /* empty */ }
+
+module.exports = function (exec, SKIP_CLOSING) {
+  if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+  var ITERATION_SUPPORT = false;
+  try {
+    var object = {};
+    object[ITERATOR] = function () {
+      return {
+        next: function () {
+          return { done: ITERATION_SUPPORT = true };
+        }
+      };
+    };
+    exec(object);
+  } catch (error) { /* empty */ }
+  return ITERATION_SUPPORT;
+};
+
+
+/***/ }),
+
+/***/ "1cdc":
+/***/ (function(module, exports, __webpack_require__) {
+
+var userAgent = __webpack_require__("342f");
+
+module.exports = /(iphone|ipod|ipad).*applewebkit/i.test(userAgent);
+
+
+/***/ }),
+
+/***/ "1d2b":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
 };
 
 
@@ -436,6 +705,56 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "2266":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+var isArrayIteratorMethod = __webpack_require__("e95a");
+var toLength = __webpack_require__("50c4");
+var bind = __webpack_require__("0366");
+var getIteratorMethod = __webpack_require__("35a1");
+var callWithSafeIterationClosing = __webpack_require__("9bdd");
+
+var Result = function (stopped, result) {
+  this.stopped = stopped;
+  this.result = result;
+};
+
+var iterate = module.exports = function (iterable, fn, that, AS_ENTRIES, IS_ITERATOR) {
+  var boundFunction = bind(fn, that, AS_ENTRIES ? 2 : 1);
+  var iterator, iterFn, index, length, result, next, step;
+
+  if (IS_ITERATOR) {
+    iterator = iterable;
+  } else {
+    iterFn = getIteratorMethod(iterable);
+    if (typeof iterFn != 'function') throw TypeError('Target is not iterable');
+    // optimisation for array iterators
+    if (isArrayIteratorMethod(iterFn)) {
+      for (index = 0, length = toLength(iterable.length); length > index; index++) {
+        result = AS_ENTRIES
+          ? boundFunction(anObject(step = iterable[index])[0], step[1])
+          : boundFunction(iterable[index]);
+        if (result && result instanceof Result) return result;
+      } return new Result(false);
+    }
+    iterator = iterFn.call(iterable);
+  }
+
+  next = iterator.next;
+  while (!(step = next.call(iterator)).done) {
+    result = callWithSafeIterationClosing(iterator, boundFunction, step.value, AS_ENTRIES);
+    if (typeof result == 'object' && result && result instanceof Result) return result;
+  } return new Result(false);
+};
+
+iterate.stop = function (result) {
+  return new Result(true, result);
+};
+
+
+/***/ }),
+
 /***/ "23cb":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -530,6 +849,112 @@ exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
   return internalObjectKeys(O, hiddenKeys);
 };
 
+
+/***/ }),
+
+/***/ "2444":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__("c532");
+var normalizeHeaderName = __webpack_require__("c8af");
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__("b50d");
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__("b50d");
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("4362")))
 
 /***/ }),
 
@@ -3362,6 +3787,33 @@ exports.MarkerCluster = MarkerCluster;
 
 })));
 //# sourceMappingURL=leaflet.markercluster-src.js.map
+
+
+/***/ }),
+
+/***/ "2626":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var getBuiltIn = __webpack_require__("d066");
+var definePropertyModule = __webpack_require__("9bf2");
+var wellKnownSymbol = __webpack_require__("b622");
+var DESCRIPTORS = __webpack_require__("83ab");
+
+var SPECIES = wellKnownSymbol('species');
+
+module.exports = function (CONSTRUCTOR_NAME) {
+  var Constructor = getBuiltIn(CONSTRUCTOR_NAME);
+  var defineProperty = definePropertyModule.f;
+
+  if (DESCRIPTORS && Constructor && !Constructor[SPECIES]) {
+    defineProperty(Constructor, SPECIES, {
+      configurable: true,
+      get: function () { return this; }
+    });
+  }
+};
 
 
 /***/ }),
@@ -11236,6 +11688,114 @@ if (inBrowser) {
 
 /***/ }),
 
+/***/ "2cf4":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+var fails = __webpack_require__("d039");
+var classof = __webpack_require__("c6b6");
+var bind = __webpack_require__("0366");
+var html = __webpack_require__("1be4");
+var createElement = __webpack_require__("cc12");
+var IS_IOS = __webpack_require__("1cdc");
+
+var location = global.location;
+var set = global.setImmediate;
+var clear = global.clearImmediate;
+var process = global.process;
+var MessageChannel = global.MessageChannel;
+var Dispatch = global.Dispatch;
+var counter = 0;
+var queue = {};
+var ONREADYSTATECHANGE = 'onreadystatechange';
+var defer, channel, port;
+
+var run = function (id) {
+  // eslint-disable-next-line no-prototype-builtins
+  if (queue.hasOwnProperty(id)) {
+    var fn = queue[id];
+    delete queue[id];
+    fn();
+  }
+};
+
+var runner = function (id) {
+  return function () {
+    run(id);
+  };
+};
+
+var listener = function (event) {
+  run(event.data);
+};
+
+var post = function (id) {
+  // old engines have not location.origin
+  global.postMessage(id + '', location.protocol + '//' + location.host);
+};
+
+// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
+if (!set || !clear) {
+  set = function setImmediate(fn) {
+    var args = [];
+    var i = 1;
+    while (arguments.length > i) args.push(arguments[i++]);
+    queue[++counter] = function () {
+      // eslint-disable-next-line no-new-func
+      (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
+    };
+    defer(counter);
+    return counter;
+  };
+  clear = function clearImmediate(id) {
+    delete queue[id];
+  };
+  // Node.js 0.8-
+  if (classof(process) == 'process') {
+    defer = function (id) {
+      process.nextTick(runner(id));
+    };
+  // Sphere (JS game engine) Dispatch API
+  } else if (Dispatch && Dispatch.now) {
+    defer = function (id) {
+      Dispatch.now(runner(id));
+    };
+  // Browsers with MessageChannel, includes WebWorkers
+  // except iOS - https://github.com/zloirock/core-js/issues/624
+  } else if (MessageChannel && !IS_IOS) {
+    channel = new MessageChannel();
+    port = channel.port2;
+    channel.port1.onmessage = listener;
+    defer = bind(port.postMessage, port, 1);
+  // Browsers with postMessage, skip WebWorkers
+  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
+  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts && !fails(post)) {
+    defer = post;
+    global.addEventListener('message', listener, false);
+  // IE8-
+  } else if (ONREADYSTATECHANGE in createElement('script')) {
+    defer = function (id) {
+      html.appendChild(createElement('script'))[ONREADYSTATECHANGE] = function () {
+        html.removeChild(this);
+        run(id);
+      };
+    };
+  // Rest old browsers
+  } else {
+    defer = function (id) {
+      setTimeout(runner(id), 0);
+    };
+  }
+}
+
+module.exports = {
+  set: set,
+  clear: clear
+};
+
+
+/***/ }),
+
 /***/ "2d00":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11263,6 +11823,124 @@ module.exports = version && +version;
 
 /***/ }),
 
+/***/ "2d83":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var enhanceError = __webpack_require__("387f");
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+
+/***/ }),
+
+/***/ "2e67":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ "30b5":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+
 /***/ "3246":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11277,7 +11955,7 @@ var ___CSS_LOADER_URL_REPLACEMENT_0___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_
 var ___CSS_LOADER_URL_REPLACEMENT_1___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_1___);
 var ___CSS_LOADER_URL_REPLACEMENT_2___ = ___CSS_LOADER_GET_URL_IMPORT___(___CSS_LOADER_URL_IMPORT_2___);
 // Module
-exports.push([module.i, ".leaflet-image-layer,.leaflet-layer,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-pane,.leaflet-pane>canvas,.leaflet-pane>svg,.leaflet-tile,.leaflet-tile-container,.leaflet-zoom-box{position:absolute;left:0;top:0}.leaflet-container{overflow:hidden}.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-user-drag:none}.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast}.leaflet-safari .leaflet-tile-container{width:1600px;height:1600px;-webkit-transform-origin:0 0}.leaflet-marker-icon,.leaflet-marker-shadow{display:block}.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-overlay-pane svg,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer{max-width:none!important;max-height:none!important}.leaflet-container.leaflet-touch-zoom{-ms-touch-action:pan-x pan-y;touch-action:pan-x pan-y}.leaflet-container.leaflet-touch-drag{-ms-touch-action:pinch-zoom;touch-action:none;touch-action:pinch-zoom}.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{-ms-touch-action:none;touch-action:none}.leaflet-container{-webkit-tap-highlight-color:transparent}.leaflet-container a{-webkit-tap-highlight-color:rgba(51,181,229,.4)}.leaflet-tile{-webkit-filter:inherit;filter:inherit;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}.leaflet-zoom-box{width:0;height:0;-webkit-box-sizing:border-box;box-sizing:border-box;z-index:800}.leaflet-overlay-pane svg{-moz-user-select:none}.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}.leaflet-vml-shape{width:1px;height:1px}.lvml{behavior:url(#default#VML);display:inline-block;position:absolute}.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto}.leaflet-bottom,.leaflet-top{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}.leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right}.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}.leaflet-fade-anim .leaflet-tile{will-change:opacity}.leaflet-fade-anim .leaflet-popup{opacity:0;-webkit-transition:opacity .2s linear;transition:opacity .2s linear}.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1}.leaflet-zoom-animated{-webkit-transform-origin:0 0;transform-origin:0 0}.leaflet-zoom-anim .leaflet-zoom-animated{will-change:transform;-webkit-transition:-webkit-transform .25s cubic-bezier(0,0,.25,1);transition:-webkit-transform .25s cubic-bezier(0,0,.25,1);transition:transform .25s cubic-bezier(0,0,.25,1);transition:transform .25s cubic-bezier(0,0,.25,1),-webkit-transform .25s cubic-bezier(0,0,.25,1)}.leaflet-pan-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-tile{-webkit-transition:none;transition:none}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}.leaflet-interactive{cursor:pointer}.leaflet-grab{cursor:-webkit-grab;cursor:-moz-grab}.leaflet-crosshair,.leaflet-crosshair .leaflet-interactive{cursor:crosshair}.leaflet-control,.leaflet-popup-pane{cursor:auto}.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive,.leaflet-dragging .leaflet-marker-draggable{cursor:move;cursor:-webkit-grabbing;cursor:-moz-grabbing}.leaflet-image-layer,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none}.leaflet-image-layer.leaflet-interactive,.leaflet-marker-icon.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive{pointer-events:visiblePainted;pointer-events:auto}.leaflet-container{background:#ddd;outline:0}.leaflet-container a{color:#0078a8}.leaflet-container a.leaflet-active{outline:2px solid orange}.leaflet-zoom-box{border:2px dotted #38f;background:hsla(0,0%,100%,.5)}.leaflet-container{font:12px/1.5 Helvetica Neue,Arial,Helvetica,sans-serif}.leaflet-bar{-webkit-box-shadow:0 1px 5px rgba(0,0,0,.65);box-shadow:0 1px 5px rgba(0,0,0,.65);border-radius:4px}.leaflet-bar a,.leaflet-bar a:hover{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:#000}.leaflet-bar a,.leaflet-control-layers-toggle{background-position:50% 50%;background-repeat:no-repeat;display:block}.leaflet-bar a:hover{background-color:#f4f4f4}.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px}.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none}.leaflet-bar a.leaflet-disabled{cursor:default;background-color:#f4f4f4;color:#bbb}.leaflet-touch .leaflet-bar a{width:30px;height:30px;line-height:30px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:2px;border-top-right-radius:2px}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:2px;border-bottom-right-radius:2px}.leaflet-control-zoom-in,.leaflet-control-zoom-out{font:700 18px Lucida Console,Monaco,monospace;text-indent:1px}.leaflet-touch .leaflet-control-zoom-in,.leaflet-touch .leaflet-control-zoom-out{font-size:22px}.leaflet-control-layers{-webkit-box-shadow:0 1px 5px rgba(0,0,0,.4);box-shadow:0 1px 5px rgba(0,0,0,.4);background:#fff;border-radius:5px}.leaflet-control-layers-toggle{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");width:36px;height:36px}.leaflet-retina .leaflet-control-layers-toggle{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");background-size:26px 26px}.leaflet-touch .leaflet-control-layers-toggle{width:44px;height:44px}.leaflet-control-layers-expanded .leaflet-control-layers-toggle,.leaflet-control-layers .leaflet-control-layers-list{display:none}.leaflet-control-layers-expanded .leaflet-control-layers-list{display:block;position:relative}.leaflet-control-layers-expanded{padding:6px 10px 6px 6px;color:#333;background:#fff}.leaflet-control-layers-scrollbar{overflow-y:scroll;overflow-x:hidden;padding-right:5px}.leaflet-control-layers-selector{margin-top:2px;position:relative;top:1px}.leaflet-control-layers label{display:block}.leaflet-control-layers-separator{height:0;border-top:1px solid #ddd;margin:5px -10px 5px -6px}.leaflet-default-icon-path{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ")}.leaflet-container .leaflet-control-attribution{background:#fff;background:hsla(0,0%,100%,.7);margin:0}.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 5px;color:#333}.leaflet-control-attribution a{text-decoration:none}.leaflet-control-attribution a:hover{text-decoration:underline}.leaflet-container .leaflet-control-attribution,.leaflet-container .leaflet-control-scale{font-size:11px}.leaflet-left .leaflet-control-scale{margin-left:5px}.leaflet-bottom .leaflet-control-scale{margin-bottom:5px}.leaflet-control-scale-line{border:2px solid #777;border-top:none;line-height:1.1;padding:2px 5px 1px;font-size:11px;white-space:nowrap;overflow:hidden;-webkit-box-sizing:border-box;box-sizing:border-box;background:#fff;background:hsla(0,0%,100%,.5)}.leaflet-control-scale-line:not(:first-child){border-top:2px solid #777;border-bottom:none;margin-top:-2px}.leaflet-control-scale-line:not(:first-child):not(:last-child){border-bottom:2px solid #777}.leaflet-touch .leaflet-bar,.leaflet-touch .leaflet-control-attribution,.leaflet-touch .leaflet-control-layers{-webkit-box-shadow:none;box-shadow:none}.leaflet-touch .leaflet-bar,.leaflet-touch .leaflet-control-layers{border:2px solid rgba(0,0,0,.2);background-clip:padding-box}.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px}.leaflet-popup-content{margin:13px 19px;line-height:1.4}.leaflet-popup-content p{margin:18px 0}.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-left:-20px;overflow:hidden;pointer-events:none}.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;-webkit-transform:rotate(45deg);transform:rotate(45deg)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#fff;color:#333;-webkit-box-shadow:0 3px 14px rgba(0,0,0,.4);box-shadow:0 3px 14px rgba(0,0,0,.4)}.leaflet-container a.leaflet-popup-close-button{position:absolute;top:0;right:0;padding:4px 4px 0 0;border:none;text-align:center;width:18px;height:14px;font:16px/14px Tahoma,Verdana,sans-serif;color:#c3c3c3;text-decoration:none;font-weight:700;background:transparent}.leaflet-container a.leaflet-popup-close-button:hover{color:#999}.leaflet-popup-scrolled{overflow:auto;border-bottom:1px solid #ddd;border-top:1px solid #ddd}.leaflet-oldie .leaflet-popup-content-wrapper{zoom:1}.leaflet-oldie .leaflet-popup-tip{width:24px;margin:0 auto;-ms-filter:\"progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)\";filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678,M12=0.70710678,M21=-0.70710678,M22=0.70710678)}.leaflet-oldie .leaflet-popup-tip-container{margin-top:-1px}.leaflet-oldie .leaflet-control-layers,.leaflet-oldie .leaflet-control-zoom,.leaflet-oldie .leaflet-popup-content-wrapper,.leaflet-oldie .leaflet-popup-tip{border:1px solid #999}.leaflet-div-icon{background:#fff;border:1px solid #666}.leaflet-tooltip{position:absolute;padding:6px;background-color:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;pointer-events:none;-webkit-box-shadow:0 1px 3px rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.4)}.leaflet-tooltip.leaflet-clickable{cursor:pointer;pointer-events:auto}.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before,.leaflet-tooltip-top:before{position:absolute;pointer-events:none;border:6px solid transparent;background:transparent;content:\"\"}.leaflet-tooltip-bottom{margin-top:6px}.leaflet-tooltip-top{margin-top:-6px}.leaflet-tooltip-bottom:before,.leaflet-tooltip-top:before{left:50%;margin-left:-6px}.leaflet-tooltip-top:before{bottom:0;margin-bottom:-12px;border-top-color:#fff}.leaflet-tooltip-bottom:before{top:0;margin-top:-12px;margin-left:-6px;border-bottom-color:#fff}.leaflet-tooltip-left{margin-left:-6px}.leaflet-tooltip-right{margin-left:6px}.leaflet-tooltip-left:before,.leaflet-tooltip-right:before{top:50%;margin-top:-6px}.leaflet-tooltip-left:before{right:0;margin-right:-12px;border-left-color:#fff}.leaflet-tooltip-right:before{left:0;margin-left:-12px;border-right-color:#fff}", ""]);
+exports.push([module.i, ".leaflet-image-layer,.leaflet-layer,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-pane,.leaflet-pane>canvas,.leaflet-pane>svg,.leaflet-tile,.leaflet-tile-container,.leaflet-zoom-box{position:absolute;left:0;top:0}.leaflet-container{overflow:hidden}.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-user-drag:none}.leaflet-tile::-moz-selection{background:transparent}.leaflet-tile::selection{background:transparent}.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast}.leaflet-safari .leaflet-tile-container{width:1600px;height:1600px;-webkit-transform-origin:0 0}.leaflet-marker-icon,.leaflet-marker-shadow{display:block}.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-overlay-pane svg,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer{max-width:none!important;max-height:none!important}.leaflet-container.leaflet-touch-zoom{-ms-touch-action:pan-x pan-y;touch-action:pan-x pan-y}.leaflet-container.leaflet-touch-drag{-ms-touch-action:pinch-zoom;touch-action:none;touch-action:pinch-zoom}.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{-ms-touch-action:none;touch-action:none}.leaflet-container{-webkit-tap-highlight-color:transparent}.leaflet-container a{-webkit-tap-highlight-color:rgba(51,181,229,.4)}.leaflet-tile{-webkit-filter:inherit;filter:inherit;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}.leaflet-zoom-box{width:0;height:0;-webkit-box-sizing:border-box;box-sizing:border-box;z-index:800}.leaflet-overlay-pane svg{-moz-user-select:none}.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}.leaflet-vml-shape{width:1px;height:1px}.lvml{behavior:url(#default#VML);display:inline-block;position:absolute}.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto}.leaflet-bottom,.leaflet-top{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}.leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right}.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}.leaflet-fade-anim .leaflet-tile{will-change:opacity}.leaflet-fade-anim .leaflet-popup{opacity:0;-webkit-transition:opacity .2s linear;transition:opacity .2s linear}.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1}.leaflet-zoom-animated{-webkit-transform-origin:0 0;transform-origin:0 0}.leaflet-zoom-anim .leaflet-zoom-animated{will-change:transform;-webkit-transition:-webkit-transform .25s cubic-bezier(0,0,.25,1);transition:-webkit-transform .25s cubic-bezier(0,0,.25,1);transition:transform .25s cubic-bezier(0,0,.25,1);transition:transform .25s cubic-bezier(0,0,.25,1),-webkit-transform .25s cubic-bezier(0,0,.25,1)}.leaflet-pan-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-tile{-webkit-transition:none;transition:none}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}.leaflet-interactive{cursor:pointer}.leaflet-grab{cursor:-webkit-grab;cursor:grab}.leaflet-crosshair,.leaflet-crosshair .leaflet-interactive{cursor:crosshair}.leaflet-control,.leaflet-popup-pane{cursor:auto}.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive,.leaflet-dragging .leaflet-marker-draggable{cursor:move;cursor:-webkit-grabbing;cursor:grabbing}.leaflet-image-layer,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none}.leaflet-image-layer.leaflet-interactive,.leaflet-marker-icon.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive,svg.leaflet-image-layer.leaflet-interactive path{pointer-events:visiblePainted;pointer-events:auto}.leaflet-container{background:#ddd;outline:0}.leaflet-container a{color:#0078a8}.leaflet-container a.leaflet-active{outline:2px solid orange}.leaflet-zoom-box{border:2px dotted #38f;background:hsla(0,0%,100%,.5)}.leaflet-container{font:12px/1.5 Helvetica Neue,Arial,Helvetica,sans-serif}.leaflet-bar{-webkit-box-shadow:0 1px 5px rgba(0,0,0,.65);box-shadow:0 1px 5px rgba(0,0,0,.65);border-radius:4px}.leaflet-bar a,.leaflet-bar a:hover{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:#000}.leaflet-bar a,.leaflet-control-layers-toggle{background-position:50% 50%;background-repeat:no-repeat;display:block}.leaflet-bar a:hover{background-color:#f4f4f4}.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px}.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none}.leaflet-bar a.leaflet-disabled{cursor:default;background-color:#f4f4f4;color:#bbb}.leaflet-touch .leaflet-bar a{width:30px;height:30px;line-height:30px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:2px;border-top-right-radius:2px}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:2px;border-bottom-right-radius:2px}.leaflet-control-zoom-in,.leaflet-control-zoom-out{font:700 18px Lucida Console,Monaco,monospace;text-indent:1px}.leaflet-touch .leaflet-control-zoom-in,.leaflet-touch .leaflet-control-zoom-out{font-size:22px}.leaflet-control-layers{-webkit-box-shadow:0 1px 5px rgba(0,0,0,.4);box-shadow:0 1px 5px rgba(0,0,0,.4);background:#fff;border-radius:5px}.leaflet-control-layers-toggle{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");width:36px;height:36px}.leaflet-retina .leaflet-control-layers-toggle{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");background-size:26px 26px}.leaflet-touch .leaflet-control-layers-toggle{width:44px;height:44px}.leaflet-control-layers-expanded .leaflet-control-layers-toggle,.leaflet-control-layers .leaflet-control-layers-list{display:none}.leaflet-control-layers-expanded .leaflet-control-layers-list{display:block;position:relative}.leaflet-control-layers-expanded{padding:6px 10px 6px 6px;color:#333;background:#fff}.leaflet-control-layers-scrollbar{overflow-y:scroll;overflow-x:hidden;padding-right:5px}.leaflet-control-layers-selector{margin-top:2px;position:relative;top:1px}.leaflet-control-layers label{display:block}.leaflet-control-layers-separator{height:0;border-top:1px solid #ddd;margin:5px -10px 5px -6px}.leaflet-default-icon-path{background-image:url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ")}.leaflet-container .leaflet-control-attribution{background:#fff;background:hsla(0,0%,100%,.7);margin:0}.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 5px;color:#333}.leaflet-control-attribution a{text-decoration:none}.leaflet-control-attribution a:hover{text-decoration:underline}.leaflet-container .leaflet-control-attribution,.leaflet-container .leaflet-control-scale{font-size:11px}.leaflet-left .leaflet-control-scale{margin-left:5px}.leaflet-bottom .leaflet-control-scale{margin-bottom:5px}.leaflet-control-scale-line{border:2px solid #777;border-top:none;line-height:1.1;padding:2px 5px 1px;font-size:11px;white-space:nowrap;overflow:hidden;-webkit-box-sizing:border-box;box-sizing:border-box;background:#fff;background:hsla(0,0%,100%,.5)}.leaflet-control-scale-line:not(:first-child){border-top:2px solid #777;border-bottom:none;margin-top:-2px}.leaflet-control-scale-line:not(:first-child):not(:last-child){border-bottom:2px solid #777}.leaflet-touch .leaflet-bar,.leaflet-touch .leaflet-control-attribution,.leaflet-touch .leaflet-control-layers{-webkit-box-shadow:none;box-shadow:none}.leaflet-touch .leaflet-bar,.leaflet-touch .leaflet-control-layers{border:2px solid rgba(0,0,0,.2);background-clip:padding-box}.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px}.leaflet-popup-content{margin:13px 19px;line-height:1.4}.leaflet-popup-content p{margin:18px 0}.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-left:-20px;overflow:hidden;pointer-events:none}.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;-webkit-transform:rotate(45deg);transform:rotate(45deg)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#fff;color:#333;-webkit-box-shadow:0 3px 14px rgba(0,0,0,.4);box-shadow:0 3px 14px rgba(0,0,0,.4)}.leaflet-container a.leaflet-popup-close-button{position:absolute;top:0;right:0;padding:4px 4px 0 0;border:none;text-align:center;width:18px;height:14px;font:16px/14px Tahoma,Verdana,sans-serif;color:#c3c3c3;text-decoration:none;font-weight:700;background:transparent}.leaflet-container a.leaflet-popup-close-button:hover{color:#999}.leaflet-popup-scrolled{overflow:auto;border-bottom:1px solid #ddd;border-top:1px solid #ddd}.leaflet-oldie .leaflet-popup-content-wrapper{zoom:1}.leaflet-oldie .leaflet-popup-tip{width:24px;margin:0 auto;-ms-filter:\"progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)\";filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678,M12=0.70710678,M21=-0.70710678,M22=0.70710678)}.leaflet-oldie .leaflet-popup-tip-container{margin-top:-1px}.leaflet-oldie .leaflet-control-layers,.leaflet-oldie .leaflet-control-zoom,.leaflet-oldie .leaflet-popup-content-wrapper,.leaflet-oldie .leaflet-popup-tip{border:1px solid #999}.leaflet-div-icon{background:#fff;border:1px solid #666}.leaflet-tooltip{position:absolute;padding:6px;background-color:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;pointer-events:none;-webkit-box-shadow:0 1px 3px rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.4)}.leaflet-tooltip.leaflet-clickable{cursor:pointer;pointer-events:auto}.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before,.leaflet-tooltip-top:before{position:absolute;pointer-events:none;border:6px solid transparent;background:transparent;content:\"\"}.leaflet-tooltip-bottom{margin-top:6px}.leaflet-tooltip-top{margin-top:-6px}.leaflet-tooltip-bottom:before,.leaflet-tooltip-top:before{left:50%;margin-left:-6px}.leaflet-tooltip-top:before{bottom:0;margin-bottom:-12px;border-top-color:#fff}.leaflet-tooltip-bottom:before{top:0;margin-top:-12px;margin-left:-6px;border-bottom-color:#fff}.leaflet-tooltip-left{margin-left:-6px}.leaflet-tooltip-right{margin-left:6px}.leaflet-tooltip-left:before,.leaflet-tooltip-right:before{top:50%;margin-top:-6px}.leaflet-tooltip-left:before{right:0;margin-right:-12px;border-left-color:#fff}.leaflet-tooltip-right:before{left:0;margin-left:-12px;border-right-color:#fff}", ""]);
 // Exports
 module.exports = exports;
 
@@ -11290,6 +11968,24 @@ module.exports = exports;
 var getBuiltIn = __webpack_require__("d066");
 
 module.exports = getBuiltIn('navigator', 'userAgent') || '';
+
+
+/***/ }),
+
+/***/ "35a1":
+/***/ (function(module, exports, __webpack_require__) {
+
+var classof = __webpack_require__("f5df");
+var Iterators = __webpack_require__("3f8c");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var ITERATOR = wellKnownSymbol('iterator');
+
+module.exports = function (it) {
+  if (it != undefined) return it[ITERATOR]
+    || it['@@iterator']
+    || Iterators[classof(it)];
+};
 
 
 /***/ }),
@@ -11428,6 +12124,140 @@ module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperti
 
 /***/ }),
 
+/***/ "387f":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+
+/***/ }),
+
+/***/ "3934":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "3f8c":
+/***/ (function(module, exports) {
+
+module.exports = {};
+
+
+/***/ }),
+
 /***/ "4160":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11451,6 +12281,47 @@ $({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
 var global = __webpack_require__("da84");
 
 module.exports = global;
+
+
+/***/ }),
+
+/***/ "4362":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports.nextTick = function nextTick(fn) {
+    var args = Array.prototype.slice.call(arguments);
+    args.shift();
+    setTimeout(function () {
+        fn.apply(null, args);
+    }, 0);
+};
+
+exports.platform = exports.arch = 
+exports.execPath = exports.title = 'browser';
+exports.pid = 1;
+exports.browser = true;
+exports.env = {};
+exports.argv = [];
+
+exports.binding = function (name) {
+	throw new Error('No such module. (Possibly not yet loaded)')
+};
+
+(function () {
+    var cwd = '/';
+    var path;
+    exports.cwd = function () { return cwd };
+    exports.chdir = function (dir) {
+        if (!path) path = __webpack_require__("df7c");
+        cwd = path.resolve(dir, cwd);
+    };
+})();
+
+exports.exit = exports.kill = 
+exports.umask = exports.dlopen = 
+exports.uptime = exports.memoryUsage = 
+exports.uvCounters = function() {};
+exports.features = {};
 
 
 /***/ }),
@@ -11516,6 +12387,21 @@ module.exports = function (key) {
 
 /***/ }),
 
+/***/ "44de":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+
+module.exports = function (a, b) {
+  var console = global.console;
+  if (console && console.error) {
+    arguments.length === 1 ? console.error(a) : console.error(a, b);
+  }
+};
+
+
+/***/ }),
+
 /***/ "44e7":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11535,10 +12421,63 @@ module.exports = function (it) {
 
 /***/ }),
 
+/***/ "467f":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createError = __webpack_require__("2d83");
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+
 /***/ "46b4":
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAABuCAYAAABr2j5SAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAADLAAAAywBkJQcgwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAA6CSURBVHic3Z17fJTVmce/552LA8kMuZiE+01IuJiEe4ANSSZA0WhbBToIuG7tiv10y25r0bW2KnGt3bVqV2u1at0Fi1yMWqpWQAQCCQFULiEJEO7hTkhCSAi5zrynfwxEQjKZ2zuTge9/73vOec6T3+fMec/lOSeCIJOTS09VkiIEwxDEI0kA4oAwBGFILAhqkVwBrgDlCA4iOSQlparKjnnTKA+mzyLQFeTmoq+QzJAwQwoyBYz006SUsF9INgHrYgXrrVbsWvjqioCJtGoTyULwQ2AuzpYSKMqRrHCoLJ03jaJAVKC5SDm5pAJPSrhXa9seUIDgxTkZfKalUc1EWrWZ8ULyeyBVK5s+I8hTJYvmWtmpjTk/WZ1LRLPgOSQ/BXQa+KQNElXCcqPKYzOnUeWPKb9EWrWZu4VkCYHtc/ylXMAPbVbW+WrAJ5Fyc9FfgKeRPINA8bXyICIRvH4pnMd/PI4Wbwt7LVLOOqKkidVI0rwtGwJsseu5f/4Uqr0p5JVIH+fRy+5gLZDslWuhhGC/XjJjlpXTnhfxkJxchkj4Ehjoi28hRpmA6TYrRzzJ7JFIK9fTWzFQwK0h0DVOqwqT56Zzyl1Gt51uzpf0UAx8zq0lEEBfRWXN8nwi3WXsVKScHHRSz2pglGauhRZ3Gux8mJPT+fiuU5HUGJ4DrJq6FWJImCpjeKazPC77pA82Y0XyJaE0ivYQgcLwAb9mQNw8ausPsvvwQhqaOvmYSVShcJctgy87Su6wJb2/BguS5dyEAimKkZQRy0no9wvKyt+nu6k/4+Lf6ryQQJGSJZ9sxdxRsr6jl4buPI+kl/8uBxe9LozJIz8iInw0uYVWLtUVYnfUkdD3MU+K92mwkw0sujGhXUvK2UIikn/z3+XgYtRHkpa0HnP3BDbtSeVSXSFhpkEM6/efnK78q0c2hOQ/Vm1qP1Bu/3NT+V9ctLBQxWTsScaoXIyGSDbtSaOu4Qi3GWJIS1rL5fpSio495akpvaLwuxtftum4czYyQSp8pYXjwSLMNIj05PU026vJL8qiqaUSg95CRnIuEpXNhZnYHZe9sikEk20ZbL/23KYlSYWnNfI9KFjCRpI5Op/6xpNsLpxKU0slimJk8siPMOgtbC2+12uBAJA8ef1ja0tatYXhQmUfQdgc0IIoywTSEtdQUZPPjv1zcaiNCKFj0ohVRFsmsWlPKlcay3w1L3UwYraVUri+Jak8xE0iUFzkVDKSN3K26jO27fsBDrUREIyNf4u4yGnkF9/jj0AAwiH452sPCkB2NoqA+f65Hhz6x85lStJajpx5g69Lf4SUzt2kpMG/ZUDsPPKL7+VS3V4tqnowO9upjwKQkIYV6KeF5UByR++fkDJ8GcXHfk3RsV8CEoAhfRYS328R2/bNprKmQJvKJP0T0p0LiwqAUMjSxnLgGNb/ScYM/QM7D/2Yg6dean0/IG4+o4e8ys6DCzh3ca2mdSqCu+HqeEiRWKWm5rVEkHzHSwzts5Dt+x/gdMXHrSm9ou9hwrCl7D36BGXn39O+aumc3IucdURJIxWhuKAvhI5x8e/QL9ZGQclMyqu/nX9GWyaSnryBQ6d/T8nxZwPlgsOuJ0YvjUwMRYF0iolJIz8k2pJCbmEG1Zd3tab1CEtkStIaTpS/H0iBAHQGOyl6AcNC8acWaR5DmGkQm/ZM4XL9wdb3YaZBpCWt40L1RnYf/mkwXEnQqwoJIoRUMugjMOjMVNZs44tv7myTdpsxlvTkL6itP8COAw8ipSPg/qiSBEU444NCgjDTQKaP/ZoRA9v/hAx6C2mJa2m211BQcj+q2hQUn4RgmAL0DEptbrB0H+6chzWdYe/Rtks6mszHfKenguh4NS6YRJnHYx2dR/Xl3eQXZdFir21NE0LHxOHLsXQfyZa902lsDmqQG4BZAcKDXev1xEZmkjFqI+cvrqVg3ywcasN1qYKx8X8iLnI6+cVZ/s7HfMWsIAnripoB+sbMJi1xLUfPvsVXB/6ldR52jcTBLzAgdj55RXdrNR/zhXAFvI+y0IJ+MT9g0oiVAJyt+pxr87BrxPf9OQn9HmfbvtlU1W7vwELQaFZwRrgGlb4xs0gZsZySssUcPfc2aYlriI34dntvQNx8ku94mZ0HH9V8PuYDV/TABSA6WDX2jZnFxBErKTn+DKUnXwQEAoXUxE/JL8pCr7cwftgSCo8uouz80mC55RrBBb0QnJKS4cGor2/MzKsCPXtVIADJ7sP/DgimJK1BoHDw5O84fPq1YLjkHskpRZUcCkZdfW6/n4kjVrGvLJvSk//TzpMT5cvQKSbKypdRfDyEltoFR/UK7NJ6VmLQ9yAuchrh3YaiCAOqbOLOQb9hX9lzHDjx23b5oy0ppCWto+z8e+w+FGJbfiq79Crs1GphWxEGhg/4FQn9nCPmy/WHQQjM3YYiEOgUE4piRFWbW8tEWSaQlvQFpys+ZufBR5GoGnmjDRJ26ZUKDsgYroB/4yW9zkxa0hrM3RPYc+QxTpavaB0Y6hQT/ePmkTz4JW7v8U/kF92DQ20gyjye9FaBFoScQEBjjYX9AuCDXPLxM0g9NfEzzN3i2bzXSkPT2Q7zhJkGMnXMds5Wfsqxc++SnryeM5V/45vSfw1FgUDw9ZwMUpSrD3n+2Opz+330jJxOQcl9LgUCuNJYxtelDzO49wLSkzdwpvKT0BUIkNK5i+sUSWWNP8YG936UE+XLqa0/4Dbv+YtfUNdwjKra7XxT+qOQFQho1cW5W1LJDvD1aIEgpkcq5y5+7mF+SWXNVloctaEtEFxpUJy/MD2AzYbjg02sRzDXW0tGQxR6nZm6hqMel5HSQTdjH+Iip7V539xSxaUrRUFZcXSHgA0PW2mE60JspOBzgfci6RQTwA1LHJ0TET6KSPMY0pPbR99V1X7F5kKrV/YCgvy2C2oVSWlirTTRjMTojS29zjlyaLHXeJTf3D2BSPNoNu6eRFXtjjZpYaaBfGdcIX1jZnGi/H1v3NAa6dDROrNu3Uqy3cVF8P4kT5hpIKpsobnlotu8AoVx8e9QcSm/nUDg/PqVV29kcK9HiLakEGkeS5hpkLcu+Y8g//og+DYRbUKyTML3vLHXP3YulTUFqLLzZSmBwqihrxJpHs36naNd5is5/jSpiZ8wdcy3ItZcKWZr8feCtjIpVJa3eb7+YUkupu5wDojwxFiv6CxS7/yUvKIZlFdvdJkvzDSQsfFvEW1JYWvJfVRc2uLWtkEfgUBgNEQxLuFdWuw1FJTc54lb/iFoNtjpff1BwjY7t1d78488tZc8+CUOn/mDS4F6hCUyZugfuWv8PvQ6Mxt2T/RIIIAW+yWa7dXUNRzlxPm/EBEenINRAv5+40nL9gGkKstQeMQTgy2Oy4R3G0JMRDqq2oTREI2521CizOOJjczEZOyJ3VHHkbNvcOrCh+h14USax9Jiv9Q6ZLCEjUCndHNZh14XzpA+C6mq2ebVH+srUmXFje/aLQBIicjZzAFwv2kZEZ7E2Ph3iLZM6MiUSxyOelYXRNHN2JuslCMI4ToUQUoH5dUb+Kr0IZqaL3hch49UmBvol5VFm53PDv+ynFx+JuFVTy0rihG94vkigkM24XDUA86WogiD67xqY/DGTJL/npPJr2583XG8tp2l6HkBD5dPVLWZ5uvWiLzB7qjzqZzmSFSh488dJXXYzm3TqUG2/23e0ij83ZbO8Y6TXCDhjcB5FIKovOkqyaVID2SyF9AoSjPkOXIgr+NjXODmUKB0XqtxyyPgtexs1+s2nYpUmsffAPcraTczgouNzSzpLEunImVnowrp+VDgpkTy+kMzOt/qdxtQGt7Iezjnc7cegnqhc/+BcitSVhZN4hb90knJ/9vSqHCXz6PQ5BY9bwJBjcELAg5Uz7oSj0SaP4VqJH/0z6fQQkpWPDAVjxbmPQ5yN6i8wq3TmhwKvOBpZo9FmjmNqltlFC4lK2yZHHSf04lXxyWMDl7m5m9NXrUi8FKkqyt2Luc4NwkrvWlF4KVIAEJ3U/dNDiH5jbeFvBbp6rjippzTSVjqbSsCH0QCEPAygoCvpWpMo2Lnv3wp6JNINit1wI2BjyGNFLxpm85JX8r6fBiwXvInhG+VdgF1xiZedJ+tY3wW6WErjUL61ny7gFdmzvC9e/DvWGkFS4Fiv2wEnvMmA6/4Y8AvkWw2HELl5/7YCDQCnv5+qn9DFr8PKNumsgnhXzhhACm82tr9QpNT3DrJIrrotJMbnrDZ8DtsThORZlsplfC2Fra0Qgj+OsfKBi1saXYfgNLEYgTuI7mCgaBZEfxSK3OaiWS7i4tI2h8c6QKkymuz0zmslT1Nb5YQFbwu0c45H6lQHN4thbhDU5FsNpoV0faqr2Aj4RnbdDyLcvUQze8osWWwWoDr2MBAItgfB/+ntdmAXOTiUHgC/P/0eo3kZ4H4Ry8BEWluOnsQQR4SCHK0+uTfSMCuBGqp5ymCt/N7WTj4RaCMB0ykB7OoBTy+KtQfhCTbNpUzgbIf0MulbBn8BfAsJtl3SqotvB7ICgIqkhBICQsJ3LxOCslCX/4XiTcE/JqyB6yUEKhNTcESW2bAW2pw7nIzGXgWNO4zBBeFot38rDOCItL3U7mM4AktbQqVpzwJm9GCoN0KOCeDleA6eNMbhGDb/jze1cKWJwT16kS9ygLA3+j2Juws6CwQVGuCKtKsqZwQksX+2BDwvG0a+7XyyROCfgnn/jxeBXy6NUoIiqrN7a+nDzRdcv92zhYSpcouwPXJm/bYVZik1b9I9IYuuc7Vlk6xxOsW8UpXCARdJBKApYHnEZ71LRIOi9t4LtA+uaLLRLoa+vyIB9dMSCn5iW0yXXZRQJfenmzLYDuCd9xke3tuZhetdF6ly6+Y7l7HIqD9JQFOdjQ183gw/emILhfpu9+lvh6sQrIYwSGgUcJhIVlcD1Z35z6CwT8Ao+7HGSaKRXkAAAAASUVORK5CYII="
+
+/***/ }),
+
+/***/ "4840":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+var aFunction = __webpack_require__("1c0b");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var SPECIES = wellKnownSymbol('species');
+
+// `SpeciesConstructor` abstract operation
+// https://tc39.github.io/ecma262/#sec-speciesconstructor
+module.exports = function (O, defaultConstructor) {
+  var C = anObject(O).constructor;
+  var S;
+  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction(S);
+};
+
 
 /***/ }),
 
@@ -11552,6 +12491,107 @@ module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
   // eslint-disable-next-line no-undef
   return !String(Symbol());
 });
+
+
+/***/ }),
+
+/***/ "498a":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var $trim = __webpack_require__("58a8").trim;
+var forcedStringTrimMethod = __webpack_require__("c8d2");
+
+// `String.prototype.trim` method
+// https://tc39.github.io/ecma262/#sec-string.prototype.trim
+$({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
+  trim: function trim() {
+    return $trim(this);
+  }
+});
+
+
+/***/ }),
+
+/***/ "4a7b":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'params', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'url', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress',
+    'maxContentLength', 'validateStatus', 'maxRedirects', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath'
+  ];
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, function mergeDeepProperties(prop) {
+    if (utils.isObject(config2[prop])) {
+      config[prop] = utils.deepMerge(config1[prop], config2[prop]);
+    } else if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (utils.isObject(config1[prop])) {
+      config[prop] = utils.deepMerge(config1[prop]);
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys);
+
+  var otherKeys = Object
+    .keys(config2)
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, function otherKeysDefaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  return config;
+};
 
 
 /***/ }),
@@ -11656,6 +12696,93 @@ module.exports = function (it, key) {
 
 /***/ }),
 
+/***/ "5270":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+var transformData = __webpack_require__("c401");
+var isCancel = __webpack_require__("2e67");
+var defaults = __webpack_require__("2444");
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+
 /***/ "5692":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11686,6 +12813,51 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
   var keys = getOwnPropertyNamesModule.f(anObject(it));
   var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
   return getOwnPropertySymbols ? keys.concat(getOwnPropertySymbols(it)) : keys;
+};
+
+
+/***/ }),
+
+/***/ "5899":
+/***/ (function(module, exports) {
+
+// a string of all valid unicode whitespaces
+// eslint-disable-next-line max-len
+module.exports = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+
+
+/***/ }),
+
+/***/ "58a8":
+/***/ (function(module, exports, __webpack_require__) {
+
+var requireObjectCoercible = __webpack_require__("1d80");
+var whitespaces = __webpack_require__("5899");
+
+var whitespace = '[' + whitespaces + ']';
+var ltrim = RegExp('^' + whitespace + whitespace + '*');
+var rtrim = RegExp(whitespace + whitespace + '*$');
+
+// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+var createMethod = function (TYPE) {
+  return function ($this) {
+    var string = String(requireObjectCoercible($this));
+    if (TYPE & 1) string = string.replace(ltrim, '');
+    if (TYPE & 2) string = string.replace(rtrim, '');
+    return string;
+  };
+};
+
+module.exports = {
+  // `String.prototype.{ trimLeft, trimStart }` methods
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
+  start: createMethod(1),
+  // `String.prototype.{ trimRight, trimEnd }` methods
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
+  end: createMethod(2),
+  // `String.prototype.trim` method
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trim
+  trim: createMethod(3)
 };
 
 
@@ -12101,12 +13273,12 @@ function normalizeComponent (
   }
 }
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"7dbd05b4-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/App.vue?vue&type=template&id=05149cda&shadow
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{staticClass:"container",attrs:{"id":"app"}},[_c('div',{ref:"map",staticClass:"map",attrs:{"id":"map"}}),_c('div',{staticClass:"center-button inline-block button white-bg rounded",on:{"click":function($event){return _vm.centerMap()}}},[_vm._m(0)]),_c('div',{staticClass:"logo bottom-left"}),_c('div',{staticClass:"margined shadowed rounded",class:{expanded: _vm.menuActive},attrs:{"id":"omnibox"}},[_c('div',{staticClass:"navbar",class:{ active: !_vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"title-header center-area fill",class:{active: _vm.currentSinglebox !== 'industries' || _vm.search}},[_c('div',{staticClass:"nav-back inline-block center-y icon back-icon clickable",on:{"click":function($event){return _vm.stepBack()}}}),_c('div',{staticClass:"title inline-block center-y title"},[_vm._v(_vm._s(_vm.currentSingleboxTitle))])]),_c('div',{staticClass:"center-area"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.searchValue),expression:"searchValue"}],ref:"search-bar",staticClass:"search-bar inline-block center-y rounded",class:{active: _vm.searchIsActive},attrs:{"type":"text","placeholder":_vm.$t('search-placeholder')},domProps:{"value":(_vm.searchValue)},on:{"input":function($event){if($event.target.composing){ return; }_vm.searchValue=$event.target.value}}}),_c('div',{staticClass:"search-button inline-block button rounded center-y",class:{active: _vm.searchIsActive},on:{"click":function($event){return _vm.toggleSearchbar()}}},[_vm._m(1)]),_c('div',{staticClass:"inline-block button rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(2)])])])]),_c('div',{staticClass:"nav-filters navbar",class:{active: _vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"center-area fill"},[_c('div',{staticClass:"inline-block center-y title"},[_vm._v(_vm._s(_vm.$t('filter')))])]),_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"inline-block button primary-bg rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(3)])])])]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'industries', shift: _vm.lastBoxes.includes('industries')},attrs:{"id":"industries"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"select-item center-area",on:{"click":function($event){return _vm.industrieSelected(industrie.id)}}},[_c('div',{staticClass:"industrie-icon icon center-y rounded primary-bg",style:({'background-image': 'url(' + industrie.icon + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(industrie.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'sectors', shift: _vm.lastBoxes.includes('sectors')},attrs:{"id":"sectors"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.filters.sectors),function(sector){return _c('div',{key:sector,staticClass:"select-item center-area",on:{"click":function($event){return _vm.sectorSelected(sector)}}},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(sector))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'results', shift: _vm.lastBoxes.includes('results')},attrs:{"id":"results"}},[_c('div',{staticClass:"select-list"},[(_vm.results.length === 0)?_c('div',{staticClass:"select-item center-area"},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v("No results.")])]):_vm._e(),_vm._l((_vm.results),function(point){return _c('div',{key:point,staticClass:"select-item center-area",on:{"click":function($event){return _vm.pointSelected(point.id)}}},[_c('div',{staticClass:"center-y icon rounded primary-bg",style:({'background-image': 'url(' + point.logo + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(point.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])})],2)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'selection'},attrs:{"id":"selection"}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"links"},[_c('div',{staticClass:"social"},[(_vm.selection.facebook)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.facebook}},[_c('div',{staticClass:"icon rounded facebook-icon"})]):_vm._e(),(_vm.selection.linkedin)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.linkedin}},[_c('div',{staticClass:"icon rounded linkedin-icon"})]):_vm._e()]),_c('div',{staticClass:"website"},[_c('a',{attrs:{"href":_vm.selection.website}},[_vm._v(_vm._s(_vm.selection.website))])])]),_c('div',{staticClass:"logo rounded",style:({'background-image': 'url(' + _vm.selection.logo + ')'})})]),_c('div',{staticClass:"description"},[_vm._v(_vm._s(_vm.selection.description))]),_c('div',{staticClass:"contact center-area"},[_vm._m(4),_c('div',{staticClass:"phone-number center-y"},[_vm._v(_vm._s(_vm.selection.phone))])]),_c('div',{staticClass:"contact center-area"},[_vm._m(5),_c('div',{staticClass:"mail center-y"},[_vm._v(_vm._s(_vm.selection.mail))])]),_c('div',{staticClass:"contact center-area"},[_vm._m(6),_c('div',{staticClass:"address center-y"},[_vm._v(_vm._s(_vm.selection.address))])])]),_c('div',{staticClass:"singlebox",class:{active: _vm.filterIsActive},attrs:{"id":"filters"}},[_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('type'))+":")]),_vm._l((_vm.activities),function(activity){return _c('div',{key:activity.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(activity.active),expression:"activity.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(activity.active)?_vm._i(activity.active,null)>-1:(activity.active)},on:{"change":[function($event){var $$a=activity.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(activity, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(activity, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(activity, "active", $$c)}},function($event){return _vm.activityChanged(activity.id, activity.active)}]}}),_c('span'),_vm._v(" "+_vm._s(activity.name)+" ")])])})],2),(_vm.search)?_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('industry'))+":")]),_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(industrie.active),expression:"industrie.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(industrie.active)?_vm._i(industrie.active,null)>-1:(industrie.active)},on:{"change":[function($event){var $$a=industrie.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(industrie, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(industrie, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(industrie, "active", $$c)}},function($event){return _vm.industrieChanged(industrie.id, industrie.active)}]}}),_c('span'),_vm._v(" "+_vm._s(industrie.name)+" ")])])})],2):_vm._e()]),_c('div',{staticClass:"expand-menu clickable center-area",on:{"click":function($event){return _vm.toggleMenu()}}},[_c('div',{staticClass:"icon down-icon center-x center-y"})])])])])}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"553d4d10-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/App.vue?vue&type=template&id=74ad1050&shadow
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{ref:"app",staticClass:"container",class:_vm.appWidth,attrs:{"id":"app"},on:{"resize":function($event){return _vm.setResponsive()}}},[_c('div',{ref:"map",staticClass:"map",attrs:{"id":"map"}}),_c('div',{staticClass:"center-button inline-block button white-bg rounded",on:{"click":function($event){return _vm.centerMap()}}},[_vm._m(0)]),_c('div',{staticClass:"logo bottom-left"}),_c('div',{staticClass:"margined shadowed rounded",class:{expanded: _vm.menuActive},attrs:{"id":"omnibox"}},[_c('div',{staticClass:"navbar",class:{ active: !_vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"title-header center-area fill",class:{active: _vm.currentSinglebox !== 'industries' || _vm.search}},[_c('div',{staticClass:"nav-back inline-block center-y icon back-icon clickable",on:{"click":function($event){return _vm.stepBack()}}}),_c('div',{staticClass:"title inline-block center-y title"},[_vm._v(_vm._s(_vm.currentSingleboxTitle))])]),_c('div',{staticClass:"center-area"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.searchValue),expression:"searchValue"}],ref:"search-bar",staticClass:"search-bar inline-block center-y rounded",class:{active: _vm.searchIsActive},attrs:{"type":"text","placeholder":_vm.$t('search-placeholder')},domProps:{"value":(_vm.searchValue)},on:{"input":function($event){if($event.target.composing){ return; }_vm.searchValue=$event.target.value}}}),_c('div',{staticClass:"search-button inline-block button rounded center-y",class:{active: _vm.searchIsActive},on:{"click":function($event){return _vm.toggleSearchbar()}}},[_vm._m(1)]),_c('div',{staticClass:"inline-block button rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(2)])])])]),_c('div',{staticClass:"nav-filters navbar",class:{active: _vm.filterIsActive}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"center-area fill"},[_c('div',{staticClass:"inline-block center-y title"},[_vm._v(_vm._s(_vm.$t('filter')))])]),_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"inline-block button primary-bg rounded center-y",on:{"click":function($event){return _vm.showFilters()}}},[_vm._m(3)])])])]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'industries', shift: _vm.lastBoxes.includes('industries')},attrs:{"id":"industries"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"select-item center-area",on:{"click":function($event){return _vm.industrieSelected(industrie.id)}}},[_c('div',{staticClass:"industrie-icon icon center-y rounded primary-bg",style:({'background-image': 'url(' + industrie.icon + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(industrie.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'sectors', shift: _vm.lastBoxes.includes('sectors')},attrs:{"id":"sectors"}},[_c('div',{staticClass:"select-list"},_vm._l((_vm.filters.sectors),function(sector){return _c('div',{key:sector,staticClass:"select-item center-area",on:{"click":function($event){return _vm.sectorSelected(sector)}}},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(sector))]),_c('div',{staticClass:"center-y icon forward-icon"})])}),0)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'results', shift: _vm.lastBoxes.includes('results')},attrs:{"id":"results"}},[_c('div',{staticClass:"select-list"},[(_vm.results.length === 0)?_c('div',{staticClass:"select-item center-area"},[_c('div',{staticClass:"select-item-label center-y"},[_vm._v("No results.")])]):_vm._e(),_vm._l((_vm.results),function(point){return _c('div',{key:point,staticClass:"select-item center-area",on:{"click":function($event){return _vm.pointSelected(point.id)}}},[_c('div',{staticClass:"center-y icon rounded primary-bg",style:({'background-image': 'url(' + point.logo + ')'})}),_c('div',{staticClass:"select-item-label center-y"},[_vm._v(_vm._s(point.name))]),_c('div',{staticClass:"center-y icon forward-icon"})])})],2)]),_c('div',{staticClass:"singlebox",class:{active: _vm.currentSinglebox === 'selection'},attrs:{"id":"selection"}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"links"},[_c('div',{staticClass:"social"},[(_vm.selection.instragram)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.instagram}},[_c('div',{staticClass:"icon rounded instagram-icon"})]):_vm._e(),(_vm.selection.facebook)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.facebook}},[_c('div',{staticClass:"icon rounded facebook-icon"})]):_vm._e(),(_vm.selection.linkedin)?_c('a',{staticClass:"icon",attrs:{"href":_vm.selection.linkedin}},[_c('div',{staticClass:"icon rounded linkedin-icon"})]):_vm._e()]),_c('div',{staticClass:"website"},[_c('a',{attrs:{"href":_vm.selection.website}},[_vm._v(_vm._s(_vm.selection.website))])])]),_c('div',{staticClass:"logo rounded",style:({'background-image': 'url(' + _vm.selection.logo + ')'})})]),_c('div',{staticClass:"description"},[_vm._v(_vm._s(_vm.selection.description))]),(_vm.selection.phone)?_c('div',{staticClass:"contact center-area"},[_vm._m(4),_c('div',{staticClass:"phone-number center-y"},[_vm._v(_vm._s(_vm.selection.phone))])]):_vm._e(),(_vm.selection.mail)?_c('div',{staticClass:"contact center-area"},[_vm._m(5),_c('div',{staticClass:"mail center-y"},[_vm._v(_vm._s(_vm.selection.mail))])]):_vm._e(),(_vm.selection.address)?_c('div',{staticClass:"contact center-area"},[_vm._m(6),_c('div',{staticClass:"address center-y"},[_vm._v(_vm._s(_vm.selection.address))])]):_vm._e()]),_c('div',{staticClass:"singlebox",class:{active: _vm.filterIsActive},attrs:{"id":"filters"}},[_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('type'))+":")]),_vm._l((_vm.activities),function(activity){return _c('div',{key:activity.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(activity.active),expression:"activity.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(activity.active)?_vm._i(activity.active,null)>-1:(activity.active)},on:{"change":[function($event){var $$a=activity.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(activity, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(activity, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(activity, "active", $$c)}},function($event){return _vm.activityChanged(activity.id, activity.active)}]}}),_c('span'),_vm._v(" "+_vm._s(activity.name)+" ")])])})],2),(_vm.search)?_c('div',{staticClass:"filter-class"},[_c('div',{staticClass:"title"},[_vm._v(_vm._s(_vm.$t('industry'))+":")]),_vm._l((_vm.industries),function(industrie){return _c('div',{key:industrie.id,staticClass:"form-check"},[_c('label',{staticClass:"form-check-label"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(industrie.active),expression:"industrie.active"}],staticClass:"form-check-input",attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(industrie.active)?_vm._i(industrie.active,null)>-1:(industrie.active)},on:{"change":[function($event){var $$a=industrie.active,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(industrie, "active", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(industrie, "active", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(industrie, "active", $$c)}},function($event){return _vm.industrieChanged(industrie.id, industrie.active)}]}}),_c('span'),_vm._v(" "+_vm._s(industrie.name)+" ")])])})],2):_vm._e()]),_c('div',{staticClass:"expand-menu clickable center-area",on:{"click":function($event){return _vm.toggleMenu()}}},[_c('div',{staticClass:"icon down-icon center-x center-y"})])])])])}
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"center-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"search-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"filter-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-area"},[_c('div',{staticClass:"confirm-icon icon center-x center-y"})])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-y button rounded primary-bg"},[_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"phone-icon icon center-x center-y"})])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-y button rounded primary-bg"},[_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"mail-icon icon center-x center-y"})])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"center-y button rounded primary-bg"},[_c('div',{staticClass:"center-area"},[_c('div',{staticClass:"pin-icon icon center-x center-y"})])])}]
 
 
-// CONCATENATED MODULE: ./src/App.vue?vue&type=template&id=05149cda&shadow
+// CONCATENATED MODULE: ./src/App.vue?vue&type=template&id=74ad1050&shadow
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.filter.js
 var es_array_filter = __webpack_require__("4de4");
@@ -12132,6 +13304,54 @@ var es_string_search = __webpack_require__("841c");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom-collections.for-each.js
 var web_dom_collections_for_each = __webpack_require__("159b");
 
+// EXTERNAL MODULE: ./node_modules/regenerator-runtime/runtime.js
+var runtime = __webpack_require__("96cf");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
+var es_object_to_string = __webpack_require__("d3b7");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.promise.js
+var es_promise = __webpack_require__("e6cf");
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
 // CONCATENATED MODULE: ./node_modules/vue-i18n/dist/vue-i18n.esm.js
 /*!
  * vue-i18n v8.15.5 
@@ -14022,6 +15242,187 @@ var leaflet_src = __webpack_require__("e11e");
 // EXTERNAL MODULE: ./node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js
 var leaflet_markercluster_src = __webpack_require__("2573");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.js
+var es_symbol = __webpack_require__("a4d3");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.description.js
+var es_symbol_description = __webpack_require__("e01a");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.trim.js
+var es_string_trim = __webpack_require__("498a");
+
+// CONCATENATED MODULE: ./src/api/config.js
+/* harmony default export */ var config = ({
+  API_BASE_URL: "https://mobility.api.opendatahub.bz.it/v2/flat/CreativeIndustry" //ToDo: integrate with pipeline
+
+});
+// EXTERNAL MODULE: ./node_modules/axios/index.js
+var axios = __webpack_require__("bc3a");
+var axios_default = /*#__PURE__*/__webpack_require__.n(axios);
+
+// CONCATENATED MODULE: ./src/api/fetcher.js
+
+
+
+
+
+
+
+function getPoints(language, path, parameters) {
+  return axios_default.a.get(config.API_BASE_URL + path, {
+    parameters: parameters
+  }).then(function (response) {
+    console.log("data fetched");
+    return generatePoints(response.data, language);
+  }).catch(function (error) {
+    console.log(error);
+    throw error;
+  });
+}
+
+function generatePoints(res, language) {
+  var points = [];
+  res.data.forEach((el, i) => {
+    if (el.smetadata.online == true) {
+      var point = parsePointData(i, el);
+
+      switch (language) {
+        case "en":
+          point.sector = point.sectorEn;
+          point.description = point.descriptionEn;
+          break;
+
+        case "de":
+          point.sector = point.sectorDe;
+          point.description = point.descriptionDe;
+          break;
+
+        case "it":
+          point.sector = point.sectorIt;
+          point.description = point.descriptionIt;
+          break;
+      }
+
+      points.push(point);
+    }
+  });
+  return points;
+}
+
+function parsePointData(index, element) {
+  var meta = element.smetadata;
+  var industryId;
+  var activityTypeId;
+
+  switch (meta.industry.trim().toLowerCase()) {
+    case "architecture":
+      industryId = 0;
+      break;
+
+    case "software & games":
+      industryId = 1;
+      break;
+
+    case "design":
+      industryId = 2;
+      break;
+
+    case "publishing & press":
+      industryId = 3;
+      break;
+
+    case "visual arts":
+      industryId = 4;
+      break;
+
+    case "film & video":
+      industryId = 5;
+      break;
+
+    case "radio & tv":
+      industryId = 6;
+      break;
+
+    case "music":
+      industryId = 7;
+      break;
+
+    case "performing arts":
+      industryId = 8;
+      break;
+
+    case "handicraft":
+      industryId = 9;
+      break;
+
+    case "advertising":
+      industryId = 10;
+      break;
+
+    default:
+      industryId = 10;
+      console.log("ERROR IN INDUSTRY NAME:" + meta.industry);
+  }
+
+  switch (meta.legal_form.trim().toLowerCase()) {
+    case "freelance":
+      activityTypeId = 0;
+      break;
+
+    case "company":
+      activityTypeId = 1;
+      break;
+
+    case "association":
+      activityTypeId = 2;
+      break;
+
+    case "entity":
+      activityTypeId = 3;
+      break;
+  }
+
+  return {
+    id: index,
+    name: meta.name,
+    industrie: industryId,
+    sectorEn: meta.sector.en,
+    sectorDe: meta.sector.de,
+    sectorIt: meta.sector.it,
+    activity: activityTypeId,
+    coords: [element.scoordinate.y, element.scoordinate.x],
+    logo: __webpack_require__("273d"),
+    descriptionEn: meta.description.en,
+    descriptionDe: meta.description.de,
+    descriptionIt: meta.description.it,
+    facebook: meta.fb,
+    instagram: meta.ig,
+    linkedin: meta.linkedin,
+    website: meta.website,
+    phone: meta.phone_number,
+    mail: meta.email,
+    active: true
+  };
+}
+/*
+Buongiorno a tutti!
+
+
+Ho appena fatto una pull request. Gli ultimi problemi che sono rimasti irrisolti sono:
+
+    attualmente nell'API le coordinate sono invertite, rispetto agli standard del sistema cartesiano. Cioe', avete mappato la longitudine all'asse y e la latitudine all'asse x.
+    Per il momento anche il component e' impostato cosi'; sarebbe da fixare, in modo tale che i futuri collaboratori non facciano confusione.
+    nelle righe attive, ovvero con `online: true`, non sono impostate correttamente tutte le industrie: piu' precisamente, c'e' un'industria indicata con `
+    Rimane aperto il discorso logo. Per ora e' impostato il logo di FlashBeing come placeholder.
+
+Per il resto dovrebbe essere tutto apposto e funzionante.
+
+Rimango a disposizione per domande e chiarimenti.
+
+
+Auguro a tutti una buona giornata :)
+
+*/
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/App.vue?vue&type=script&lang=js&shadow
 
 
@@ -14031,6 +15432,13 @@ var leaflet_markercluster_src = __webpack_require__("2573");
 
 
 
+
+
+//
+//
+//
+//
+//
 //
 //
 //
@@ -14252,31 +15660,77 @@ var leaflet_markercluster_src = __webpack_require__("2573");
 vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
 
 
+
 /* harmony default export */ var Appvue_type_script_lang_js_shadow = ({
   name: "webcomp-creative-industries",
   i18n: new vue_i18n_esm({
     locale: "en",
     messages: {
       en: {
-        "industry": "Industry",
-        "industries": "Industries",
-        "type": "Type",
-        "filter": "Filter",
-        "search-placeholder": "Freelancers, Companies, ..."
+        industry: "Industry",
+        industries: "Industries",
+        type: "Type",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Companies, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architecture",
+        music: "Music",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Advertising",
+        handicraft: "Handicraft",
+        press: "Publishing & Press",
+        "performing-arts": "Performing Arts",
+        "visual-arts": "Visual Arts",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Company",
+        association: "Association",
+        entity: "Public entity"
       },
       de: {
-        "industry": "Industrie",
-        "industries": "Industrien",
-        "type": "Typ",
-        "filter": "Filter",
-        "search-placeholder": "Freelancers, Firmen, ..."
+        industry: "Industrie",
+        industries: "Industrien",
+        type: "Typ",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Firmen, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architektur",
+        music: "Musik",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Werbung",
+        handicraft: "Kunsthandwerk",
+        press: "Buch, Verlangswesen & Presse",
+        "performing-arts": "Darstellende Kunst",
+        "visual-arts": "Bildende Kunst",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Firma",
+        association: "Verband",
+        entity: "Öffentliche Einrichtung"
       },
       it: {
-        "industry": "Industria",
-        "industries": "Industrie",
-        "type": "Tipo",
-        "filter": "Filtra",
-        "search-placeholder": "Freelancer, Aziende, ..."
+        industry: "Industria",
+        industries: "Industrie",
+        type: "Tipo",
+        filter: "Filtra",
+        "search-placeholder": "Freelancer, Aziende, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architettura",
+        music: "Musica",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Pubblicità",
+        handicraft: "Artigianato artistico",
+        press: "Editoria & Stampa",
+        "performing-arts": "Arti performative",
+        "visual-arts": "Arti visive",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Azienda",
+        association: "Associazione",
+        entity: "Ente pubblico"
       }
     }
   }),
@@ -14284,6 +15738,7 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
   data() {
     return {
       publicPath: "/public/",
+      appWidth: "",
       menuActive: false,
       map: null,
       center: [46.643211, 11.365379],
@@ -14306,176 +15761,9 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
       titleHeaderIsActive: false,
       searchIsActive: false,
       filterIsActive: false,
-      activities: [{
-        id: 0,
-        name: "Freelancer",
-        active: false
-      }, {
-        id: 1,
-        name: "Company",
-        active: false
-      }, {
-        id: 2,
-        name: "Entity",
-        active: false
-      }],
-      industries: [{
-        id: 0,
-        name: "Architecture",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("256a"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("4ea8"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 1,
-        name: "Software Production",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("2915"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("5c33"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 2,
-        name: "Design",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("81d4"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("46b4"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 3,
-        name: "Editoria & Stampa",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("a726"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("6615"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 4,
-        name: "Visual Arts",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("2882"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("b82e"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 5,
-        name: "Video Production",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("af71"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("4376"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 6,
-        name: "Radio & TV",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("a0a7"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("8558"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 7,
-        name: "Music",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("1084"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("c838"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 8,
-        name: "Performing Arts",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("eace"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("5bfd"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 9,
-        name: "",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("6d87"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("e804"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 10,
-        name: "Education",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("dacd"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("ee42"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }, {
-        id: 11,
-        name: "Advertising",
-        sectors: [],
-        active: false,
-        icon: __webpack_require__("c319"),
-        marker: leaflet_src["icon"]({
-          iconUrl: __webpack_require__("24f2"),
-          iconSize: [18.5, 30],
-          // size of the icon
-          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-
-        })
-      }]
+      activities: [],
+      industries: [],
+      points: []
     };
   },
 
@@ -14483,124 +15771,230 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
     locale: {
       type: String,
       default: () => "en"
-    },
-    points: {
-      type: Array,
-      default: () => [{
-        id: 0,
-        name: "Bozen",
-        industrie: 0,
-        sector: "UniBz",
-        activity: 2,
-        address: "Piazza Universita', 39100 Bolzano (BZ)",
-        coords: [46.49067, 11.33982],
-        logo: __webpack_require__("273d"),
-        description: "Lorem Ipsum lorot sit amet",
-        linkedin: "",
-        facebook: "",
-        website: "jdsajsd",
-        phone: "",
-        mail: "",
-        active: false
-      }, {
-        id: 1,
-        name: "Brixen",
-        industrie: 0,
-        sector: "UniBz",
-        activity: 2,
-        address: "Via Volta",
-        coords: [46.71503, 11.65598],
-        logo: __webpack_require__("7fd1"),
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        linkedin: "linkedin.com",
-        facebook: "facebook.com",
-        website: "jdsajsd",
-        phone: "38923820",
-        mail: "shsaas@kjdfjds.co",
-        active: false
-      }, {
-        id: 2,
-        name: "Bruneck",
-        industrie: 0,
-        sector: "UniBz",
-        activity: 2,
-        coords: [46.79942, 11.93429],
-        logo: __webpack_require__("7fd1"),
-        description: "Lorem Ipsum lorot sit amet",
-        linkedin: "",
-        facebook: "",
-        website: "nada.com",
-        phone: "",
-        mail: "",
-        active: false
-      }, {
-        id: 3,
-        name: "Claudiana",
-        industrie: 0,
-        sector: "Private Uni",
-        activity: 2,
-        coords: [46.499657, 11.31319],
-        logo: __webpack_require__("7fd1"),
-        description: "Lorem Ipsum lorot sit amet",
-        linkedin: "",
-        facebook: "",
-        website: "xyz.abc",
-        phone: "",
-        mail: "",
-        active: false
-      }, {
-        id: 4,
-        name: "FlashBeing",
-        industrie: 1,
-        sector: "Software Production",
-        activity: 1,
-        coords: [46.488827, 11.332528],
-        logo: __webpack_require__("273d"),
-        description: "Lorem Ipsum lorot sit amet",
-        linkedin: "",
-        facebook: "",
-        website: "abc.com",
-        phone: "",
-        mail: "",
-        active: false
-      }, {
-        id: 5,
-        name: "Free Software Lab",
-        industrie: 1,
-        sector: "Software Production",
-        activity: 1,
-        coords: [46.478827, 11.332528],
-        active: false
-      }, {
-        id: 6,
-        name: "Tizio",
-        industrie: 1,
-        sector: "Software Production",
-        activity: 0,
-        coords: [46.458827, 11.332528],
-        active: false
-      }, {
-        id: 7,
-        name: "Test",
-        industrie: 0,
-        sector: "Private Uni",
-        activity: 2,
-        coords: [46.488827, 11.332528],
-        active: false
-      }]
     }
   },
 
-  mounted() {
+  beforeMount() {
     this.$i18n.locale = this.locale;
-    this.currentSingleboxTitle = this.$t('industries');
-    this.initMap();
-    this.initMarkers();
-    this.initFilters();
-    this.renderFilters();
+    this.currentSingleboxTitle = this.$t("industries");
+    this.activities = [{
+      id: 0,
+      name: this.$t("freelancer"),
+      active: false
+    }, {
+      id: 1,
+      name: this.$t("company"),
+      active: false
+    }, {
+      id: 2,
+      name: this.$t("association"),
+      active: false
+    }, {
+      id: 3,
+      name: this.$t("entity"),
+      active: false
+    }];
+    this.industries = [{
+      id: 0,
+      name: this.$t("architecture"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("256a"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("4ea8"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 1,
+      name: this.$t("software-and-games"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("2915"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("5c33"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 2,
+      name: this.$t("design"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("81d4"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("46b4"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 3,
+      name: this.$t("press"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("a726"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("6615"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 4,
+      name: this.$t("visual-arts"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("2882"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("b82e"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 5,
+      name: this.$t("film-and-video"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("af71"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("4376"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 6,
+      name: this.$t("radio-and-tv"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("a0a7"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("8558"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 7,
+      name: this.$t("music"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("1084"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("c838"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 8,
+      name: this.$t("performing-arts"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("eace"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("5bfd"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 9,
+      name: this.$t("handicraft"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("6d87"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("e804"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }, {
+      id: 10,
+      name: this.$t("advertising"),
+      sectors: [],
+      active: false,
+      icon: __webpack_require__("c319"),
+      marker: leaflet_src["icon"]({
+        iconUrl: __webpack_require__("24f2"),
+        iconSize: [18.5, 30],
+        // size of the icon
+        iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+
+      })
+    }];
+  },
+
+  mounted() {
+    var _this = this;
+
+    return _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee() {
+      var self;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return getPoints(_this.locale, "/");
+
+            case 2:
+              _this.points = _context.sent;
+
+              _this.initMap();
+
+              _this.initMarkers();
+
+              _this.initFilters();
+
+              _this.renderFilters();
+
+              _this.setResponsive();
+
+              self = _this;
+              window.addEventListener("resize", function () {
+                self.setResponsive();
+              });
+
+            case 10:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }))();
   },
 
   methods: {
+    setResponsive() {
+      var app = this.$refs["app"];
+      var w = app.clientWidth;
+
+      if (w <= 500) {
+        this.appWidth = "small";
+      } else if (w <= 1199) {
+        this.appWidth = "medium";
+      } else {
+        this.appWidth = "large";
+      }
+    },
+
     toggleMenu() {
       this.menuActive = !this.menuActive;
     },
@@ -14826,7 +16220,6 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
         var industrie = this.industries.find(industrie => industrie.id === point.industrie);
 
         if (!industrie.sectors.includes(point.sector)) {
-          console.log("Push " + point.sector + " for " + industrie.name);
           industrie.sectors.push(point.sector);
         }
 
@@ -14852,7 +16245,6 @@ vue_runtime_esm["a" /* default */].use(vue_i18n_esm);
 
       this.points.forEach(point => {
         var industrie = this.industries.find(industrie => industrie.id === point.industrie);
-        console.log(industrie.name);
         point.leafletObject = leaflet_src["marker"](point.coords, {
           icon: industrie.marker,
           title: point.name
@@ -15154,6 +16546,24 @@ exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
 
+/***/ "746f":
+/***/ (function(module, exports, __webpack_require__) {
+
+var path = __webpack_require__("428f");
+var has = __webpack_require__("5135");
+var wrappedWellKnownSymbolModule = __webpack_require__("e538");
+var defineProperty = __webpack_require__("9bf2").f;
+
+module.exports = function (NAME) {
+  var Symbol = path.Symbol || (path.Symbol = {});
+  if (!has(Symbol, NAME)) defineProperty(Symbol, NAME, {
+    value: wrappedWellKnownSymbolModule.f(NAME)
+  });
+};
+
+
+/***/ }),
+
 /***/ "7839":
 /***/ (function(module, exports) {
 
@@ -15167,6 +16577,94 @@ module.exports = [
   'toString',
   'valueOf'
 ];
+
+
+/***/ }),
+
+/***/ "7a77":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
+
+/***/ "7aac":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
 
 
 /***/ }),
@@ -15322,13 +16820,6 @@ module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSour
 
 /***/ }),
 
-/***/ "7fd1":
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "img/unibz.b1f2bc7b.png";
-
-/***/ }),
-
 /***/ "81d4":
 /***/ (function(module, exports) {
 
@@ -15359,6 +16850,34 @@ var fails = __webpack_require__("d039");
 module.exports = !fails(function () {
   return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
 });
+
+
+/***/ }),
+
+/***/ "83b9":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isAbsoluteURL = __webpack_require__("d925");
+var combineURLs = __webpack_require__("e683");
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
 
 
 /***/ }),
@@ -15437,6 +16956,71 @@ if (typeof store.inspectSource != 'function') {
 }
 
 module.exports = store.inspectSource;
+
+
+/***/ }),
+
+/***/ "8df4":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Cancel = __webpack_require__("7a77");
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
 
 
 /***/ }),
@@ -15615,6 +17199,759 @@ module.exports = isForced;
 
 /***/ }),
 
+/***/ "96cf":
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  IteratorPrototype[iteratorSymbol] = function () {
+    return this;
+  };
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunctionPrototype[toStringTagSymbol] =
+    GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return Promise.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    return this;
+  };
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        // Note: ["return"] must be used for ES3 parsing compatibility.
+        if (delegate.iterator["return"]) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[toStringTagSymbol] = "Generator";
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+   true ? module.exports : undefined
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  Function("r", "regeneratorRuntime = r")(runtime);
+}
+
+
+/***/ }),
+
+/***/ "9bdd":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+
+// call something on iterator step with safe closing on error
+module.exports = function (iterator, fn, value, ENTRIES) {
+  try {
+    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+  // 7.4.6 IteratorClose(iterator, completion)
+  } catch (error) {
+    var returnMethod = iterator['return'];
+    if (returnMethod !== undefined) anObject(returnMethod.call(iterator));
+    throw error;
+  }
+};
+
+
+/***/ }),
+
 /***/ "9bf2":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15649,7 +17986,7 @@ exports.f = DESCRIPTORS ? nativeDefineProperty : function defineProperty(O, P, A
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__("24fb");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "#omnibox .expand-menu{visibility:hidden}@media (max-width:1199px){#omnibox{height:125px;-webkit-transition:height .2s ease;transition:height .2s ease}#omnibox .expand-menu{visibility:visible;height:50px;z-index:900;position:absolute;bottom:0;width:calc(100% - 9px);background-image:-webkit-gradient(linear,left top,left bottom,from(hsla(0,0%,100%,0)),to(#fff));background-image:linear-gradient(hsla(0,0%,100%,0),#fff)}#omnibox.expanded{height:65%}#omnibox .expand-menu .icon{-webkit-transition:-webkit-transform .2s ease;transition:-webkit-transform .2s ease;transition:transform .2s ease;transition:transform .2s ease,-webkit-transform .2s ease}#omnibox.expanded .expand-menu .icon{-webkit-transform:scaleY(-1);transform:scaleY(-1)}#filters .filter-class:last-child,#omnibox .singlebox .select-list{margin-bottom:50px}}@media (max-width:500px){#omnibox{width:calc(100% - 60px)}#omnibox .navbar .search-bar.active{width:130px}}", ""]);
+exports.push([module.i, "#omnibox .expand-menu{visibility:hidden}@media (max-width:1199px){#omnibox{height:125px;-webkit-transition:height .2s ease;transition:height .2s ease}#omnibox .expand-menu{visibility:visible;height:50px;z-index:900;position:absolute;bottom:0;width:calc(100% - 9px);background-image:-webkit-gradient(linear,left top,left bottom,from(hsla(0,0%,100%,0)),to(#fff));background-image:linear-gradient(hsla(0,0%,100%,0),#fff)}#omnibox.expanded{height:65%}#omnibox .expand-menu .icon{-webkit-transition:-webkit-transform .2s ease;transition:-webkit-transform .2s ease;transition:transform .2s ease;transition:transform .2s ease,-webkit-transform .2s ease}#omnibox.expanded .expand-menu .icon{-webkit-transform:scaleY(-1);transform:scaleY(-1)}#filters .filter-class:last-child,#omnibox .singlebox .select-list{margin-bottom:50px}}#app.medium #omnibox{height:125px;-webkit-transition:height .2s ease;transition:height .2s ease}#app.medium #omnibox .expand-menu{visibility:visible;height:50px;z-index:900;position:absolute;bottom:0;width:calc(100% - 9px);background-image:-webkit-gradient(linear,left top,left bottom,from(hsla(0,0%,100%,0)),to(#fff));background-image:linear-gradient(hsla(0,0%,100%,0),#fff)}#app.medium #omnibox.expanded{height:65%}#app.medium #omnibox .expand-menu .icon{-webkit-transition:-webkit-transform .2s ease;transition:-webkit-transform .2s ease;transition:transform .2s ease;transition:transform .2s ease,-webkit-transform .2s ease}#app.medium #omnibox.expanded .expand-menu .icon{-webkit-transform:scaleY(-1);transform:scaleY(-1)}#app.medium #filters .filter-class:last-child,#app.medium #omnibox .singlebox .select-list{margin-bottom:50px}@media (max-width:500px){#omnibox{width:calc(100% - 60px)}#omnibox .navbar .search-bar.active{width:130px}}#app.small #omnibox{width:calc(100% - 60px)}#app.small #omnibox .navbar .search-bar.active{width:130px}", ""]);
 // Exports
 module.exports = exports;
 
@@ -15691,6 +18028,325 @@ exports.BROKEN_CARET = fails(function () {
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
+
+/***/ }),
+
+/***/ "a4d3":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var global = __webpack_require__("da84");
+var getBuiltIn = __webpack_require__("d066");
+var IS_PURE = __webpack_require__("c430");
+var DESCRIPTORS = __webpack_require__("83ab");
+var NATIVE_SYMBOL = __webpack_require__("4930");
+var USE_SYMBOL_AS_UID = __webpack_require__("fdbf");
+var fails = __webpack_require__("d039");
+var has = __webpack_require__("5135");
+var isArray = __webpack_require__("e8b5");
+var isObject = __webpack_require__("861d");
+var anObject = __webpack_require__("825a");
+var toObject = __webpack_require__("7b0b");
+var toIndexedObject = __webpack_require__("fc6a");
+var toPrimitive = __webpack_require__("c04e");
+var createPropertyDescriptor = __webpack_require__("5c6c");
+var nativeObjectCreate = __webpack_require__("7c73");
+var objectKeys = __webpack_require__("df75");
+var getOwnPropertyNamesModule = __webpack_require__("241c");
+var getOwnPropertyNamesExternal = __webpack_require__("057f");
+var getOwnPropertySymbolsModule = __webpack_require__("7418");
+var getOwnPropertyDescriptorModule = __webpack_require__("06cf");
+var definePropertyModule = __webpack_require__("9bf2");
+var propertyIsEnumerableModule = __webpack_require__("d1e7");
+var createNonEnumerableProperty = __webpack_require__("9112");
+var redefine = __webpack_require__("6eeb");
+var shared = __webpack_require__("5692");
+var sharedKey = __webpack_require__("f772");
+var hiddenKeys = __webpack_require__("d012");
+var uid = __webpack_require__("90e3");
+var wellKnownSymbol = __webpack_require__("b622");
+var wrappedWellKnownSymbolModule = __webpack_require__("e538");
+var defineWellKnownSymbol = __webpack_require__("746f");
+var setToStringTag = __webpack_require__("d44e");
+var InternalStateModule = __webpack_require__("69f3");
+var $forEach = __webpack_require__("b727").forEach;
+
+var HIDDEN = sharedKey('hidden');
+var SYMBOL = 'Symbol';
+var PROTOTYPE = 'prototype';
+var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
+var setInternalState = InternalStateModule.set;
+var getInternalState = InternalStateModule.getterFor(SYMBOL);
+var ObjectPrototype = Object[PROTOTYPE];
+var $Symbol = global.Symbol;
+var $stringify = getBuiltIn('JSON', 'stringify');
+var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
+var nativeDefineProperty = definePropertyModule.f;
+var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
+var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
+var AllSymbols = shared('symbols');
+var ObjectPrototypeSymbols = shared('op-symbols');
+var StringToSymbolRegistry = shared('string-to-symbol-registry');
+var SymbolToStringRegistry = shared('symbol-to-string-registry');
+var WellKnownSymbolsStore = shared('wks');
+var QObject = global.QObject;
+// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
+var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
+
+// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
+var setSymbolDescriptor = DESCRIPTORS && fails(function () {
+  return nativeObjectCreate(nativeDefineProperty({}, 'a', {
+    get: function () { return nativeDefineProperty(this, 'a', { value: 7 }).a; }
+  })).a != 7;
+}) ? function (O, P, Attributes) {
+  var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor(ObjectPrototype, P);
+  if (ObjectPrototypeDescriptor) delete ObjectPrototype[P];
+  nativeDefineProperty(O, P, Attributes);
+  if (ObjectPrototypeDescriptor && O !== ObjectPrototype) {
+    nativeDefineProperty(ObjectPrototype, P, ObjectPrototypeDescriptor);
+  }
+} : nativeDefineProperty;
+
+var wrap = function (tag, description) {
+  var symbol = AllSymbols[tag] = nativeObjectCreate($Symbol[PROTOTYPE]);
+  setInternalState(symbol, {
+    type: SYMBOL,
+    tag: tag,
+    description: description
+  });
+  if (!DESCRIPTORS) symbol.description = description;
+  return symbol;
+};
+
+var isSymbol = USE_SYMBOL_AS_UID ? function (it) {
+  return typeof it == 'symbol';
+} : function (it) {
+  return Object(it) instanceof $Symbol;
+};
+
+var $defineProperty = function defineProperty(O, P, Attributes) {
+  if (O === ObjectPrototype) $defineProperty(ObjectPrototypeSymbols, P, Attributes);
+  anObject(O);
+  var key = toPrimitive(P, true);
+  anObject(Attributes);
+  if (has(AllSymbols, key)) {
+    if (!Attributes.enumerable) {
+      if (!has(O, HIDDEN)) nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
+      O[HIDDEN][key] = true;
+    } else {
+      if (has(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
+      Attributes = nativeObjectCreate(Attributes, { enumerable: createPropertyDescriptor(0, false) });
+    } return setSymbolDescriptor(O, key, Attributes);
+  } return nativeDefineProperty(O, key, Attributes);
+};
+
+var $defineProperties = function defineProperties(O, Properties) {
+  anObject(O);
+  var properties = toIndexedObject(Properties);
+  var keys = objectKeys(properties).concat($getOwnPropertySymbols(properties));
+  $forEach(keys, function (key) {
+    if (!DESCRIPTORS || $propertyIsEnumerable.call(properties, key)) $defineProperty(O, key, properties[key]);
+  });
+  return O;
+};
+
+var $create = function create(O, Properties) {
+  return Properties === undefined ? nativeObjectCreate(O) : $defineProperties(nativeObjectCreate(O), Properties);
+};
+
+var $propertyIsEnumerable = function propertyIsEnumerable(V) {
+  var P = toPrimitive(V, true);
+  var enumerable = nativePropertyIsEnumerable.call(this, P);
+  if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P)) return false;
+  return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
+};
+
+var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
+  var it = toIndexedObject(O);
+  var key = toPrimitive(P, true);
+  if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key)) return;
+  var descriptor = nativeGetOwnPropertyDescriptor(it, key);
+  if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
+    descriptor.enumerable = true;
+  }
+  return descriptor;
+};
+
+var $getOwnPropertyNames = function getOwnPropertyNames(O) {
+  var names = nativeGetOwnPropertyNames(toIndexedObject(O));
+  var result = [];
+  $forEach(names, function (key) {
+    if (!has(AllSymbols, key) && !has(hiddenKeys, key)) result.push(key);
+  });
+  return result;
+};
+
+var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
+  var IS_OBJECT_PROTOTYPE = O === ObjectPrototype;
+  var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject(O));
+  var result = [];
+  $forEach(names, function (key) {
+    if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
+      result.push(AllSymbols[key]);
+    }
+  });
+  return result;
+};
+
+// `Symbol` constructor
+// https://tc39.github.io/ecma262/#sec-symbol-constructor
+if (!NATIVE_SYMBOL) {
+  $Symbol = function Symbol() {
+    if (this instanceof $Symbol) throw TypeError('Symbol is not a constructor');
+    var description = !arguments.length || arguments[0] === undefined ? undefined : String(arguments[0]);
+    var tag = uid(description);
+    var setter = function (value) {
+      if (this === ObjectPrototype) setter.call(ObjectPrototypeSymbols, value);
+      if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+      setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
+    };
+    if (DESCRIPTORS && USE_SETTER) setSymbolDescriptor(ObjectPrototype, tag, { configurable: true, set: setter });
+    return wrap(tag, description);
+  };
+
+  redefine($Symbol[PROTOTYPE], 'toString', function toString() {
+    return getInternalState(this).tag;
+  });
+
+  redefine($Symbol, 'withoutSetter', function (description) {
+    return wrap(uid(description), description);
+  });
+
+  propertyIsEnumerableModule.f = $propertyIsEnumerable;
+  definePropertyModule.f = $defineProperty;
+  getOwnPropertyDescriptorModule.f = $getOwnPropertyDescriptor;
+  getOwnPropertyNamesModule.f = getOwnPropertyNamesExternal.f = $getOwnPropertyNames;
+  getOwnPropertySymbolsModule.f = $getOwnPropertySymbols;
+
+  wrappedWellKnownSymbolModule.f = function (name) {
+    return wrap(wellKnownSymbol(name), name);
+  };
+
+  if (DESCRIPTORS) {
+    // https://github.com/tc39/proposal-Symbol-description
+    nativeDefineProperty($Symbol[PROTOTYPE], 'description', {
+      configurable: true,
+      get: function description() {
+        return getInternalState(this).description;
+      }
+    });
+    if (!IS_PURE) {
+      redefine(ObjectPrototype, 'propertyIsEnumerable', $propertyIsEnumerable, { unsafe: true });
+    }
+  }
+}
+
+$({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
+  Symbol: $Symbol
+});
+
+$forEach(objectKeys(WellKnownSymbolsStore), function (name) {
+  defineWellKnownSymbol(name);
+});
+
+$({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
+  // `Symbol.for` method
+  // https://tc39.github.io/ecma262/#sec-symbol.for
+  'for': function (key) {
+    var string = String(key);
+    if (has(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
+    var symbol = $Symbol(string);
+    StringToSymbolRegistry[string] = symbol;
+    SymbolToStringRegistry[symbol] = string;
+    return symbol;
+  },
+  // `Symbol.keyFor` method
+  // https://tc39.github.io/ecma262/#sec-symbol.keyfor
+  keyFor: function keyFor(sym) {
+    if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol');
+    if (has(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
+  },
+  useSetter: function () { USE_SETTER = true; },
+  useSimple: function () { USE_SETTER = false; }
+});
+
+$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS }, {
+  // `Object.create` method
+  // https://tc39.github.io/ecma262/#sec-object.create
+  create: $create,
+  // `Object.defineProperty` method
+  // https://tc39.github.io/ecma262/#sec-object.defineproperty
+  defineProperty: $defineProperty,
+  // `Object.defineProperties` method
+  // https://tc39.github.io/ecma262/#sec-object.defineproperties
+  defineProperties: $defineProperties,
+  // `Object.getOwnPropertyDescriptor` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptors
+  getOwnPropertyDescriptor: $getOwnPropertyDescriptor
+});
+
+$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL }, {
+  // `Object.getOwnPropertyNames` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertynames
+  getOwnPropertyNames: $getOwnPropertyNames,
+  // `Object.getOwnPropertySymbols` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertysymbols
+  getOwnPropertySymbols: $getOwnPropertySymbols
+});
+
+// Chrome 38 and 39 `Object.getOwnPropertySymbols` fails on primitives
+// https://bugs.chromium.org/p/v8/issues/detail?id=3443
+$({ target: 'Object', stat: true, forced: fails(function () { getOwnPropertySymbolsModule.f(1); }) }, {
+  getOwnPropertySymbols: function getOwnPropertySymbols(it) {
+    return getOwnPropertySymbolsModule.f(toObject(it));
+  }
+});
+
+// `JSON.stringify` method behavior with symbols
+// https://tc39.github.io/ecma262/#sec-json.stringify
+if ($stringify) {
+  var FORCED_JSON_STRINGIFY = !NATIVE_SYMBOL || fails(function () {
+    var symbol = $Symbol();
+    // MS Edge converts symbol values to JSON as {}
+    return $stringify([symbol]) != '[null]'
+      // WebKit converts symbol values to JSON as null
+      || $stringify({ a: symbol }) != '{}'
+      // V8 throws on boxed symbols
+      || $stringify(Object(symbol)) != '{}';
+  });
+
+  $({ target: 'JSON', stat: true, forced: FORCED_JSON_STRINGIFY }, {
+    // eslint-disable-next-line no-unused-vars
+    stringify: function stringify(it, replacer, space) {
+      var args = [it];
+      var index = 1;
+      var $replacer;
+      while (arguments.length > index) args.push(arguments[index++]);
+      $replacer = replacer;
+      if (!isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
+      if (!isArray(replacer)) replacer = function (key, value) {
+        if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+        if (!isSymbol(value)) return value;
+      };
+      args[1] = replacer;
+      return $stringify.apply(null, args);
+    }
+  });
+}
+
+// `Symbol.prototype[@@toPrimitive]` method
+// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@toprimitive
+if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
+  createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
+}
+// `Symbol.prototype[@@toStringTag]` property
+// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@tostringtag
+setToStringTag($Symbol, SYMBOL);
+
+hiddenKeys[HIDDEN] = true;
+
 
 /***/ }),
 
@@ -15836,6 +18492,30 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw
 
 /***/ }),
 
+/***/ "b041":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var classof = __webpack_require__("f5df");
+
+// `Object.prototype.toString` method implementation
+// https://tc39.github.io/ecma262/#sec-object.prototype.tostring
+module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
+  return '[object ' + classof(this) + ']';
+};
+
+
+/***/ }),
+
+/***/ "b069":
+/***/ (function(module, exports) {
+
+module.exports = "data:image/png;base64,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"
+
+/***/ }),
+
 /***/ "b332":
 /***/ (function(module, exports) {
 
@@ -15847,6 +18527,279 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAABMCAYAAAAo
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACkAAAApCAYAAACoYAD2AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAADMQAAAzEB0LBh2gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANxSURBVFiFzdldb1RFGAfwX9dteLOixkSCFyZQG/wACiQlRsVouDM2ISLIywew8Z5g4hfBD0LxhYpoL3y7IAEXhYQYb9TtSgDTFS9mT5iZ7mnPObu0/JNJds/MPM9/5zzzvO2E5tiNNzGLfZjBdjyFZdzBdVzFIhbw+wj6KmMSJ/AF+nhQY/RxEccHcsaOCZzBbzWJlY1fcXogt5Ly9TCDz3BwyNw9XMESruEvdLETzwz2vooD2DJk/9c4hV+qkC3DUcG+8pO4JLy27RXl7BDMZHGIrC7mmhL8GP9lAr/Ha00FDvA6frDaXuebEIyFrOAsnhiRYIE2zg3kxnoqEz0qPcFlvFVh3xbBHRVja4U9b6MnPdF1X/2M1AaXsb+CMtgjPZW9FfcdyIh2MV22uIXL0ldc5QRHJQnvSF/9JSWe50ym5GwNJaOShE+y/SfzBZNSR/2TYNwbSbItvfU3ZZHpw0xBEzczKkl4I5PxQTz5udQemmAcJAlRqJCxUDzcLXU5xxsKbw+IFqOuuRQ4GXHpYxchXBUP7wohbDMxhfsecjrWEhxvgStCHriZ6OHb6PuhFl6OHixtLJ9SxDz2FXZU4Hq2eCteKBF0U3DAVdHGiyVzt4W0r8C16PNe0pD0brZ5Vnpj47FHPeS3Px6z2dr3orluC9uiybs1FT8qxPdiR0tKbJvHA7GHudMWso4nBw+eyxYvKXfKt2oqvrWGrNvZ95hHt42Oh5djJlt8HzdqkinDSg1ZMY9OS6iLC7wyJkKjIuZxlRAGi5t0z+MXcd4nxO640D/RUPi4Yvcpaex+vpi4GE0sNhQ+rizom0jGhXgiTjIeCGXnZpA8nMk4Fk9OCq2PODOv268Zd2beMcRkTmdKzm0wyU+z/UPvxoS0DbIi1MUbQfKI9PJ+aY0+1bQQgYrFPaEufpQkD+KfaN/fVfbOSX9VT6iL10OTDsaRjGDf6kysFPPSU1kR6uKmvi/HpGCDeSP2o7qC5ocI+VEoO0fBYfycye03IVhgTmqjxbgsVHVTFeVMCZEkdtSxDa75iqt0eqdx3ursGf4ViqbvhJT/z4HSp/GstNM7zO9+JbR3OhV4rIsJ4eRuKC8B6oyO4Acr9czroi20PhY0+/fhghDqal3AUX7JLuESHRL+x3lJyPB3CnbcExr28f84fzRR9D/u6Iwd6B1oCAAAAABJRU5ErkJggg=="
+
+/***/ }),
+
+/***/ "b50d":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+var settle = __webpack_require__("467f");
+var buildURL = __webpack_require__("30b5");
+var buildFullPath = __webpack_require__("83b9");
+var parseHeaders = __webpack_require__("c345");
+var isURLSameOrigin = __webpack_require__("3934");
+var createError = __webpack_require__("2d83");
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies = __webpack_require__("7aac");
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+
+/***/ }),
+
+/***/ "b575":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+var getOwnPropertyDescriptor = __webpack_require__("06cf").f;
+var classof = __webpack_require__("c6b6");
+var macrotask = __webpack_require__("2cf4").set;
+var IS_IOS = __webpack_require__("1cdc");
+
+var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+var process = global.process;
+var Promise = global.Promise;
+var IS_NODE = classof(process) == 'process';
+// Node.js 11 shows ExperimentalWarning on getting `queueMicrotask`
+var queueMicrotaskDescriptor = getOwnPropertyDescriptor(global, 'queueMicrotask');
+var queueMicrotask = queueMicrotaskDescriptor && queueMicrotaskDescriptor.value;
+
+var flush, head, last, notify, toggle, node, promise, then;
+
+// modern engines have queueMicrotask method
+if (!queueMicrotask) {
+  flush = function () {
+    var parent, fn;
+    if (IS_NODE && (parent = process.domain)) parent.exit();
+    while (head) {
+      fn = head.fn;
+      head = head.next;
+      try {
+        fn();
+      } catch (error) {
+        if (head) notify();
+        else last = undefined;
+        throw error;
+      }
+    } last = undefined;
+    if (parent) parent.enter();
+  };
+
+  // Node.js
+  if (IS_NODE) {
+    notify = function () {
+      process.nextTick(flush);
+    };
+  // browsers with MutationObserver, except iOS - https://github.com/zloirock/core-js/issues/339
+  } else if (MutationObserver && !IS_IOS) {
+    toggle = true;
+    node = document.createTextNode('');
+    new MutationObserver(flush).observe(node, { characterData: true });
+    notify = function () {
+      node.data = toggle = !toggle;
+    };
+  // environments with maybe non-completely correct, but existent Promise
+  } else if (Promise && Promise.resolve) {
+    // Promise.resolve without an argument throws an error in LG WebOS 2
+    promise = Promise.resolve(undefined);
+    then = promise.then;
+    notify = function () {
+      then.call(promise, flush);
+    };
+  // for other environments - macrotask based on:
+  // - setImmediate
+  // - MessageChannel
+  // - window.postMessag
+  // - onreadystatechange
+  // - setTimeout
+  } else {
+    notify = function () {
+      // strange IE + webpack dev server bug - use .call(global)
+      macrotask.call(global, flush);
+    };
+  }
+}
+
+module.exports = queueMicrotask || function (fn) {
+  var task = { fn: fn, next: undefined };
+  if (last) last.next = task;
+  if (!head) {
+    head = task;
+    notify();
+  } last = task;
+};
+
 
 /***/ }),
 
@@ -15953,6 +18906,13 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAABuCAYAAABr
 
 /***/ }),
 
+/***/ "bc3a":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__("cee4");
+
+/***/ }),
+
 /***/ "bd05":
 /***/ (function(module, exports) {
 
@@ -16016,10 +18976,451 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw
 
 /***/ }),
 
+/***/ "c345":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+
+/***/ "c401":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+
 /***/ "c430":
 /***/ (function(module, exports) {
 
 module.exports = false;
+
+
+/***/ }),
+
+/***/ "c532":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var bind = __webpack_require__("1d2b");
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Function equal to merge with the difference being that no reference
+ * to original objects is kept.
+ *
+ * @see merge
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function deepMerge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = deepMerge(result[key], val);
+    } else if (typeof val === 'object') {
+      result[key] = deepMerge({}, val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  deepMerge: deepMerge,
+  extend: extend,
+  trim: trim
+};
 
 
 /***/ }),
@@ -16057,6 +19458,26 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAABuCAYAAABr
 
 /***/ }),
 
+/***/ "c8af":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+
 /***/ "c8ba":
 /***/ (function(module, exports) {
 
@@ -16080,6 +19501,25 @@ try {
 // easier to handle this case. if(!global) { ...}
 
 module.exports = g;
+
+
+/***/ }),
+
+/***/ "c8d2":
+/***/ (function(module, exports, __webpack_require__) {
+
+var fails = __webpack_require__("d039");
+var whitespaces = __webpack_require__("5899");
+
+var non = '\u200B\u0085\u180E';
+
+// check that a method works with the correct list
+// of whitespaces and has a correct name
+module.exports = function (METHOD_NAME) {
+  return fails(function () {
+    return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
+  });
+};
 
 
 /***/ }),
@@ -16158,6 +19598,25 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGoAAACECAYAAAB4
 
 /***/ }),
 
+/***/ "cdf9":
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__("825a");
+var isObject = __webpack_require__("861d");
+var newPromiseCapability = __webpack_require__("f069");
+
+module.exports = function (C, x) {
+  anObject(C);
+  if (isObject(x) && x.constructor === C) return x;
+  var promiseCapability = newPromiseCapability.f(C);
+  var resolve = promiseCapability.resolve;
+  resolve(x);
+  return promiseCapability.promise;
+};
+
+
+/***/ }),
+
 /***/ "ce4e":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16171,6 +19630,67 @@ module.exports = function (key, value) {
     global[key] = value;
   } return value;
 };
+
+
+/***/ }),
+
+/***/ "cee4":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+var bind = __webpack_require__("1d2b");
+var Axios = __webpack_require__("0a06");
+var mergeConfig = __webpack_require__("4a7b");
+var defaults = __webpack_require__("2444");
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__("7a77");
+axios.CancelToken = __webpack_require__("8df4");
+axios.isCancel = __webpack_require__("2e67");
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__("0df6");
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
 
 
 /***/ }),
@@ -16232,6 +19752,40 @@ exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
   var descriptor = getOwnPropertyDescriptor(this, V);
   return !!descriptor && descriptor.enumerable;
 } : nativePropertyIsEnumerable;
+
+
+/***/ }),
+
+/***/ "d3b7":
+/***/ (function(module, exports, __webpack_require__) {
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var redefine = __webpack_require__("6eeb");
+var toString = __webpack_require__("b041");
+
+// `Object.prototype.toString` method
+// https://tc39.github.io/ecma262/#sec-object.prototype.tostring
+if (!TO_STRING_TAG_SUPPORT) {
+  redefine(Object.prototype, 'toString', toString, { unsafe: true });
+}
+
+
+/***/ }),
+
+/***/ "d44e":
+/***/ (function(module, exports, __webpack_require__) {
+
+var defineProperty = __webpack_require__("9bf2").f;
+var has = __webpack_require__("5135");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+
+module.exports = function (it, TAG, STATIC) {
+  if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
+    defineProperty(it, TO_STRING_TAG, { configurable: true, value: TAG });
+  }
+};
 
 
 /***/ }),
@@ -16402,6 +19956,28 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGT
 
 /***/ }),
 
+/***/ "d925":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
 /***/ "da84":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16423,13 +19999,6 @@ module.exports =
 
 /***/ }),
 
-/***/ "dacd":
-/***/ (function(module, exports) {
-
-module.exports = "data:image/png;base64,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"
-
-/***/ }),
-
 /***/ "df75":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16445,12 +20014,380 @@ module.exports = Object.keys || function keys(O) {
 
 /***/ }),
 
+/***/ "df7c":
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
+// backported and transplited with Babel, with backwards-compat fixes
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  if (path.length === 0) return '.';
+  var code = path.charCodeAt(0);
+  var hasRoot = code === 47 /*/*/;
+  var end = -1;
+  var matchedSlash = true;
+  for (var i = path.length - 1; i >= 1; --i) {
+    code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+      // We saw the first non-path separator
+      matchedSlash = false;
+    }
+  }
+
+  if (end === -1) return hasRoot ? '/' : '.';
+  if (hasRoot && end === 1) {
+    // return '//';
+    // Backwards-compat fix:
+    return '/';
+  }
+  return path.slice(0, end);
+};
+
+function basename(path) {
+  if (typeof path !== 'string') path = path + '';
+
+  var start = 0;
+  var end = -1;
+  var matchedSlash = true;
+  var i;
+
+  for (i = path.length - 1; i >= 0; --i) {
+    if (path.charCodeAt(i) === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          start = i + 1;
+          break;
+        }
+      } else if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // path component
+      matchedSlash = false;
+      end = i + 1;
+    }
+  }
+
+  if (end === -1) return '';
+  return path.slice(start, end);
+}
+
+// Uses a mixed approach for backwards-compatibility, as ext behavior changed
+// in new Node.js versions, so only basename() above is backported here
+exports.basename = function (path, ext) {
+  var f = basename(path);
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+exports.extname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  var startDot = -1;
+  var startPart = 0;
+  var end = -1;
+  var matchedSlash = true;
+  // Track the state of characters (if any) we see before our first dot and
+  // after any path separator we find
+  var preDotState = 0;
+  for (var i = path.length - 1; i >= 0; --i) {
+    var code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+    if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // extension
+      matchedSlash = false;
+      end = i + 1;
+    }
+    if (code === 46 /*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+    } else if (startDot !== -1) {
+      // We saw a non-dot and non-path separator before our dot, so we should
+      // have a good chance at having a non-empty extension
+      preDotState = -1;
+    }
+  }
+
+  if (startDot === -1 || end === -1 ||
+      // We saw a non-dot character immediately before the dot
+      preDotState === 0 ||
+      // The (right-most) trimmed path component is exactly '..'
+      preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+    return '';
+  }
+  return path.slice(startDot, end);
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("4362")))
+
+/***/ }),
+
+/***/ "e01a":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+// `Symbol.prototype.description` getter
+// https://tc39.github.io/ecma262/#sec-symbol.prototype.description
+
+var $ = __webpack_require__("23e7");
+var DESCRIPTORS = __webpack_require__("83ab");
+var global = __webpack_require__("da84");
+var has = __webpack_require__("5135");
+var isObject = __webpack_require__("861d");
+var defineProperty = __webpack_require__("9bf2").f;
+var copyConstructorProperties = __webpack_require__("e893");
+
+var NativeSymbol = global.Symbol;
+
+if (DESCRIPTORS && typeof NativeSymbol == 'function' && (!('description' in NativeSymbol.prototype) ||
+  // Safari 12 bug
+  NativeSymbol().description !== undefined
+)) {
+  var EmptyStringDescriptionStore = {};
+  // wrap Symbol constructor for correct work with undefined description
+  var SymbolWrapper = function Symbol() {
+    var description = arguments.length < 1 || arguments[0] === undefined ? undefined : String(arguments[0]);
+    var result = this instanceof SymbolWrapper
+      ? new NativeSymbol(description)
+      // in Edge 13, String(Symbol(undefined)) === 'Symbol(undefined)'
+      : description === undefined ? NativeSymbol() : NativeSymbol(description);
+    if (description === '') EmptyStringDescriptionStore[result] = true;
+    return result;
+  };
+  copyConstructorProperties(SymbolWrapper, NativeSymbol);
+  var symbolPrototype = SymbolWrapper.prototype = NativeSymbol.prototype;
+  symbolPrototype.constructor = SymbolWrapper;
+
+  var symbolToString = symbolPrototype.toString;
+  var native = String(NativeSymbol('test')) == 'Symbol(test)';
+  var regexp = /^Symbol\((.*)\)[^)]+$/;
+  defineProperty(symbolPrototype, 'description', {
+    configurable: true,
+    get: function description() {
+      var symbol = isObject(this) ? this.valueOf() : this;
+      var string = symbolToString.call(symbol);
+      if (has(EmptyStringDescriptionStore, symbol)) return '';
+      var desc = native ? string.slice(7, -1) : string.replace(regexp, '$1');
+      return desc === '' ? undefined : desc;
+    }
+  });
+
+  $({ global: true, forced: true }, {
+    Symbol: SymbolWrapper
+  });
+}
+
+
+/***/ }),
+
 /***/ "e11e":
 /***/ (function(module, exports, __webpack_require__) {
 
 /* @preserve
- * Leaflet 1.3.1, a JS library for interactive maps. http://leafletjs.com
- * (c) 2010-2017 Vladimir Agafonkin, (c) 2010-2011 CloudMade
+ * Leaflet 1.6.0, a JS library for interactive maps. http://leafletjs.com
+ * (c) 2010-2019 Vladimir Agafonkin, (c) 2010-2011 CloudMade
  */
 
 (function (global, factory) {
@@ -16458,7 +20395,7 @@ module.exports = Object.keys || function keys(O) {
 	undefined;
 }(this, (function (exports) { 'use strict';
 
-var version = "1.3.1";
+var version = "1.6.0";
 
 /*
  * @namespace Util
@@ -16917,7 +20854,7 @@ var Events = {
 	 *
 	 * @alternative
 	 * @method off: this
-	 * Removes all listeners to all events on the object.
+	 * Removes all listeners to all events on the object. This includes implicitly attached events.
 	 */
 	off: function (types, fn, context) {
 
@@ -17809,7 +21746,7 @@ function toLatLngBounds(a, b) {
  * map.panTo(L.latLng(50, 30));
  * ```
  *
- * Note that `LatLng` does not inherit from Leafet's `Class` object,
+ * Note that `LatLng` does not inherit from Leaflet's `Class` object,
  * which means new classes can't inherit from it, and new methods
  * can't be added to it with the `include` function.
  */
@@ -18097,9 +22034,11 @@ var Earth = extend({}, CRS, {
  * a sphere. Used by the `EPSG:3857` CRS.
  */
 
+var earthRadius = 6378137;
+
 var SphericalMercator = {
 
-	R: 6378137,
+	R: earthRadius,
 	MAX_LATITUDE: 85.0511287798,
 
 	project: function (latlng) {
@@ -18122,7 +22061,7 @@ var SphericalMercator = {
 	},
 
 	bounds: (function () {
-		var d = 6378137 * Math.PI;
+		var d = earthRadius * Math.PI;
 		return new Bounds([-d, -d], [d, d]);
 	})()
 };
@@ -18353,7 +22292,7 @@ var msPointer = !window.PointerEvent && window.MSPointerEvent;
 
 // @property pointer: Boolean
 // `true` for all browsers supporting [pointer events](https://msdn.microsoft.com/en-us/library/dn433244%28v=vs.85%29.aspx).
-var pointer = !!(window.PointerEvent || msPointer);
+var pointer = !webkit && !!(window.PointerEvent || msPointer);
 
 // @property touch: Boolean
 // `true` for all browsers supporting [touch events](https://developer.mozilla.org/docs/Web/API/Touch_events).
@@ -18371,9 +22310,26 @@ var mobileOpera = mobile && opera;
 var mobileGecko = mobile && gecko;
 
 // @property retina: Boolean
-// `true` for browsers on a high-resolution "retina" screen.
+// `true` for browsers on a high-resolution "retina" screen or on any screen when browser's display zoom is more than 100%.
 var retina = (window.devicePixelRatio || (window.screen.deviceXDPI / window.screen.logicalXDPI)) > 1;
 
+// @property passiveEvents: Boolean
+// `true` for browsers that support passive events.
+var passiveEvents = (function () {
+	var supportsPassiveOption = false;
+	try {
+		var opts = Object.defineProperty({}, 'passive', {
+			get: function () {
+				supportsPassiveOption = true;
+			}
+		});
+		window.addEventListener('testPassiveEventSupport', falseFn, opts);
+		window.removeEventListener('testPassiveEventSupport', falseFn, opts);
+	} catch (e) {
+		// Errors can safely be ignored since this is only a browser support test.
+	}
+	return supportsPassiveOption;
+});
 
 // @property canvas: Boolean
 // `true` when the browser supports [`<canvas>`](https://developer.mozilla.org/docs/Web/API/Canvas_API).
@@ -18436,6 +22392,7 @@ var Browser = (Object.freeze || Object)({
 	mobileOpera: mobileOpera,
 	mobileGecko: mobileGecko,
 	retina: retina,
+	passiveEvents: passiveEvents,
 	canvas: canvas,
 	svg: svg,
 	vml: vml
@@ -18620,6 +22577,7 @@ function addDoubleTapListener(obj, handler, id) {
 				touch$$1 = newTouch;
 			}
 			touch$$1.type = 'dblclick';
+			touch$$1.button = 0;
 			handler(touch$$1);
 			last = null;
 		}
@@ -18629,8 +22587,8 @@ function addDoubleTapListener(obj, handler, id) {
 	obj[_pre + _touchend + id] = onTouchEnd;
 	obj[_pre + 'dblclick' + id] = handler;
 
-	obj.addEventListener(_touchstart, onTouchStart, false);
-	obj.addEventListener(_touchend, onTouchEnd, false);
+	obj.addEventListener(_touchstart, onTouchStart, passiveEvents ? {passive: false} : false);
+	obj.addEventListener(_touchend, onTouchEnd, passiveEvents ? {passive: false} : false);
 
 	// On some platforms (notably, chrome<55 on win10 + touchscreen + mouse),
 	// the browser doesn't fire touchend/pointerup events but does fire
@@ -18646,334 +22604,14 @@ function removeDoubleTapListener(obj, id) {
 	    touchend = obj[_pre + _touchend + id],
 	    dblclick = obj[_pre + 'dblclick' + id];
 
-	obj.removeEventListener(_touchstart, touchstart, false);
-	obj.removeEventListener(_touchend, touchend, false);
+	obj.removeEventListener(_touchstart, touchstart, passiveEvents ? {passive: false} : false);
+	obj.removeEventListener(_touchend, touchend, passiveEvents ? {passive: false} : false);
 	if (!edge) {
 		obj.removeEventListener('dblclick', dblclick, false);
 	}
 
 	return this;
 }
-
-/*
- * @namespace DomEvent
- * Utility functions to work with the [DOM events](https://developer.mozilla.org/docs/Web/API/Event), used by Leaflet internally.
- */
-
-// Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
-
-// @function on(el: HTMLElement, types: String, fn: Function, context?: Object): this
-// Adds a listener function (`fn`) to a particular DOM event type of the
-// element `el`. You can optionally specify the context of the listener
-// (object the `this` keyword will point to). You can also pass several
-// space-separated types (e.g. `'click dblclick'`).
-
-// @alternative
-// @function on(el: HTMLElement, eventMap: Object, context?: Object): this
-// Adds a set of type/listener pairs, e.g. `{click: onClick, mousemove: onMouseMove}`
-function on(obj, types, fn, context) {
-
-	if (typeof types === 'object') {
-		for (var type in types) {
-			addOne(obj, type, types[type], fn);
-		}
-	} else {
-		types = splitWords(types);
-
-		for (var i = 0, len = types.length; i < len; i++) {
-			addOne(obj, types[i], fn, context);
-		}
-	}
-
-	return this;
-}
-
-var eventsKey = '_leaflet_events';
-
-// @function off(el: HTMLElement, types: String, fn: Function, context?: Object): this
-// Removes a previously added listener function.
-// Note that if you passed a custom context to on, you must pass the same
-// context to `off` in order to remove the listener.
-
-// @alternative
-// @function off(el: HTMLElement, eventMap: Object, context?: Object): this
-// Removes a set of type/listener pairs, e.g. `{click: onClick, mousemove: onMouseMove}`
-function off(obj, types, fn, context) {
-
-	if (typeof types === 'object') {
-		for (var type in types) {
-			removeOne(obj, type, types[type], fn);
-		}
-	} else if (types) {
-		types = splitWords(types);
-
-		for (var i = 0, len = types.length; i < len; i++) {
-			removeOne(obj, types[i], fn, context);
-		}
-	} else {
-		for (var j in obj[eventsKey]) {
-			removeOne(obj, j, obj[eventsKey][j]);
-		}
-		delete obj[eventsKey];
-	}
-
-	return this;
-}
-
-function addOne(obj, type, fn, context) {
-	var id = type + stamp(fn) + (context ? '_' + stamp(context) : '');
-
-	if (obj[eventsKey] && obj[eventsKey][id]) { return this; }
-
-	var handler = function (e) {
-		return fn.call(context || obj, e || window.event);
-	};
-
-	var originalHandler = handler;
-
-	if (pointer && type.indexOf('touch') === 0) {
-		// Needs DomEvent.Pointer.js
-		addPointerListener(obj, type, handler, id);
-
-	} else if (touch && (type === 'dblclick') && addDoubleTapListener &&
-	           !(pointer && chrome)) {
-		// Chrome >55 does not need the synthetic dblclicks from addDoubleTapListener
-		// See #5180
-		addDoubleTapListener(obj, handler, id);
-
-	} else if ('addEventListener' in obj) {
-
-		if (type === 'mousewheel') {
-			obj.addEventListener('onwheel' in obj ? 'wheel' : 'mousewheel', handler, false);
-
-		} else if ((type === 'mouseenter') || (type === 'mouseleave')) {
-			handler = function (e) {
-				e = e || window.event;
-				if (isExternalTarget(obj, e)) {
-					originalHandler(e);
-				}
-			};
-			obj.addEventListener(type === 'mouseenter' ? 'mouseover' : 'mouseout', handler, false);
-
-		} else {
-			if (type === 'click' && android) {
-				handler = function (e) {
-					filterClick(e, originalHandler);
-				};
-			}
-			obj.addEventListener(type, handler, false);
-		}
-
-	} else if ('attachEvent' in obj) {
-		obj.attachEvent('on' + type, handler);
-	}
-
-	obj[eventsKey] = obj[eventsKey] || {};
-	obj[eventsKey][id] = handler;
-}
-
-function removeOne(obj, type, fn, context) {
-
-	var id = type + stamp(fn) + (context ? '_' + stamp(context) : ''),
-	    handler = obj[eventsKey] && obj[eventsKey][id];
-
-	if (!handler) { return this; }
-
-	if (pointer && type.indexOf('touch') === 0) {
-		removePointerListener(obj, type, id);
-
-	} else if (touch && (type === 'dblclick') && removeDoubleTapListener &&
-	           !(pointer && chrome)) {
-		removeDoubleTapListener(obj, id);
-
-	} else if ('removeEventListener' in obj) {
-
-		if (type === 'mousewheel') {
-			obj.removeEventListener('onwheel' in obj ? 'wheel' : 'mousewheel', handler, false);
-
-		} else {
-			obj.removeEventListener(
-				type === 'mouseenter' ? 'mouseover' :
-				type === 'mouseleave' ? 'mouseout' : type, handler, false);
-		}
-
-	} else if ('detachEvent' in obj) {
-		obj.detachEvent('on' + type, handler);
-	}
-
-	obj[eventsKey][id] = null;
-}
-
-// @function stopPropagation(ev: DOMEvent): this
-// Stop the given event from propagation to parent elements. Used inside the listener functions:
-// ```js
-// L.DomEvent.on(div, 'click', function (ev) {
-// 	L.DomEvent.stopPropagation(ev);
-// });
-// ```
-function stopPropagation(e) {
-
-	if (e.stopPropagation) {
-		e.stopPropagation();
-	} else if (e.originalEvent) {  // In case of Leaflet event.
-		e.originalEvent._stopped = true;
-	} else {
-		e.cancelBubble = true;
-	}
-	skipped(e);
-
-	return this;
-}
-
-// @function disableScrollPropagation(el: HTMLElement): this
-// Adds `stopPropagation` to the element's `'mousewheel'` events (plus browser variants).
-function disableScrollPropagation(el) {
-	addOne(el, 'mousewheel', stopPropagation);
-	return this;
-}
-
-// @function disableClickPropagation(el: HTMLElement): this
-// Adds `stopPropagation` to the element's `'click'`, `'doubleclick'`,
-// `'mousedown'` and `'touchstart'` events (plus browser variants).
-function disableClickPropagation(el) {
-	on(el, 'mousedown touchstart dblclick', stopPropagation);
-	addOne(el, 'click', fakeStop);
-	return this;
-}
-
-// @function preventDefault(ev: DOMEvent): this
-// Prevents the default action of the DOM Event `ev` from happening (such as
-// following a link in the href of the a element, or doing a POST request
-// with page reload when a `<form>` is submitted).
-// Use it inside listener functions.
-function preventDefault(e) {
-	if (e.preventDefault) {
-		e.preventDefault();
-	} else {
-		e.returnValue = false;
-	}
-	return this;
-}
-
-// @function stop(ev: DOMEvent): this
-// Does `stopPropagation` and `preventDefault` at the same time.
-function stop(e) {
-	preventDefault(e);
-	stopPropagation(e);
-	return this;
-}
-
-// @function getMousePosition(ev: DOMEvent, container?: HTMLElement): Point
-// Gets normalized mouse position from a DOM event relative to the
-// `container` or to the whole page if not specified.
-function getMousePosition(e, container) {
-	if (!container) {
-		return new Point(e.clientX, e.clientY);
-	}
-
-	var rect = container.getBoundingClientRect();
-
-	var scaleX = rect.width / container.offsetWidth || 1;
-	var scaleY = rect.height / container.offsetHeight || 1;
-	return new Point(
-		e.clientX / scaleX - rect.left - container.clientLeft,
-		e.clientY / scaleY - rect.top - container.clientTop);
-}
-
-// Chrome on Win scrolls double the pixels as in other platforms (see #4538),
-// and Firefox scrolls device pixels, not CSS pixels
-var wheelPxFactor =
-	(win && chrome) ? 2 * window.devicePixelRatio :
-	gecko ? window.devicePixelRatio : 1;
-
-// @function getWheelDelta(ev: DOMEvent): Number
-// Gets normalized wheel delta from a mousewheel DOM event, in vertical
-// pixels scrolled (negative if scrolling down).
-// Events from pointing devices without precise scrolling are mapped to
-// a best guess of 60 pixels.
-function getWheelDelta(e) {
-	return (edge) ? e.wheelDeltaY / 2 : // Don't trust window-geometry-based delta
-	       (e.deltaY && e.deltaMode === 0) ? -e.deltaY / wheelPxFactor : // Pixels
-	       (e.deltaY && e.deltaMode === 1) ? -e.deltaY * 20 : // Lines
-	       (e.deltaY && e.deltaMode === 2) ? -e.deltaY * 60 : // Pages
-	       (e.deltaX || e.deltaZ) ? 0 :	// Skip horizontal/depth wheel events
-	       e.wheelDelta ? (e.wheelDeltaY || e.wheelDelta) / 2 : // Legacy IE pixels
-	       (e.detail && Math.abs(e.detail) < 32765) ? -e.detail * 20 : // Legacy Moz lines
-	       e.detail ? e.detail / -32765 * 60 : // Legacy Moz pages
-	       0;
-}
-
-var skipEvents = {};
-
-function fakeStop(e) {
-	// fakes stopPropagation by setting a special event flag, checked/reset with skipped(e)
-	skipEvents[e.type] = true;
-}
-
-function skipped(e) {
-	var events = skipEvents[e.type];
-	// reset when checking, as it's only used in map container and propagates outside of the map
-	skipEvents[e.type] = false;
-	return events;
-}
-
-// check if element really left/entered the event target (for mouseenter/mouseleave)
-function isExternalTarget(el, e) {
-
-	var related = e.relatedTarget;
-
-	if (!related) { return true; }
-
-	try {
-		while (related && (related !== el)) {
-			related = related.parentNode;
-		}
-	} catch (err) {
-		return false;
-	}
-	return (related !== el);
-}
-
-var lastClick;
-
-// this is a horrible workaround for a bug in Android where a single touch triggers two click events
-function filterClick(e, handler) {
-	var timeStamp = (e.timeStamp || (e.originalEvent && e.originalEvent.timeStamp)),
-	    elapsed = lastClick && (timeStamp - lastClick);
-
-	// are they closer together than 500ms yet more than 100ms?
-	// Android typically triggers them ~300ms apart while multiple listeners
-	// on the same event should be triggered far faster;
-	// or check if click is simulated on the element, and if it is, reject any non-simulated events
-
-	if ((elapsed && elapsed > 100 && elapsed < 500) || (e.target._simulatedClick && !e._simulated)) {
-		stop(e);
-		return;
-	}
-	lastClick = timeStamp;
-
-	handler(e);
-}
-
-
-
-
-var DomEvent = (Object.freeze || Object)({
-	on: on,
-	off: off,
-	stopPropagation: stopPropagation,
-	disableScrollPropagation: disableScrollPropagation,
-	disableClickPropagation: disableClickPropagation,
-	preventDefault: preventDefault,
-	stop: stop,
-	getMousePosition: getMousePosition,
-	getWheelDelta: getWheelDelta,
-	fakeStop: fakeStop,
-	skipped: skipped,
-	isExternalTarget: isExternalTarget,
-	addListener: on,
-	removeListener: off
-});
 
 /*
  * @namespace DomUtil
@@ -18990,7 +22628,7 @@ var DomEvent = (Object.freeze || Object)({
 // @property TRANSFORM: String
 // Vendor-prefixed transform style name (e.g. `'webkitTransform'` for WebKit).
 var TRANSFORM = testProp(
-	['transform', 'WebkitTransform', 'OTransform', 'MozTransform', 'msTransform']);
+	['transform', 'webkitTransform', 'OTransform', 'MozTransform', 'msTransform']);
 
 // webkitTransition comes first because some browser versions that drop vendor prefix don't do
 // the same for the transitionend event, in particular the Android 4.1 stock browser
@@ -19059,7 +22697,7 @@ function empty(el) {
 // Makes `el` the last child of its parent, so it renders in front of the other children.
 function toFront(el) {
 	var parent = el.parentNode;
-	if (parent.lastChild !== el) {
+	if (parent && parent.lastChild !== el) {
 		parent.appendChild(el);
 	}
 }
@@ -19068,7 +22706,7 @@ function toFront(el) {
 // Makes `el` the first child of its parent, so it renders behind the other children.
 function toBack(el) {
 	var parent = el.parentNode;
-	if (parent.firstChild !== el) {
+	if (parent && parent.firstChild !== el) {
 		parent.insertBefore(el, parent.firstChild);
 	}
 }
@@ -19121,6 +22759,11 @@ function setClass(el, name) {
 // @function getClass(el: HTMLElement): String
 // Returns the element's class.
 function getClass(el) {
+	// Check if the element is an SVGElementInstance and use the correspondingElement instead
+	// (Required for linked SVG elements in IE11.)
+	if (el.correspondingElement) {
+		el = el.correspondingElement;
+	}
 	return el.className.baseVal === undefined ? el.className : el.className.baseVal;
 }
 
@@ -19293,6 +22936,29 @@ function restoreOutline() {
 	off(window, 'keydown', restoreOutline);
 }
 
+// @function getSizedParentNode(el: HTMLElement): HTMLElement
+// Finds the closest parent node which size (width and height) is not null.
+function getSizedParentNode(element) {
+	do {
+		element = element.parentNode;
+	} while ((!element.offsetWidth || !element.offsetHeight) && element !== document.body);
+	return element;
+}
+
+// @function getScale(el: HTMLElement): Object
+// Computes the CSS scale currently applied on the element.
+// Returns an object with `x` and `y` members as horizontal and vertical scales respectively,
+// and `boundingClientRect` as the result of [`getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
+function getScale(element) {
+	var rect = element.getBoundingClientRect(); // Read-only in old browsers.
+
+	return {
+		x: rect.width / element.offsetWidth || 1,
+		y: rect.height / element.offsetHeight || 1,
+		boundingClientRect: rect
+	};
+}
+
 
 var DomUtil = (Object.freeze || Object)({
 	TRANSFORM: TRANSFORM,
@@ -19320,7 +22986,331 @@ var DomUtil = (Object.freeze || Object)({
 	disableImageDrag: disableImageDrag,
 	enableImageDrag: enableImageDrag,
 	preventOutline: preventOutline,
-	restoreOutline: restoreOutline
+	restoreOutline: restoreOutline,
+	getSizedParentNode: getSizedParentNode,
+	getScale: getScale
+});
+
+/*
+ * @namespace DomEvent
+ * Utility functions to work with the [DOM events](https://developer.mozilla.org/docs/Web/API/Event), used by Leaflet internally.
+ */
+
+// Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
+
+// @function on(el: HTMLElement, types: String, fn: Function, context?: Object): this
+// Adds a listener function (`fn`) to a particular DOM event type of the
+// element `el`. You can optionally specify the context of the listener
+// (object the `this` keyword will point to). You can also pass several
+// space-separated types (e.g. `'click dblclick'`).
+
+// @alternative
+// @function on(el: HTMLElement, eventMap: Object, context?: Object): this
+// Adds a set of type/listener pairs, e.g. `{click: onClick, mousemove: onMouseMove}`
+function on(obj, types, fn, context) {
+
+	if (typeof types === 'object') {
+		for (var type in types) {
+			addOne(obj, type, types[type], fn);
+		}
+	} else {
+		types = splitWords(types);
+
+		for (var i = 0, len = types.length; i < len; i++) {
+			addOne(obj, types[i], fn, context);
+		}
+	}
+
+	return this;
+}
+
+var eventsKey = '_leaflet_events';
+
+// @function off(el: HTMLElement, types: String, fn: Function, context?: Object): this
+// Removes a previously added listener function.
+// Note that if you passed a custom context to on, you must pass the same
+// context to `off` in order to remove the listener.
+
+// @alternative
+// @function off(el: HTMLElement, eventMap: Object, context?: Object): this
+// Removes a set of type/listener pairs, e.g. `{click: onClick, mousemove: onMouseMove}`
+function off(obj, types, fn, context) {
+
+	if (typeof types === 'object') {
+		for (var type in types) {
+			removeOne(obj, type, types[type], fn);
+		}
+	} else if (types) {
+		types = splitWords(types);
+
+		for (var i = 0, len = types.length; i < len; i++) {
+			removeOne(obj, types[i], fn, context);
+		}
+	} else {
+		for (var j in obj[eventsKey]) {
+			removeOne(obj, j, obj[eventsKey][j]);
+		}
+		delete obj[eventsKey];
+	}
+
+	return this;
+}
+
+function addOne(obj, type, fn, context) {
+	var id = type + stamp(fn) + (context ? '_' + stamp(context) : '');
+
+	if (obj[eventsKey] && obj[eventsKey][id]) { return this; }
+
+	var handler = function (e) {
+		return fn.call(context || obj, e || window.event);
+	};
+
+	var originalHandler = handler;
+
+	if (pointer && type.indexOf('touch') === 0) {
+		// Needs DomEvent.Pointer.js
+		addPointerListener(obj, type, handler, id);
+
+	} else if (touch && (type === 'dblclick') && addDoubleTapListener &&
+	           !(pointer && chrome)) {
+		// Chrome >55 does not need the synthetic dblclicks from addDoubleTapListener
+		// See #5180
+		addDoubleTapListener(obj, handler, id);
+
+	} else if ('addEventListener' in obj) {
+
+		if (type === 'mousewheel') {
+			obj.addEventListener('onwheel' in obj ? 'wheel' : 'mousewheel', handler, passiveEvents ? {passive: false} : false);
+
+		} else if ((type === 'mouseenter') || (type === 'mouseleave')) {
+			handler = function (e) {
+				e = e || window.event;
+				if (isExternalTarget(obj, e)) {
+					originalHandler(e);
+				}
+			};
+			obj.addEventListener(type === 'mouseenter' ? 'mouseover' : 'mouseout', handler, false);
+
+		} else {
+			if (type === 'click' && android) {
+				handler = function (e) {
+					filterClick(e, originalHandler);
+				};
+			}
+			obj.addEventListener(type, handler, false);
+		}
+
+	} else if ('attachEvent' in obj) {
+		obj.attachEvent('on' + type, handler);
+	}
+
+	obj[eventsKey] = obj[eventsKey] || {};
+	obj[eventsKey][id] = handler;
+}
+
+function removeOne(obj, type, fn, context) {
+
+	var id = type + stamp(fn) + (context ? '_' + stamp(context) : ''),
+	    handler = obj[eventsKey] && obj[eventsKey][id];
+
+	if (!handler) { return this; }
+
+	if (pointer && type.indexOf('touch') === 0) {
+		removePointerListener(obj, type, id);
+
+	} else if (touch && (type === 'dblclick') && removeDoubleTapListener &&
+	           !(pointer && chrome)) {
+		removeDoubleTapListener(obj, id);
+
+	} else if ('removeEventListener' in obj) {
+
+		if (type === 'mousewheel') {
+			obj.removeEventListener('onwheel' in obj ? 'wheel' : 'mousewheel', handler, passiveEvents ? {passive: false} : false);
+
+		} else {
+			obj.removeEventListener(
+				type === 'mouseenter' ? 'mouseover' :
+				type === 'mouseleave' ? 'mouseout' : type, handler, false);
+		}
+
+	} else if ('detachEvent' in obj) {
+		obj.detachEvent('on' + type, handler);
+	}
+
+	obj[eventsKey][id] = null;
+}
+
+// @function stopPropagation(ev: DOMEvent): this
+// Stop the given event from propagation to parent elements. Used inside the listener functions:
+// ```js
+// L.DomEvent.on(div, 'click', function (ev) {
+// 	L.DomEvent.stopPropagation(ev);
+// });
+// ```
+function stopPropagation(e) {
+
+	if (e.stopPropagation) {
+		e.stopPropagation();
+	} else if (e.originalEvent) {  // In case of Leaflet event.
+		e.originalEvent._stopped = true;
+	} else {
+		e.cancelBubble = true;
+	}
+	skipped(e);
+
+	return this;
+}
+
+// @function disableScrollPropagation(el: HTMLElement): this
+// Adds `stopPropagation` to the element's `'mousewheel'` events (plus browser variants).
+function disableScrollPropagation(el) {
+	addOne(el, 'mousewheel', stopPropagation);
+	return this;
+}
+
+// @function disableClickPropagation(el: HTMLElement): this
+// Adds `stopPropagation` to the element's `'click'`, `'doubleclick'`,
+// `'mousedown'` and `'touchstart'` events (plus browser variants).
+function disableClickPropagation(el) {
+	on(el, 'mousedown touchstart dblclick', stopPropagation);
+	addOne(el, 'click', fakeStop);
+	return this;
+}
+
+// @function preventDefault(ev: DOMEvent): this
+// Prevents the default action of the DOM Event `ev` from happening (such as
+// following a link in the href of the a element, or doing a POST request
+// with page reload when a `<form>` is submitted).
+// Use it inside listener functions.
+function preventDefault(e) {
+	if (e.preventDefault) {
+		e.preventDefault();
+	} else {
+		e.returnValue = false;
+	}
+	return this;
+}
+
+// @function stop(ev: DOMEvent): this
+// Does `stopPropagation` and `preventDefault` at the same time.
+function stop(e) {
+	preventDefault(e);
+	stopPropagation(e);
+	return this;
+}
+
+// @function getMousePosition(ev: DOMEvent, container?: HTMLElement): Point
+// Gets normalized mouse position from a DOM event relative to the
+// `container` (border excluded) or to the whole page if not specified.
+function getMousePosition(e, container) {
+	if (!container) {
+		return new Point(e.clientX, e.clientY);
+	}
+
+	var scale = getScale(container),
+	    offset = scale.boundingClientRect; // left and top  values are in page scale (like the event clientX/Y)
+
+	return new Point(
+		// offset.left/top values are in page scale (like clientX/Y),
+		// whereas clientLeft/Top (border width) values are the original values (before CSS scale applies).
+		(e.clientX - offset.left) / scale.x - container.clientLeft,
+		(e.clientY - offset.top) / scale.y - container.clientTop
+	);
+}
+
+// Chrome on Win scrolls double the pixels as in other platforms (see #4538),
+// and Firefox scrolls device pixels, not CSS pixels
+var wheelPxFactor =
+	(win && chrome) ? 2 * window.devicePixelRatio :
+	gecko ? window.devicePixelRatio : 1;
+
+// @function getWheelDelta(ev: DOMEvent): Number
+// Gets normalized wheel delta from a mousewheel DOM event, in vertical
+// pixels scrolled (negative if scrolling down).
+// Events from pointing devices without precise scrolling are mapped to
+// a best guess of 60 pixels.
+function getWheelDelta(e) {
+	return (edge) ? e.wheelDeltaY / 2 : // Don't trust window-geometry-based delta
+	       (e.deltaY && e.deltaMode === 0) ? -e.deltaY / wheelPxFactor : // Pixels
+	       (e.deltaY && e.deltaMode === 1) ? -e.deltaY * 20 : // Lines
+	       (e.deltaY && e.deltaMode === 2) ? -e.deltaY * 60 : // Pages
+	       (e.deltaX || e.deltaZ) ? 0 :	// Skip horizontal/depth wheel events
+	       e.wheelDelta ? (e.wheelDeltaY || e.wheelDelta) / 2 : // Legacy IE pixels
+	       (e.detail && Math.abs(e.detail) < 32765) ? -e.detail * 20 : // Legacy Moz lines
+	       e.detail ? e.detail / -32765 * 60 : // Legacy Moz pages
+	       0;
+}
+
+var skipEvents = {};
+
+function fakeStop(e) {
+	// fakes stopPropagation by setting a special event flag, checked/reset with skipped(e)
+	skipEvents[e.type] = true;
+}
+
+function skipped(e) {
+	var events = skipEvents[e.type];
+	// reset when checking, as it's only used in map container and propagates outside of the map
+	skipEvents[e.type] = false;
+	return events;
+}
+
+// check if element really left/entered the event target (for mouseenter/mouseleave)
+function isExternalTarget(el, e) {
+
+	var related = e.relatedTarget;
+
+	if (!related) { return true; }
+
+	try {
+		while (related && (related !== el)) {
+			related = related.parentNode;
+		}
+	} catch (err) {
+		return false;
+	}
+	return (related !== el);
+}
+
+var lastClick;
+
+// this is a horrible workaround for a bug in Android where a single touch triggers two click events
+function filterClick(e, handler) {
+	var timeStamp = (e.timeStamp || (e.originalEvent && e.originalEvent.timeStamp)),
+	    elapsed = lastClick && (timeStamp - lastClick);
+
+	// are they closer together than 500ms yet more than 100ms?
+	// Android typically triggers them ~300ms apart while multiple listeners
+	// on the same event should be triggered far faster;
+	// or check if click is simulated on the element, and if it is, reject any non-simulated events
+
+	if ((elapsed && elapsed > 100 && elapsed < 500) || (e.target._simulatedClick && !e._simulated)) {
+		stop(e);
+		return;
+	}
+	lastClick = timeStamp;
+
+	handler(e);
+}
+
+
+
+
+var DomEvent = (Object.freeze || Object)({
+	on: on,
+	off: off,
+	stopPropagation: stopPropagation,
+	disableScrollPropagation: disableScrollPropagation,
+	disableClickPropagation: disableClickPropagation,
+	preventDefault: preventDefault,
+	stop: stop,
+	getMousePosition: getMousePosition,
+	getWheelDelta: getWheelDelta,
+	fakeStop: fakeStop,
+	skipped: skipped,
+	isExternalTarget: isExternalTarget,
+	addListener: on,
+	removeListener: off
 });
 
 /*
@@ -19535,6 +23525,13 @@ var Map = Evented.extend({
 	initialize: function (id, options) { // (HTMLElement or String, Object)
 		options = setOptions(this, options);
 
+		// Make sure to assign internal flags at the beginning,
+		// to avoid inconsistent state in some edge cases.
+		this._handlers = [];
+		this._layers = {};
+		this._zoomBoundLayers = {};
+		this._sizeChanged = true;
+
 		this._initContainer(id);
 		this._initLayout();
 
@@ -19554,11 +23551,6 @@ var Map = Evented.extend({
 		if (options.center && options.zoom !== undefined) {
 			this.setView(toLatLng(options.center), options.zoom, {reset: true});
 		}
-
-		this._handlers = [];
-		this._layers = {};
-		this._zoomBoundLayers = {};
-		this._sizeChanged = true;
 
 		this.callInitHooks();
 
@@ -19918,6 +23910,51 @@ var Map = Evented.extend({
 		return this;
 	},
 
+	// @method panInside(latlng: LatLng, options?: options): this
+	// Pans the map the minimum amount to make the `latlng` visible. Use
+	// `padding`, `paddingTopLeft` and `paddingTopRight` options to fit
+	// the display to more restricted bounds, like [`fitBounds`](#map-fitbounds).
+	// If `latlng` is already within the (optionally padded) display bounds,
+	// the map will not be panned.
+	panInside: function (latlng, options) {
+		options = options || {};
+
+		var paddingTL = toPoint(options.paddingTopLeft || options.padding || [0, 0]),
+		    paddingBR = toPoint(options.paddingBottomRight || options.padding || [0, 0]),
+		    center = this.getCenter(),
+		    pixelCenter = this.project(center),
+		    pixelPoint = this.project(latlng),
+		    pixelBounds = this.getPixelBounds(),
+		    halfPixelBounds = pixelBounds.getSize().divideBy(2),
+		    paddedBounds = toBounds([pixelBounds.min.add(paddingTL), pixelBounds.max.subtract(paddingBR)]);
+
+		if (!paddedBounds.contains(pixelPoint)) {
+			this._enforcingBounds = true;
+			var diff = pixelCenter.subtract(pixelPoint),
+			    newCenter = toPoint(pixelPoint.x + diff.x, pixelPoint.y + diff.y);
+
+			if (pixelPoint.x < paddedBounds.min.x || pixelPoint.x > paddedBounds.max.x) {
+				newCenter.x = pixelCenter.x - diff.x;
+				if (diff.x > 0) {
+					newCenter.x += halfPixelBounds.x - paddingTL.x;
+				} else {
+					newCenter.x -= halfPixelBounds.x - paddingBR.x;
+				}
+			}
+			if (pixelPoint.y < paddedBounds.min.y || pixelPoint.y > paddedBounds.max.y) {
+				newCenter.y = pixelCenter.y - diff.y;
+				if (diff.y > 0) {
+					newCenter.y += halfPixelBounds.y - paddingTL.y;
+				} else {
+					newCenter.y -= halfPixelBounds.y - paddingBR.y;
+				}
+			}
+			this.panTo(this.unproject(newCenter), options);
+			this._enforcingBounds = false;
+		}
+		return this;
+	},
+
 	// @method invalidateSize(options: Zoom/pan options): this
 	// Checks if the map container size changed and updates the map if so —
 	// call it after you've changed the map size dynamically, also animating
@@ -20065,7 +24102,7 @@ var Map = Evented.extend({
 		var lat = pos.coords.latitude,
 		    lng = pos.coords.longitude,
 		    latlng = new LatLng(lat, lng),
-		    bounds = latlng.toBounds(pos.coords.accuracy),
+		    bounds = latlng.toBounds(pos.coords.accuracy * 2),
 		    options = this._locateOptions;
 
 		if (options.setView) {
@@ -20140,6 +24177,10 @@ var Map = Evented.extend({
 
 		if (this._clearControlPos) {
 			this._clearControlPos();
+		}
+		if (this._resizeRequest) {
+			cancelAnimFrame(this._resizeRequest);
+			this._resizeRequest = null;
 		}
 
 		this._clearHandlers();
@@ -20225,7 +24266,7 @@ var Map = Evented.extend({
 			this.options.maxZoom;
 	},
 
-	// @method getBoundsZoom(bounds: LatLngBounds, inside?: Boolean): Number
+	// @method getBoundsZoom(bounds: LatLngBounds, inside?: Boolean, padding?: Point): Number
 	// Returns the maximum zoom level on which the given bounds fit to the map
 	// view in its entirety. If `inside` (optional) is set to `true`, the method
 	// instead returns the minimum zoom level on which the map view fits into
@@ -20674,9 +24715,15 @@ var Map = Evented.extend({
 		// this event. Also fired on mobile when the user holds a single touch
 		// for a second (also called long press).
 		// @event keypress: KeyboardEvent
-		// Fired when the user presses a key from the keyboard while the map is focused.
+		// Fired when the user presses a key from the keyboard that produces a character value while the map is focused.
+		// @event keydown: KeyboardEvent
+		// Fired when the user presses a key from the keyboard while the map is focused. Unlike the `keypress` event,
+		// the `keydown` event is fired for keys that produce a character value and for keys
+		// that do not produce a character value.
+		// @event keyup: KeyboardEvent
+		// Fired when the user releases a key from the keyboard while the map is focused.
 		onOff(this._container, 'click dblclick mousedown mouseup ' +
-			'mouseover mouseout mousemove contextmenu keypress', this._handleDOMEvent, this);
+			'mouseover mouseout mousemove contextmenu keypress keydown keyup', this._handleDOMEvent, this);
 
 		if (this.options.trackResize) {
 			onOff(window, 'resize', this._onResize, this);
@@ -20740,7 +24787,7 @@ var Map = Evented.extend({
 
 		var type = e.type;
 
-		if (type === 'mousedown' || type === 'keypress') {
+		if (type === 'mousedown' || type === 'keypress' || type === 'keyup' || type === 'keydown') {
 			// prevents outline when clicking on keyboard-focusable element
 			preventOutline(e.target || e.srcElement);
 		}
@@ -20779,7 +24826,7 @@ var Map = Evented.extend({
 			originalEvent: e
 		};
 
-		if (e.type !== 'keypress') {
+		if (e.type !== 'keypress' && e.type !== 'keydown' && e.type !== 'keyup') {
 			var isMarker = target.getLatLng && (!target._radius || target._radius <= 10);
 			data.containerPoint = isMarker ?
 				this.latLngToContainerPoint(target.getLatLng()) : this.mouseEventToContainerPoint(e);
@@ -20968,18 +25015,21 @@ var Map = Evented.extend({
 			}
 		}, this);
 
-		this.on('load moveend', function () {
-			var c = this.getCenter(),
-			    z = this.getZoom();
-			setTransform(this._proxy, this.project(c, z), this.getZoomScale(z, 1));
-		}, this);
+		this.on('load moveend', this._animMoveEnd, this);
 
 		this._on('unload', this._destroyAnimProxy, this);
 	},
 
 	_destroyAnimProxy: function () {
 		remove(this._proxy);
+		this.off('load moveend', this._animMoveEnd, this);
 		delete this._proxy;
+	},
+
+	_animMoveEnd: function () {
+		var c = this.getCenter(),
+		    z = this.getZoom();
+		setTransform(this._proxy, this.project(c, z), this.getZoomScale(z, 1));
 	},
 
 	_catchTransitionEnd: function (e) {
@@ -21031,8 +25081,9 @@ var Map = Evented.extend({
 			addClass(this._mapPane, 'leaflet-zoom-anim');
 		}
 
+		// @section Other Events
 		// @event zoomanim: ZoomAnimEvent
-		// Fired on every frame of a zoom animation
+		// Fired at least once per zoom animation. For continuous zoom, like pinch zooming, fired once per frame during zoom.
 		this.fire('zoomanim', {
 			center: center,
 			zoom: zoom,
@@ -21150,6 +25201,8 @@ var Control = Class.extend({
 			corner.appendChild(container);
 		}
 
+		this._map.on('unload', this.remove, this);
+
 		return this;
 	},
 
@@ -21166,6 +25219,7 @@ var Control = Class.extend({
 			this.onRemove(this._map);
 		}
 
+		this._map.off('unload', this.remove, this);
 		this._map = null;
 
 		return this;
@@ -21388,13 +25442,13 @@ var Layers = Control.extend({
 	// Expand the control container if collapsed.
 	expand: function () {
 		addClass(this._container, 'leaflet-control-layers-expanded');
-		this._form.style.height = null;
+		this._section.style.height = null;
 		var acceptableHeight = this._map.getSize().y - (this._container.offsetTop + 50);
-		if (acceptableHeight < this._form.clientHeight) {
-			addClass(this._form, 'leaflet-control-layers-scrollbar');
-			this._form.style.height = acceptableHeight + 'px';
+		if (acceptableHeight < this._section.clientHeight) {
+			addClass(this._section, 'leaflet-control-layers-scrollbar');
+			this._section.style.height = acceptableHeight + 'px';
 		} else {
-			removeClass(this._form, 'leaflet-control-layers-scrollbar');
+			removeClass(this._section, 'leaflet-control-layers-scrollbar');
 		}
 		this._checkDisabledLayers();
 		return this;
@@ -21418,7 +25472,7 @@ var Layers = Control.extend({
 		disableClickPropagation(container);
 		disableScrollPropagation(container);
 
-		var form = this._form = create$1('form', className + '-list');
+		var section = this._section = create$1('section', className + '-list');
 
 		if (collapsed) {
 			this._map.on('click', this.collapse, this);
@@ -21446,11 +25500,11 @@ var Layers = Control.extend({
 			this.expand();
 		}
 
-		this._baseLayersList = create$1('div', className + '-base', form);
-		this._separator = create$1('div', className + '-separator', form);
-		this._overlaysList = create$1('div', className + '-overlays', form);
+		this._baseLayersList = create$1('div', className + '-base', section);
+		this._separator = create$1('div', className + '-separator', section);
+		this._overlaysList = create$1('div', className + '-overlays', section);
 
-		container.appendChild(form);
+		container.appendChild(section);
 	},
 
 	_getLayer: function (id) {
@@ -21563,7 +25617,7 @@ var Layers = Control.extend({
 			input.className = 'leaflet-control-layers-selector';
 			input.defaultChecked = checked;
 		} else {
-			input = this._createRadioElement('leaflet-base-layers', checked);
+			input = this._createRadioElement('leaflet-base-layers_' + stamp(this), checked);
 		}
 
 		this._layerControlInputs.push(input);
@@ -21661,7 +25715,7 @@ var Layers = Control.extend({
 
 
 // @factory L.control.layers(baselayers?: Object, overlays?: Object, options?: Control.Layers options)
-// Creates an attribution control with the given layers. Base layers will be switched with radio buttons, while overlays will be switched with checkboxes. Note that all base layers should be passed in the base layers object, but only one should be added to the map during map instantiation.
+// Creates a layers control with the given layers. Base layers will be switched with radio buttons, while overlays will be switched with checkboxes. Note that all base layers should be passed in the base layers object, but only one should be added to the map during map instantiation.
 var layers = function (baseLayers, overlays, options) {
 	return new Layers(baseLayers, overlays, options);
 };
@@ -21787,6 +25841,10 @@ Map.mergeOptions({
 
 Map.addInitHook(function () {
 	if (this.options.zoomControl) {
+		// @section Controls
+		// @property zoomControl: Control.Zoom
+		// The default zoom control (only available if the
+		// [`zoomControl` option](#map-zoomcontrol) was `true` when creating the map).
 		this.zoomControl = new Zoom();
 		this.addControl(this.zoomControl);
 	}
@@ -21944,7 +26002,7 @@ var Attribution = Control.extend({
 
 		// @option prefix: String = 'Leaflet'
 		// The HTML text shown before the attributions. Pass `false` to disable.
-		prefix: '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
+		prefix: '<a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
 	},
 
 	initialize: function (options) {
@@ -22226,9 +26284,13 @@ var Draggable = Evented.extend({
 		// Fired when a drag is about to start.
 		this.fire('down');
 
-		var first = e.touches ? e.touches[0] : e;
+		var first = e.touches ? e.touches[0] : e,
+		    sizedParent = getSizedParentNode(this._element);
 
 		this._startPoint = new Point(first.clientX, first.clientY);
+
+		// Cache the scale, so that we can continuously compensate for it during drag (_onMove).
+		this._parentScale = getScale(sizedParent);
 
 		on(document, MOVE[e.type], this._onMove, this);
 		on(document, END[e.type], this._onUp, this);
@@ -22248,11 +26310,16 @@ var Draggable = Evented.extend({
 		}
 
 		var first = (e.touches && e.touches.length === 1 ? e.touches[0] : e),
-		    newPoint = new Point(first.clientX, first.clientY),
-		    offset = newPoint.subtract(this._startPoint);
+		    offset = new Point(first.clientX, first.clientY)._subtract(this._startPoint);
 
 		if (!offset.x && !offset.y) { return; }
 		if (Math.abs(offset.x) + Math.abs(offset.y) < this.options.clickTolerance) { return; }
+
+		// We assume that the parent container's position, border and scale do not change for the duration of the drag.
+		// Therefore there is no need to account for the position and border (they are eliminated by the subtraction)
+		// and we can use the cached value for the scale.
+		offset.x /= this._parentScale.x;
+		offset.y /= this._parentScale.y;
 
 		preventDefault(e);
 
@@ -22680,7 +26747,7 @@ var LonLat = {
  * @namespace Projection
  * @projection L.Projection.Mercator
  *
- * Elliptical Mercator projection — more complex than Spherical Mercator. Takes into account that Earth is a geoid, not a perfect sphere. Used by the EPSG:3395 CRS.
+ * Elliptical Mercator projection — more complex than Spherical Mercator. Assumes that Earth is an ellipsoid. Used by the EPSG:3395 CRS.
  */
 
 var Mercator = {
@@ -22840,7 +26907,7 @@ CRS.Simple = Simple;
  * @example
  *
  * ```js
- * var layer = L.Marker(latlng).addTo(map);
+ * var layer = L.marker(latlng).addTo(map);
  * layer.addTo(map);
  * layer.remove();
  * ```
@@ -22862,7 +26929,7 @@ var Layer = Evented.extend({
 		pane: 'overlayPane',
 
 		// @option attribution: String = null
-		// String to be shown in the attribution control, describes the layer data, e.g. "© Mapbox".
+		// String to be shown in the attribution control, e.g. "© OpenStreetMap contributors". It describes the layer data and is often a legal obligation towards copyright holders and tile providers.
 		attribution: null,
 
 		bubblingMouseEvents: true
@@ -23423,7 +27490,7 @@ var Icon = Class.extend({
 
 	options: {
 		popupAnchor: [0, 0],
-		tooltipAnchor: [0, 0],
+		tooltipAnchor: [0, 0]
 	},
 
 	initialize: function (options) {
@@ -23622,7 +27689,7 @@ var MarkerDrag = Handler.extend({
 		    map = marker._map,
 		    speed = this._marker.options.autoPanSpeed,
 		    padding = this._marker.options.autoPanPadding,
-		    iconPos = L.DomUtil.getPosition(marker._icon),
+		    iconPos = getPosition(marker._icon),
 		    bounds = map.getPixelBounds(),
 		    origin = map.getPixelOrigin();
 
@@ -23646,7 +27713,7 @@ var MarkerDrag = Handler.extend({
 			this._draggable._newPos._add(movement);
 			this._draggable._startPos._add(movement);
 
-			L.DomUtil.setPosition(marker._icon, this._draggable._newPos);
+			setPosition(marker._icon, this._draggable._newPos);
 			this._onDrag(e);
 
 			this._panRequest = requestAnimFrame(this._adjustPan.bind(this, e));
@@ -23678,7 +27745,7 @@ var MarkerDrag = Handler.extend({
 	_onDrag: function (e) {
 		var marker = this._marker,
 		    shadow = marker._shadow,
-		iconPos = getPosition(marker._icon),
+		    iconPos = getPosition(marker._icon),
 		    latlng = marker._map.layerPointToLatLng(iconPos);
 
 		// update shadow position
@@ -23739,22 +27806,6 @@ var Marker = Layer.extend({
 		// Option inherited from "Interactive layer" abstract class
 		interactive: true,
 
-		// @option draggable: Boolean = false
-		// Whether the marker is draggable with mouse/touch or not.
-		draggable: false,
-
-		// @option autoPan: Boolean = false
-		// Set it to `true` if you want the map to do panning animation when marker hits the edges.
-		autoPan: false,
-
-		// @option autoPanPadding: Point = Point(50, 50)
-		// Equivalent of setting both top left and bottom right autopan padding to the same value.
-		autoPanPadding: [50, 50],
-
-		// @option autoPanSpeed: Number = 10
-		// Number of pixels the map should move by.
-		autoPanSpeed: 10,
-
 		// @option keyboard: Boolean = true
 		// Whether the marker can be tabbed to with a keyboard and clicked by pressing enter.
 		keyboard: true,
@@ -23787,10 +27838,32 @@ var Marker = Layer.extend({
 		// `Map pane` where the markers icon will be added.
 		pane: 'markerPane',
 
+		// @option pane: String = 'shadowPane'
+		// `Map pane` where the markers shadow will be added.
+		shadowPane: 'shadowPane',
+
 		// @option bubblingMouseEvents: Boolean = false
 		// When `true`, a mouse event on this marker will trigger the same event on the map
 		// (unless [`L.DomEvent.stopPropagation`](#domevent-stoppropagation) is used).
-		bubblingMouseEvents: false
+		bubblingMouseEvents: false,
+
+		// @section Draggable marker options
+		// @option draggable: Boolean = false
+		// Whether the marker is draggable with mouse/touch or not.
+		draggable: false,
+
+		// @option autoPan: Boolean = false
+		// Whether to pan the map when dragging this marker near its edge or not.
+		autoPan: false,
+
+		// @option autoPanPadding: Point = Point(50, 50)
+		// Distance (in pixels to the left/right and to the top/bottom) of the
+		// map edge to start panning the map.
+		autoPanPadding: [50, 50],
+
+		// @option autoPanSpeed: Number = 10
+		// Number of pixels the map should pan by.
+		autoPanSpeed: 10
 	},
 
 	/* @section
@@ -23859,6 +27932,12 @@ var Marker = Layer.extend({
 	setZIndexOffset: function (offset) {
 		this.options.zIndexOffset = offset;
 		return this.update();
+	},
+
+	// @method getIcon: Icon
+	// Returns the current icon used by the marker
+	getIcon: function () {
+		return this.options.icon;
 	},
 
 	// @method setIcon(icon: Icon): this
@@ -23956,7 +28035,7 @@ var Marker = Layer.extend({
 		}
 		this._initInteraction();
 		if (newShadow && addShadow) {
-			this.getPane('shadowPane').appendChild(this._shadow);
+			this.getPane(options.shadowPane).appendChild(this._shadow);
 		}
 	},
 
@@ -23982,7 +28061,10 @@ var Marker = Layer.extend({
 	},
 
 	_setPos: function (pos) {
-		setPosition(this._icon, pos);
+
+		if (this._icon) {
+			setPosition(this._icon, pos);
+		}
 
 		if (this._shadow) {
 			setPosition(this._shadow, pos);
@@ -23994,7 +28076,9 @@ var Marker = Layer.extend({
 	},
 
 	_updateZIndex: function (offset) {
-		this._icon.style.zIndex = this._zIndex + offset;
+		if (this._icon) {
+			this._icon.style.zIndex = this._zIndex + offset;
+		}
 	},
 
 	_animateZoom: function (opt) {
@@ -24040,7 +28124,9 @@ var Marker = Layer.extend({
 	_updateOpacity: function () {
 		var opacity = this.options.opacity;
 
-		setOpacity(this._icon, opacity);
+		if (this._icon) {
+			setOpacity(this._icon, opacity);
+		}
 
 		if (this._shadow) {
 			setOpacity(this._shadow, opacity);
@@ -24177,6 +28263,9 @@ var Path = Layer.extend({
 		setOptions(this, style);
 		if (this._renderer) {
 			this._renderer._updateStyle(this);
+			if (this.options.stroke && style && style.hasOwnProperty('weight')) {
+				this._updateBounds();
+			}
 		}
 		return this;
 	},
@@ -24244,9 +28333,13 @@ var CircleMarker = Path.extend({
 	// @method setLatLng(latLng: LatLng): this
 	// Sets the position of a circle marker to a new location.
 	setLatLng: function (latlng) {
+		var oldLatLng = this._latlng;
 		this._latlng = toLatLng(latlng);
 		this.redraw();
-		return this.fire('move', {latlng: this._latlng});
+
+		// @event move: Event
+		// Fired when the marker is moved via [`setLatLng`](#circlemarker-setlatlng). Old and new coordinates are included in event arguments as `oldLatLng`, `latlng`.
+		return this.fire('move', {oldLatLng: oldLatLng, latlng: this._latlng});
 	},
 
 	// @method getLatLng(): LatLng
@@ -24499,7 +28592,7 @@ var Polyline = Path.extend({
 		return !this._latlngs.length;
 	},
 
-	// @method closestLayerPoint: Point
+	// @method closestLayerPoint(p: Point): Point
 	// Returns the point closest to `p` on the Polyline.
 	closestLayerPoint: function (p) {
 		var minDistance = Infinity,
@@ -24618,14 +28711,19 @@ var Polyline = Path.extend({
 		this._rings = [];
 		this._projectLatlngs(this._latlngs, this._rings, pxBounds);
 
+		if (this._bounds.isValid() && pxBounds.isValid()) {
+			this._rawPxBounds = pxBounds;
+			this._updateBounds();
+		}
+	},
+
+	_updateBounds: function () {
 		var w = this._clickTolerance(),
 		    p = new Point(w, w);
-
-		if (this._bounds.isValid() && pxBounds.isValid()) {
-			pxBounds.min._subtract(p);
-			pxBounds.max._add(p);
-			this._pxBounds = pxBounds;
-		}
+		this._pxBounds = new Bounds([
+			this._rawPxBounds.min.subtract(p),
+			this._rawPxBounds.max.add(p)
+		]);
 	},
 
 	// recursively turns latlngs into a set of rings with projected coordinates
@@ -24892,7 +28990,7 @@ var Polygon = Polyline.extend({
 		var inside = false,
 		    part, p1, p2, i, j, k, len, len2;
 
-		if (!this._pxBounds.contains(p)) { return false; }
+		if (!this._pxBounds || !this._pxBounds.contains(p)) { return false; }
 
 		// ray casting algorithm for detecting if point is in polygon
 		for (i = 0, len = this._parts.length; i < len; i++) {
@@ -24988,6 +29086,9 @@ var GeoJSON = FeatureGroup.extend({
 	 * @option coordsToLatLng: Function = *
 	 * A `Function` that will be used for converting GeoJSON coordinates to `LatLng`s.
 	 * The default is the `coordsToLatLng` static method.
+	 *
+	 * @option markersInheritOptions: Boolean = false
+	 * Whether default Markers for "Point" type Features inherit from group options.
 	 */
 
 	initialize: function (geojson, options) {
@@ -25037,9 +29138,13 @@ var GeoJSON = FeatureGroup.extend({
 		return this.addLayer(layer);
 	},
 
-	// @method resetStyle( <Path> layer ): this
+	// @method resetStyle( <Path> layer? ): this
 	// Resets the given vector layer's style to the original GeoJSON style, useful for resetting style after hover events.
+	// If `layer` is omitted, the style of all features in the current layer is reset.
 	resetStyle: function (layer) {
+		if (layer === undefined) {
+			return this.eachLayer(this.resetStyle, this);
+		}
 		// reset any custom styles
 		layer.options = extend({}, layer.defaultOptions);
 		this._setLayerStyle(layer, this.options.style);
@@ -25055,10 +29160,10 @@ var GeoJSON = FeatureGroup.extend({
 	},
 
 	_setLayerStyle: function (layer, style) {
-		if (typeof style === 'function') {
-			style = style(layer.feature);
-		}
 		if (layer.setStyle) {
+			if (typeof style === 'function') {
+				style = style(layer.feature);
+			}
 			layer.setStyle(style);
 		}
 	}
@@ -25087,12 +29192,12 @@ function geometryToLayer(geojson, options) {
 	switch (geometry.type) {
 	case 'Point':
 		latlng = _coordsToLatLng(coords);
-		return pointToLayer ? pointToLayer(geojson, latlng) : new Marker(latlng);
+		return _pointToLayer(pointToLayer, geojson, latlng, options);
 
 	case 'MultiPoint':
 		for (i = 0, len = coords.length; i < len; i++) {
 			latlng = _coordsToLatLng(coords[i]);
-			layers.push(pointToLayer ? pointToLayer(geojson, latlng) : new Marker(latlng));
+			layers.push(_pointToLayer(pointToLayer, geojson, latlng, options));
 		}
 		return new FeatureGroup(layers);
 
@@ -25123,6 +29228,12 @@ function geometryToLayer(geojson, options) {
 	default:
 		throw new Error('Invalid GeoJSON object.');
 	}
+}
+
+function _pointToLayer(pointToLayerFn, geojson, latlng, options) {
+	return pointToLayerFn ?
+		pointToLayerFn(geojson, latlng) :
+		new Marker(latlng, options && options.markersInheritOptions && options);
 }
 
 // @function coordsToLatLng(coords: Array): LatLng
@@ -25208,19 +29319,26 @@ var PointToGeoJSON = {
 };
 
 // @namespace Marker
-// @method toGeoJSON(): Object
+// @section Other methods
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the marker (as a GeoJSON `Point` Feature).
 Marker.include(PointToGeoJSON);
 
 // @namespace CircleMarker
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the circle marker (as a GeoJSON `Point` Feature).
 Circle.include(PointToGeoJSON);
 CircleMarker.include(PointToGeoJSON);
 
 
 // @namespace Polyline
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the polyline (as a GeoJSON `LineString` or `MultiLineString` Feature).
 Polyline.include({
 	toGeoJSON: function (precision) {
@@ -25236,7 +29354,9 @@ Polyline.include({
 });
 
 // @namespace Polygon
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the polygon (as a GeoJSON `Polygon` or `MultiPolygon` Feature).
 Polygon.include({
 	toGeoJSON: function (precision) {
@@ -25272,7 +29392,9 @@ LayerGroup.include({
 		});
 	},
 
-	// @method toGeoJSON(): Object
+	// @method toGeoJSON(precision?: Number): Object
+	// `precision` is the number of decimal places for coordinates.
+	// The default value is 6 places.
 	// Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the layer group (as a GeoJSON `FeatureCollection`, `GeometryCollection`, or `MultiPoint`).
 	toGeoJSON: function (precision) {
 
@@ -25319,7 +29441,7 @@ LayerGroup.include({
 // @namespace GeoJSON
 // @factory L.geoJSON(geojson?: Object, options?: GeoJSON options)
 // Creates a GeoJSON layer. Optionally accepts an object in
-// [GeoJSON format](http://geojson.org/geojson-spec.html) to display on the map
+// [GeoJSON format](https://tools.ietf.org/html/rfc7946) to display on the map
 // (you can alternatively add it later with `addData` method) and an `options` object.
 function geoJSON(geojson, options) {
 	return new GeoJSON(geojson, options);
@@ -25361,8 +29483,10 @@ var ImageOverlay = Layer.extend({
 		// If `true`, the image overlay will emit [mouse events](#interactive-layer) when clicked or hovered.
 		interactive: false,
 
-		// @option crossOrigin: Boolean = false
-		// If true, the image will have its crossOrigin attribute set to ''. This is needed if you want to access image pixel data.
+		// @option crossOrigin: Boolean|String = false
+		// Whether the crossOrigin attribute will be added to the image.
+		// If a String is provided, the image will have its crossOrigin attribute set to the String provided. This is needed if you want to access image pixel data.
+		// Refer to [CORS Settings](https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_settings_attributes) for valid String values.
 		crossOrigin: false,
 
 		// @option errorOverlayUrl: String = ''
@@ -25370,12 +29494,12 @@ var ImageOverlay = Layer.extend({
 		errorOverlayUrl: '',
 
 		// @option zIndex: Number = 1
-		// The explicit [zIndex](https://developer.mozilla.org/docs/Web/CSS/CSS_Positioning/Understanding_z_index) of the tile layer.
+		// The explicit [zIndex](https://developer.mozilla.org/docs/Web/CSS/CSS_Positioning/Understanding_z_index) of the overlay layer.
 		zIndex: 1,
 
 		// @option className: String = ''
 		// A custom class name to assign to the image. Empty by default.
-		className: '',
+		className: ''
 	},
 
 	initialize: function (url, bounds, options) { // (String, LatLngBounds, Object)
@@ -25481,7 +29605,7 @@ var ImageOverlay = Layer.extend({
 		return events;
 	},
 
-	// @method: setZIndex(value: Number) : this
+	// @method setZIndex(value: Number): this
 	// Changes the [zIndex](#imageoverlay-zindex) of the image overlay.
 	setZIndex: function (value) {
 		this.options.zIndex = value;
@@ -25518,8 +29642,8 @@ var ImageOverlay = Layer.extend({
 		img.onload = bind(this.fire, this, 'load');
 		img.onerror = bind(this._overlayOnError, this, 'error');
 
-		if (this.options.crossOrigin) {
-			img.crossOrigin = '';
+		if (this.options.crossOrigin || this.options.crossOrigin === '') {
+			img.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
 		}
 
 		if (this.options.zIndex) {
@@ -25567,7 +29691,7 @@ var ImageOverlay = Layer.extend({
 
 	_overlayOnError: function () {
 		// @event error: Event
-		// Fired when the ImageOverlay layer has loaded its image
+		// Fired when the ImageOverlay layer fails to load its image
 		this.fire('error');
 
 		var errorUrl = this.options.errorOverlayUrl;
@@ -25600,7 +29724,7 @@ var imageOverlay = function (url, bounds, options) {
  * ```js
  * var videoUrl = 'https://www.mapbox.com/bites/00188/patricia_nasa.webm',
  * 	videoBounds = [[ 32, -130], [ 13, -100]];
- * L.VideoOverlay(videoUrl, videoBounds ).addTo(map);
+ * L.videoOverlay(videoUrl, videoBounds ).addTo(map);
  * ```
  */
 
@@ -25615,7 +29739,12 @@ var VideoOverlay = ImageOverlay.extend({
 
 		// @option loop: Boolean = true
 		// Whether the video will loop back to the beginning when played.
-		loop: true
+		loop: true,
+
+		// @option keepAspectRatio: Boolean = true
+		// Whether the video will save aspect ratio after the projection.
+		// Relevant for supported browsers. Browser compatibility- https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
+		keepAspectRatio: true
 	},
 
 	_initImage: function () {
@@ -25624,6 +29753,7 @@ var VideoOverlay = ImageOverlay.extend({
 
 		addClass(vid, 'leaflet-image-layer');
 		if (this._zoomAnimated) { addClass(vid, 'leaflet-zoom-animated'); }
+		if (this.options.className) { addClass(vid, this.options.className); }
 
 		vid.onselectstart = falseFn;
 		vid.onmousemove = falseFn;
@@ -25645,6 +29775,7 @@ var VideoOverlay = ImageOverlay.extend({
 
 		if (!isArray(this._url)) { this._url = [this._url]; }
 
+		if (!this.options.keepAspectRatio && vid.style.hasOwnProperty('objectFit')) { vid.style['objectFit'] = 'fill'; }
 		vid.autoplay = !!this.options.autoplay;
 		vid.loop = !!this.options.loop;
 		for (var i = 0; i < this._url.length; i++) {
@@ -25666,6 +29797,53 @@ var VideoOverlay = ImageOverlay.extend({
 
 function videoOverlay(video, bounds, options) {
 	return new VideoOverlay(video, bounds, options);
+}
+
+/*
+ * @class SVGOverlay
+ * @aka L.SVGOverlay
+ * @inherits ImageOverlay
+ *
+ * Used to load, display and provide DOM access to an SVG file over specific bounds of the map. Extends `ImageOverlay`.
+ *
+ * An SVG overlay uses the [`<svg>`](https://developer.mozilla.org/docs/Web/SVG/Element/svg) element.
+ *
+ * @example
+ *
+ * ```js
+ * var svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+ * svgElement.setAttribute('xmlns', "http://www.w3.org/2000/svg");
+ * svgElement.setAttribute('viewBox', "0 0 200 200");
+ * svgElement.innerHTML = '<rect width="200" height="200"/><rect x="75" y="23" width="50" height="50" style="fill:red"/><rect x="75" y="123" width="50" height="50" style="fill:#0013ff"/>';
+ * var svgElementBounds = [ [ 32, -130 ], [ 13, -100 ] ];
+ * L.svgOverlay(svgElement, svgElementBounds).addTo(map);
+ * ```
+ */
+
+var SVGOverlay = ImageOverlay.extend({
+	_initImage: function () {
+		var el = this._image = this._url;
+
+		addClass(el, 'leaflet-image-layer');
+		if (this._zoomAnimated) { addClass(el, 'leaflet-zoom-animated'); }
+		if (this.options.className) { addClass(el, this.options.className); }
+
+		el.onselectstart = falseFn;
+		el.onmousemove = falseFn;
+	}
+
+	// @method getElement(): SVGElement
+	// Returns the instance of [`SVGElement`](https://developer.mozilla.org/docs/Web/API/SVGElement)
+	// used by this overlay.
+});
+
+
+// @factory L.svgOverlay(svg: String|SVGElement, bounds: LatLngBounds, options?: SVGOverlay options)
+// Instantiates an image overlay object given an SVG element and the geographical bounds it is tied to.
+// A viewBox attribute is required on the SVG element to zoom in and out properly.
+
+function svgOverlay(el, bounds, options) {
+	return new SVGOverlay(el, bounds, options);
 }
 
 /*
@@ -25820,6 +29998,38 @@ var DivOverlay = Layer.extend({
 			toBack(this._container);
 		}
 		return this;
+	},
+
+	_prepareOpen: function (parent, layer, latlng) {
+		if (!(layer instanceof Layer)) {
+			latlng = layer;
+			layer = parent;
+		}
+
+		if (layer instanceof FeatureGroup) {
+			for (var id in parent._layers) {
+				layer = parent._layers[id];
+				break;
+			}
+		}
+
+		if (!latlng) {
+			if (layer.getCenter) {
+				latlng = layer.getCenter();
+			} else if (layer.getLatLng) {
+				latlng = layer.getLatLng();
+			} else {
+				throw new Error('Unable to get source layer LatLng.');
+			}
+		}
+
+		// set overlay source to this layer
+		this._source = layer;
+
+		// update the overlay (content, layout, ect...)
+		this.update();
+
+		return latlng;
 	},
 
 	_updateContent: function () {
@@ -26093,7 +30303,8 @@ var Popup = DivOverlay.extend({
 	},
 
 	_adjustPan: function () {
-		if (!this.options.autoPan || (this._map._panAnim && this._map._panAnim._inProgress)) { return; }
+		if (!this.options.autoPan) { return; }
+		if (this._map._panAnim) { this._map._panAnim.stop(); }
 
 		var map = this._map,
 		    marginBottom = parseInt(getStyle(this._container, 'marginBottom'), 10) || 0,
@@ -26275,28 +30486,8 @@ Layer.include({
 	// @method openPopup(latlng?: LatLng): this
 	// Opens the bound popup at the specified `latlng` or at the default popup anchor if no `latlng` is passed.
 	openPopup: function (layer, latlng) {
-		if (!(layer instanceof Layer)) {
-			latlng = layer;
-			layer = this;
-		}
-
-		if (layer instanceof FeatureGroup) {
-			for (var id in this._layers) {
-				layer = this._layers[id];
-				break;
-			}
-		}
-
-		if (!latlng) {
-			latlng = layer.getCenter ? layer.getCenter() : layer.getLatLng();
-		}
-
 		if (this._popup && this._map) {
-			// set popup source to this layer
-			this._popup._source = layer;
-
-			// update the popup (content, layout, ect...)
-			this._popup.update();
+			latlng = this._popup._prepareOpen(this, layer, latlng);
 
 			// open the popup on the map
 			this._map.openPopup(this._popup, latlng);
@@ -26693,29 +30884,8 @@ Layer.include({
 	// @method openTooltip(latlng?: LatLng): this
 	// Opens the bound tooltip at the specified `latlng` or at the default tooltip anchor if no `latlng` is passed.
 	openTooltip: function (layer, latlng) {
-		if (!(layer instanceof Layer)) {
-			latlng = layer;
-			layer = this;
-		}
-
-		if (layer instanceof FeatureGroup) {
-			for (var id in this._layers) {
-				layer = this._layers[id];
-				break;
-			}
-		}
-
-		if (!latlng) {
-			latlng = layer.getCenter ? layer.getCenter() : layer.getLatLng();
-		}
-
 		if (this._tooltip && this._map) {
-
-			// set tooltip source to this layer
-			this._tooltip._source = layer;
-
-			// update the tooltip (content, layout, ect...)
-			this._tooltip.update();
+			latlng = this._tooltip._prepareOpen(this, layer, latlng);
 
 			// open the tooltip on the map
 			this._map.openTooltip(this._tooltip, latlng);
@@ -26826,8 +30996,9 @@ var DivIcon = Icon.extend({
 		// iconAnchor: (Point),
 		// popupAnchor: (Point),
 
-		// @option html: String = ''
-		// Custom HTML code to put inside the div element, empty by default.
+		// @option html: String|HTMLElement = ''
+		// Custom HTML code to put inside the div element, empty by default. Alternatively,
+		// an instance of `HTMLElement`.
 		html: false,
 
 		// @option bgPos: Point = [0, 0]
@@ -26841,7 +31012,12 @@ var DivIcon = Icon.extend({
 		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
 		    options = this.options;
 
-		div.innerHTML = options.html !== false ? options.html : '';
+		if (options.html instanceof Element) {
+			empty(div);
+			div.appendChild(options.html);
+		} else {
+			div.innerHTML = options.html !== false ? options.html : '';
+		}
 
 		if (options.bgPos) {
 			var bgPos = toPoint(options.bgPos);
@@ -27627,12 +31803,6 @@ var GridLayer = Layer.extend({
 		var tile = this._tiles[key];
 		if (!tile) { return; }
 
-		// Cancels any pending http requests associated with the tile
-		// unless we're on Android's stock browser,
-		// see https://github.com/Leaflet/Leaflet/issues/137
-		if (!androidStock) {
-			tile.el.setAttribute('src', emptyImageUrl);
-		}
 		remove(tile.el);
 
 		delete this._tiles[key];
@@ -27701,8 +31871,6 @@ var GridLayer = Layer.extend({
 	},
 
 	_tileReady: function (coords, err, tile) {
-		if (!this._map) { return; }
-
 		if (err) {
 			// @event tileerror: TileErrorEvent
 			// Fired when there is an error loading a tile.
@@ -27792,12 +31960,12 @@ function gridLayer(options) {
  * @class TileLayer
  * @inherits GridLayer
  * @aka L.TileLayer
- * Used to load and display tile layers on the map. Extends `GridLayer`.
+ * Used to load and display tile layers on the map. Note that most tile servers require attribution, which you can set under `Layer`. Extends `GridLayer`.
  *
  * @example
  *
  * ```js
- * L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(map);
+ * L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar', attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'}).addTo(map);
  * ```
  *
  * @section URL template
@@ -27856,8 +32024,10 @@ var TileLayer = GridLayer.extend({
 		// If `true` and user is on a retina display, it will request four tiles of half the specified size and a bigger zoom level in place of one to utilize the high resolution.
 		detectRetina: false,
 
-		// @option crossOrigin: Boolean = false
-		// If true, all tiles will have their crossOrigin attribute set to ''. This is needed if you want to access tile pixel data.
+		// @option crossOrigin: Boolean|String = false
+		// Whether the crossOrigin attribute will be added to the tiles.
+		// If a String is provided, all tiles will have their crossOrigin attribute set to the String provided. This is needed if you want to access tile pixel data.
+		// Refer to [CORS Settings](https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_settings_attributes) for valid String values.
 		crossOrigin: false
 	},
 
@@ -27895,7 +32065,13 @@ var TileLayer = GridLayer.extend({
 
 	// @method setUrl(url: String, noRedraw?: Boolean): this
 	// Updates the layer's URL template and redraws it (unless `noRedraw` is set to `true`).
+	// If the URL does not change, the layer will not be redrawn unless
+	// the noRedraw parameter is set to false.
 	setUrl: function (url, noRedraw) {
+		if (this._url === url && noRedraw === undefined) {
+			noRedraw = true;
+		}
+
 		this._url = url;
 
 		if (!noRedraw) {
@@ -27914,8 +32090,8 @@ var TileLayer = GridLayer.extend({
 		on(tile, 'load', bind(this._tileOnLoad, this, done, tile));
 		on(tile, 'error', bind(this._tileOnError, this, done, tile));
 
-		if (this.options.crossOrigin) {
-			tile.crossOrigin = '';
+		if (this.options.crossOrigin || this.options.crossOrigin === '') {
+			tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
 		}
 
 		/*
@@ -28016,6 +32192,28 @@ var TileLayer = GridLayer.extend({
 				}
 			}
 		}
+	},
+
+	_removeTile: function (key) {
+		var tile = this._tiles[key];
+		if (!tile) { return; }
+
+		// Cancels any pending http requests associated with the tile
+		// unless we're on Android's stock browser,
+		// see https://github.com/Leaflet/Leaflet/issues/137
+		if (!androidStock) {
+			tile.el.setAttribute('src', emptyImageUrl);
+		}
+
+		return GridLayer.prototype._removeTile.call(this, key);
+	},
+
+	_tileReady: function (coords, err, tile) {
+		if (!this._map || (tile && tile.getAttribute('src') === emptyImageUrl)) {
+			return;
+		}
+
+		return GridLayer.prototype._tileReady.call(this, coords, err, tile);
 	}
 });
 
@@ -28132,7 +32330,7 @@ var TileLayerWMS = TileLayer.extend({
 		    bbox = (this._wmsVersion >= 1.3 && this._crs === EPSG4326 ?
 		    [min.y, min.x, max.y, max.x] :
 		    [min.x, min.y, max.x, max.y]).join(','),
-		url = L.TileLayer.prototype.getTileUrl.call(this, coords);
+		    url = TileLayer.prototype.getTileUrl.call(this, coords);
 		return url +
 			getParamString(this.wmsParams, url, this.options.uppercase) +
 			(this.options.uppercase ? '&BBOX=' : '&bbox=') + bbox;
@@ -28350,7 +32548,7 @@ var Canvas = Renderer.extend({
 	_initContainer: function () {
 		var container = this._container = document.createElement('canvas');
 
-		on(container, 'mousemove', throttle(this._onMouseMove, 32, this), this);
+		on(container, 'mousemove', this._onMouseMove, this);
 		on(container, 'click dblclick mousedown mouseup contextmenu', this._onClick, this);
 		on(container, 'mouseout', this._handleMouseOut, this);
 
@@ -28358,6 +32556,7 @@ var Canvas = Renderer.extend({
 	},
 
 	_destroyContainer: function () {
+		cancelAnimFrame(this._redrawRequest);
 		delete this._ctx;
 		remove(this._container);
 		off(this._container);
@@ -28378,8 +32577,6 @@ var Canvas = Renderer.extend({
 
 	_update: function () {
 		if (this._map._animatingZoom && this._bounds) { return; }
-
-		this._drawnLayers = {};
 
 		Renderer.prototype._update.call(this);
 
@@ -28452,7 +32649,7 @@ var Canvas = Renderer.extend({
 
 		delete layer._order;
 
-		delete this._layers[L.stamp(layer)];
+		delete this._layers[stamp(layer)];
 
 		this._requestRedraw(layer);
 	},
@@ -28474,14 +32671,20 @@ var Canvas = Renderer.extend({
 	},
 
 	_updateDashArray: function (layer) {
-		if (layer.options.dashArray) {
-			var parts = layer.options.dashArray.split(','),
+		if (typeof layer.options.dashArray === 'string') {
+			var parts = layer.options.dashArray.split(/[, ]+/),
 			    dashArray = [],
+			    dashValue,
 			    i;
 			for (i = 0; i < parts.length; i++) {
-				dashArray.push(Number(parts[i]));
+				dashValue = Number(parts[i]);
+				// Ignore dash array containing invalid lengths
+				if (isNaN(dashValue)) { return; }
+				dashArray.push(dashValue);
 			}
 			layer.options._dashArray = dashArray;
+		} else {
+			layer.options._dashArray = layer.options.dashArray;
 		}
 	},
 
@@ -28559,8 +32762,6 @@ var Canvas = Renderer.extend({
 
 		if (!len) { return; }
 
-		this._drawnLayers[layer._leaflet_id] = layer;
-
 		ctx.beginPath();
 
 		for (i = 0; i < len; i++) {
@@ -28586,8 +32787,6 @@ var Canvas = Renderer.extend({
 		    ctx = this._ctx,
 		    r = Math.max(Math.round(layer._radius), 1),
 		    s = (Math.max(Math.round(layer._radiusY), 1) || r) / r;
-
-		this._drawnLayers[layer._leaflet_id] = layer;
 
 		if (s !== 1) {
 			ctx.save();
@@ -28659,10 +32858,15 @@ var Canvas = Renderer.extend({
 			removeClass(this._container, 'leaflet-interactive');
 			this._fireEvent([layer], e, 'mouseout');
 			this._hoveredLayer = null;
+			this._mouseHoverThrottled = false;
 		}
 	},
 
 	_handleMouseHover: function (e, point) {
+		if (this._mouseHoverThrottled) {
+			return;
+		}
+
 		var layer, candidateHoveredLayer;
 
 		for (var order = this._drawFirst; order; order = order.next) {
@@ -28685,6 +32889,11 @@ var Canvas = Renderer.extend({
 		if (this._hoveredLayer) {
 			this._fireEvent([this._hoveredLayer], e);
 		}
+
+		this._mouseHoverThrottled = true;
+		setTimeout(L.bind(function () {
+			this._mouseHoverThrottled = false;
+		}, this), 32);
 	},
 
 	_fireEvent: function (layers, e, type) {
@@ -28693,6 +32902,9 @@ var Canvas = Renderer.extend({
 
 	_bringToFront: function (layer) {
 		var order = layer._order;
+
+		if (!order) { return; }
+
 		var next = order.next;
 		var prev = order.prev;
 
@@ -28721,6 +32933,9 @@ var Canvas = Renderer.extend({
 
 	_bringToBack: function (layer) {
 		var order = layer._order;
+
+		if (!order) { return; }
+
 		var next = order.next;
 		var prev = order.prev;
 
@@ -28776,7 +32991,6 @@ var vmlCreate = (function () {
 /*
  * @class SVG
  *
- * Although SVG is not available on IE7 and IE8, these browsers support [VML](https://en.wikipedia.org/wiki/Vector_Markup_Language), and the SVG renderer will fall back to VML in this case.
  *
  * VML was deprecated in 2012, which means VML functionality exists only for backwards compatibility
  * with old versions of Internet Explorer.
@@ -29118,10 +33332,7 @@ Map.include({
 		var renderer = layer.options.renderer || this._getPaneRenderer(layer.options.pane) || this.options.renderer || this._renderer;
 
 		if (!renderer) {
-			// @namespace Map; @option preferCanvas: Boolean = false
-			// Whether `Path`s should be rendered on a `Canvas` renderer.
-			// By default, all `Path`s are rendered in a `SVG` renderer.
-			renderer = this._renderer = (this.options.preferCanvas && canvas$1()) || svg$1();
+			renderer = this._renderer = this._createRenderer();
 		}
 
 		if (!this.hasLayer(renderer)) {
@@ -29137,10 +33348,17 @@ Map.include({
 
 		var renderer = this._paneRenderers[name];
 		if (renderer === undefined) {
-			renderer = (SVG && svg$1({pane: name})) || (Canvas && canvas$1({pane: name}));
+			renderer = this._createRenderer({pane: name});
 			this._paneRenderers[name] = renderer;
 		}
 		return renderer;
+	},
+
+	_createRenderer: function (options) {
+		// @namespace Map; @option preferCanvas: Boolean = false
+		// Whether `Path`s should be rendered on a `Canvas` renderer.
+		// By default, all `Path`s are rendered in a `SVG` renderer.
+		return (this.options.preferCanvas && canvas$1(options)) || svg$1(options);
 	}
 });
 
@@ -29775,20 +33993,18 @@ var Keyboard = Handler.extend({
 		    offset;
 
 		if (key in this._panKeys) {
+			if (!map._panAnim || !map._panAnim._inProgress) {
+				offset = this._panKeys[key];
+				if (e.shiftKey) {
+					offset = toPoint(offset).multiplyBy(3);
+				}
 
-			if (map._panAnim && map._panAnim._inProgress) { return; }
+				map.panBy(offset);
 
-			offset = this._panKeys[key];
-			if (e.shiftKey) {
-				offset = toPoint(offset).multiplyBy(3);
+				if (map.options.maxBounds) {
+					map.panInsideBounds(map.options.maxBounds);
+				}
 			}
-
-			map.panBy(offset);
-
-			if (map.options.maxBounds) {
-				map.panInsideBounds(map.options.maxBounds);
-			}
-
 		} else if (key in this._zoomKeys) {
 			map.setZoom(map.getZoom() + (e.shiftKey ? 3 : 1) * this._zoomKeys[key]);
 
@@ -30156,21 +34372,9 @@ Map.ScrollWheelZoom = ScrollWheelZoom;
 Map.Tap = Tap;
 Map.TouchZoom = TouchZoom;
 
-// misc
-
-var oldL = window.L;
-function noConflict() {
-	window.L = oldL;
-	return this;
-}
-
-// Always export us to window global (see #2364)
-window.L = exports;
-
 Object.freeze = freeze;
 
 exports.version = version;
-exports.noConflict = noConflict;
 exports.Control = Control;
 exports.control = control;
 exports.Browser = Browser;
@@ -30213,6 +34417,8 @@ exports.ImageOverlay = ImageOverlay;
 exports.imageOverlay = imageOverlay;
 exports.VideoOverlay = VideoOverlay;
 exports.videoOverlay = videoOverlay;
+exports.SVGOverlay = SVGOverlay;
+exports.svgOverlay = svgOverlay;
 exports.DivOverlay = DivOverlay;
 exports.Popup = Popup;
 exports.popup = popup;
@@ -30247,8 +34453,463 @@ exports.rectangle = rectangle;
 exports.Map = Map;
 exports.map = createMap;
 
+var oldL = window.L;
+exports.noConflict = function() {
+	window.L = oldL;
+	return this;
+}
+
+// Always export us to window global (see #2364)
+window.L = exports;
+
 })));
 //# sourceMappingURL=leaflet-src.js.map
+
+
+/***/ }),
+
+/***/ "e2cc":
+/***/ (function(module, exports, __webpack_require__) {
+
+var redefine = __webpack_require__("6eeb");
+
+module.exports = function (target, src, options) {
+  for (var key in src) redefine(target, key, src[key], options);
+  return target;
+};
+
+
+/***/ }),
+
+/***/ "e538":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+
+exports.f = wellKnownSymbol;
+
+
+/***/ }),
+
+/***/ "e667":
+/***/ (function(module, exports) {
+
+module.exports = function (exec) {
+  try {
+    return { error: false, value: exec() };
+  } catch (error) {
+    return { error: true, value: error };
+  }
+};
+
+
+/***/ }),
+
+/***/ "e683":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+
+/***/ "e6cf":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var IS_PURE = __webpack_require__("c430");
+var global = __webpack_require__("da84");
+var getBuiltIn = __webpack_require__("d066");
+var NativePromise = __webpack_require__("fea9");
+var redefine = __webpack_require__("6eeb");
+var redefineAll = __webpack_require__("e2cc");
+var setToStringTag = __webpack_require__("d44e");
+var setSpecies = __webpack_require__("2626");
+var isObject = __webpack_require__("861d");
+var aFunction = __webpack_require__("1c0b");
+var anInstance = __webpack_require__("19aa");
+var classof = __webpack_require__("c6b6");
+var inspectSource = __webpack_require__("8925");
+var iterate = __webpack_require__("2266");
+var checkCorrectnessOfIteration = __webpack_require__("1c7e");
+var speciesConstructor = __webpack_require__("4840");
+var task = __webpack_require__("2cf4").set;
+var microtask = __webpack_require__("b575");
+var promiseResolve = __webpack_require__("cdf9");
+var hostReportErrors = __webpack_require__("44de");
+var newPromiseCapabilityModule = __webpack_require__("f069");
+var perform = __webpack_require__("e667");
+var InternalStateModule = __webpack_require__("69f3");
+var isForced = __webpack_require__("94ca");
+var wellKnownSymbol = __webpack_require__("b622");
+var V8_VERSION = __webpack_require__("2d00");
+
+var SPECIES = wellKnownSymbol('species');
+var PROMISE = 'Promise';
+var getInternalState = InternalStateModule.get;
+var setInternalState = InternalStateModule.set;
+var getInternalPromiseState = InternalStateModule.getterFor(PROMISE);
+var PromiseConstructor = NativePromise;
+var TypeError = global.TypeError;
+var document = global.document;
+var process = global.process;
+var $fetch = getBuiltIn('fetch');
+var newPromiseCapability = newPromiseCapabilityModule.f;
+var newGenericPromiseCapability = newPromiseCapability;
+var IS_NODE = classof(process) == 'process';
+var DISPATCH_EVENT = !!(document && document.createEvent && global.dispatchEvent);
+var UNHANDLED_REJECTION = 'unhandledrejection';
+var REJECTION_HANDLED = 'rejectionhandled';
+var PENDING = 0;
+var FULFILLED = 1;
+var REJECTED = 2;
+var HANDLED = 1;
+var UNHANDLED = 2;
+var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
+
+var FORCED = isForced(PROMISE, function () {
+  var GLOBAL_CORE_JS_PROMISE = inspectSource(PromiseConstructor) !== String(PromiseConstructor);
+  if (!GLOBAL_CORE_JS_PROMISE) {
+    // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
+    // We can't detect it synchronously, so just check versions
+    if (V8_VERSION === 66) return true;
+    // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
+    if (!IS_NODE && typeof PromiseRejectionEvent != 'function') return true;
+  }
+  // We need Promise#finally in the pure version for preventing prototype pollution
+  if (IS_PURE && !PromiseConstructor.prototype['finally']) return true;
+  // We can't use @@species feature detection in V8 since it causes
+  // deoptimization and performance degradation
+  // https://github.com/zloirock/core-js/issues/679
+  if (V8_VERSION >= 51 && /native code/.test(PromiseConstructor)) return false;
+  // Detect correctness of subclassing with @@species support
+  var promise = PromiseConstructor.resolve(1);
+  var FakePromise = function (exec) {
+    exec(function () { /* empty */ }, function () { /* empty */ });
+  };
+  var constructor = promise.constructor = {};
+  constructor[SPECIES] = FakePromise;
+  return !(promise.then(function () { /* empty */ }) instanceof FakePromise);
+});
+
+var INCORRECT_ITERATION = FORCED || !checkCorrectnessOfIteration(function (iterable) {
+  PromiseConstructor.all(iterable)['catch'](function () { /* empty */ });
+});
+
+// helpers
+var isThenable = function (it) {
+  var then;
+  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
+};
+
+var notify = function (promise, state, isReject) {
+  if (state.notified) return;
+  state.notified = true;
+  var chain = state.reactions;
+  microtask(function () {
+    var value = state.value;
+    var ok = state.state == FULFILLED;
+    var index = 0;
+    // variable length - can't use forEach
+    while (chain.length > index) {
+      var reaction = chain[index++];
+      var handler = ok ? reaction.ok : reaction.fail;
+      var resolve = reaction.resolve;
+      var reject = reaction.reject;
+      var domain = reaction.domain;
+      var result, then, exited;
+      try {
+        if (handler) {
+          if (!ok) {
+            if (state.rejection === UNHANDLED) onHandleUnhandled(promise, state);
+            state.rejection = HANDLED;
+          }
+          if (handler === true) result = value;
+          else {
+            if (domain) domain.enter();
+            result = handler(value); // can throw
+            if (domain) {
+              domain.exit();
+              exited = true;
+            }
+          }
+          if (result === reaction.promise) {
+            reject(TypeError('Promise-chain cycle'));
+          } else if (then = isThenable(result)) {
+            then.call(result, resolve, reject);
+          } else resolve(result);
+        } else reject(value);
+      } catch (error) {
+        if (domain && !exited) domain.exit();
+        reject(error);
+      }
+    }
+    state.reactions = [];
+    state.notified = false;
+    if (isReject && !state.rejection) onUnhandled(promise, state);
+  });
+};
+
+var dispatchEvent = function (name, promise, reason) {
+  var event, handler;
+  if (DISPATCH_EVENT) {
+    event = document.createEvent('Event');
+    event.promise = promise;
+    event.reason = reason;
+    event.initEvent(name, false, true);
+    global.dispatchEvent(event);
+  } else event = { promise: promise, reason: reason };
+  if (handler = global['on' + name]) handler(event);
+  else if (name === UNHANDLED_REJECTION) hostReportErrors('Unhandled promise rejection', reason);
+};
+
+var onUnhandled = function (promise, state) {
+  task.call(global, function () {
+    var value = state.value;
+    var IS_UNHANDLED = isUnhandled(state);
+    var result;
+    if (IS_UNHANDLED) {
+      result = perform(function () {
+        if (IS_NODE) {
+          process.emit('unhandledRejection', value, promise);
+        } else dispatchEvent(UNHANDLED_REJECTION, promise, value);
+      });
+      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
+      state.rejection = IS_NODE || isUnhandled(state) ? UNHANDLED : HANDLED;
+      if (result.error) throw result.value;
+    }
+  });
+};
+
+var isUnhandled = function (state) {
+  return state.rejection !== HANDLED && !state.parent;
+};
+
+var onHandleUnhandled = function (promise, state) {
+  task.call(global, function () {
+    if (IS_NODE) {
+      process.emit('rejectionHandled', promise);
+    } else dispatchEvent(REJECTION_HANDLED, promise, state.value);
+  });
+};
+
+var bind = function (fn, promise, state, unwrap) {
+  return function (value) {
+    fn(promise, state, value, unwrap);
+  };
+};
+
+var internalReject = function (promise, state, value, unwrap) {
+  if (state.done) return;
+  state.done = true;
+  if (unwrap) state = unwrap;
+  state.value = value;
+  state.state = REJECTED;
+  notify(promise, state, true);
+};
+
+var internalResolve = function (promise, state, value, unwrap) {
+  if (state.done) return;
+  state.done = true;
+  if (unwrap) state = unwrap;
+  try {
+    if (promise === value) throw TypeError("Promise can't be resolved itself");
+    var then = isThenable(value);
+    if (then) {
+      microtask(function () {
+        var wrapper = { done: false };
+        try {
+          then.call(value,
+            bind(internalResolve, promise, wrapper, state),
+            bind(internalReject, promise, wrapper, state)
+          );
+        } catch (error) {
+          internalReject(promise, wrapper, error, state);
+        }
+      });
+    } else {
+      state.value = value;
+      state.state = FULFILLED;
+      notify(promise, state, false);
+    }
+  } catch (error) {
+    internalReject(promise, { done: false }, error, state);
+  }
+};
+
+// constructor polyfill
+if (FORCED) {
+  // 25.4.3.1 Promise(executor)
+  PromiseConstructor = function Promise(executor) {
+    anInstance(this, PromiseConstructor, PROMISE);
+    aFunction(executor);
+    Internal.call(this);
+    var state = getInternalState(this);
+    try {
+      executor(bind(internalResolve, this, state), bind(internalReject, this, state));
+    } catch (error) {
+      internalReject(this, state, error);
+    }
+  };
+  // eslint-disable-next-line no-unused-vars
+  Internal = function Promise(executor) {
+    setInternalState(this, {
+      type: PROMISE,
+      done: false,
+      notified: false,
+      parent: false,
+      reactions: [],
+      rejection: false,
+      state: PENDING,
+      value: undefined
+    });
+  };
+  Internal.prototype = redefineAll(PromiseConstructor.prototype, {
+    // `Promise.prototype.then` method
+    // https://tc39.github.io/ecma262/#sec-promise.prototype.then
+    then: function then(onFulfilled, onRejected) {
+      var state = getInternalPromiseState(this);
+      var reaction = newPromiseCapability(speciesConstructor(this, PromiseConstructor));
+      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
+      reaction.fail = typeof onRejected == 'function' && onRejected;
+      reaction.domain = IS_NODE ? process.domain : undefined;
+      state.parent = true;
+      state.reactions.push(reaction);
+      if (state.state != PENDING) notify(this, state, false);
+      return reaction.promise;
+    },
+    // `Promise.prototype.catch` method
+    // https://tc39.github.io/ecma262/#sec-promise.prototype.catch
+    'catch': function (onRejected) {
+      return this.then(undefined, onRejected);
+    }
+  });
+  OwnPromiseCapability = function () {
+    var promise = new Internal();
+    var state = getInternalState(promise);
+    this.promise = promise;
+    this.resolve = bind(internalResolve, promise, state);
+    this.reject = bind(internalReject, promise, state);
+  };
+  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
+    return C === PromiseConstructor || C === PromiseWrapper
+      ? new OwnPromiseCapability(C)
+      : newGenericPromiseCapability(C);
+  };
+
+  if (!IS_PURE && typeof NativePromise == 'function') {
+    nativeThen = NativePromise.prototype.then;
+
+    // wrap native Promise#then for native async functions
+    redefine(NativePromise.prototype, 'then', function then(onFulfilled, onRejected) {
+      var that = this;
+      return new PromiseConstructor(function (resolve, reject) {
+        nativeThen.call(that, resolve, reject);
+      }).then(onFulfilled, onRejected);
+    // https://github.com/zloirock/core-js/issues/640
+    }, { unsafe: true });
+
+    // wrap fetch result
+    if (typeof $fetch == 'function') $({ global: true, enumerable: true, forced: true }, {
+      // eslint-disable-next-line no-unused-vars
+      fetch: function fetch(input /* , init */) {
+        return promiseResolve(PromiseConstructor, $fetch.apply(global, arguments));
+      }
+    });
+  }
+}
+
+$({ global: true, wrap: true, forced: FORCED }, {
+  Promise: PromiseConstructor
+});
+
+setToStringTag(PromiseConstructor, PROMISE, false, true);
+setSpecies(PROMISE);
+
+PromiseWrapper = getBuiltIn(PROMISE);
+
+// statics
+$({ target: PROMISE, stat: true, forced: FORCED }, {
+  // `Promise.reject` method
+  // https://tc39.github.io/ecma262/#sec-promise.reject
+  reject: function reject(r) {
+    var capability = newPromiseCapability(this);
+    capability.reject.call(undefined, r);
+    return capability.promise;
+  }
+});
+
+$({ target: PROMISE, stat: true, forced: IS_PURE || FORCED }, {
+  // `Promise.resolve` method
+  // https://tc39.github.io/ecma262/#sec-promise.resolve
+  resolve: function resolve(x) {
+    return promiseResolve(IS_PURE && this === PromiseWrapper ? PromiseConstructor : this, x);
+  }
+});
+
+$({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
+  // `Promise.all` method
+  // https://tc39.github.io/ecma262/#sec-promise.all
+  all: function all(iterable) {
+    var C = this;
+    var capability = newPromiseCapability(C);
+    var resolve = capability.resolve;
+    var reject = capability.reject;
+    var result = perform(function () {
+      var $promiseResolve = aFunction(C.resolve);
+      var values = [];
+      var counter = 0;
+      var remaining = 1;
+      iterate(iterable, function (promise) {
+        var index = counter++;
+        var alreadyCalled = false;
+        values.push(undefined);
+        remaining++;
+        $promiseResolve.call(C, promise).then(function (value) {
+          if (alreadyCalled) return;
+          alreadyCalled = true;
+          values[index] = value;
+          --remaining || resolve(values);
+        }, reject);
+      });
+      --remaining || resolve(values);
+    });
+    if (result.error) reject(result.value);
+    return capability.promise;
+  },
+  // `Promise.race` method
+  // https://tc39.github.io/ecma262/#sec-promise.race
+  race: function race(iterable) {
+    var C = this;
+    var capability = newPromiseCapability(C);
+    var reject = capability.reject;
+    var result = perform(function () {
+      var $promiseResolve = aFunction(C.resolve);
+      iterate(iterable, function (promise) {
+        $promiseResolve.call(C, promise).then(capability.resolve, reject);
+      });
+    });
+    if (result.error) reject(result.value);
+    return capability.promise;
+  }
+});
 
 
 /***/ }),
@@ -30295,6 +34956,23 @@ module.exports = Array.isArray || function isArray(arg) {
 
 /***/ }),
 
+/***/ "e95a":
+/***/ (function(module, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__("b622");
+var Iterators = __webpack_require__("3f8c");
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+module.exports = function (it) {
+  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+
+/***/ }),
+
 /***/ "ea71":
 /***/ (function(module, exports) {
 
@@ -30309,10 +34987,29 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4
 
 /***/ }),
 
-/***/ "ee42":
-/***/ (function(module, exports) {
+/***/ "f069":
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = "data:image/png;base64,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"
+"use strict";
+
+var aFunction = __webpack_require__("1c0b");
+
+var PromiseCapability = function (C) {
+  var resolve, reject;
+  this.promise = new C(function ($$resolve, $$reject) {
+    if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
+    resolve = $$resolve;
+    reject = $$reject;
+  });
+  this.resolve = aFunction(resolve);
+  this.reject = aFunction(reject);
+};
+
+// 25.4.1.5 NewPromiseCapability(C)
+module.exports.f = function (C) {
+  return new PromiseCapability(C);
+};
+
 
 /***/ }),
 
@@ -30330,6 +35027,99 @@ var add = __webpack_require__("35d6").default
 module.exports.__inject__ = function (shadowRoot) {
   add("fc0952da", content, shadowRoot)
 };
+
+/***/ }),
+
+/***/ "f5df":
+/***/ (function(module, exports, __webpack_require__) {
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var classofRaw = __webpack_require__("c6b6");
+var wellKnownSymbol = __webpack_require__("b622");
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+// ES3 wrong here
+var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) == 'Arguments';
+
+// fallback for IE11 Script Access Denied error
+var tryGet = function (it, key) {
+  try {
+    return it[key];
+  } catch (error) { /* empty */ }
+};
+
+// getting tag from ES6+ `Object.prototype.toString`
+module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
+  var O, tag, result;
+  return it === undefined ? 'Undefined' : it === null ? 'Null'
+    // @@toStringTag case
+    : typeof (tag = tryGet(O = Object(it), TO_STRING_TAG)) == 'string' ? tag
+    // builtinTag case
+    : CORRECT_ARGUMENTS ? classofRaw(O)
+    // ES3 arguments fallback
+    : (result = classofRaw(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : result;
+};
+
+
+/***/ }),
+
+/***/ "f6b4":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__("c532");
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
 
 /***/ }),
 
@@ -30457,6 +35247,16 @@ module.exports = NATIVE_SYMBOL
   && !Symbol.sham
   // eslint-disable-next-line no-undef
   && typeof Symbol.iterator == 'symbol';
+
+
+/***/ }),
+
+/***/ "fea9":
+/***/ (function(module, exports, __webpack_require__) {
+
+var global = __webpack_require__("da84");
+
+module.exports = global.Promise;
 
 
 /***/ })

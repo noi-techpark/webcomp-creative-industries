@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="app" class="container">
+    <div id="app" ref="app" class="container" v-bind:class="appWidth" v-on:resize="setResponsive()">
       <div id="map" ref="map" class="map"></div>
       <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
         <div class="center-area">
@@ -133,6 +133,9 @@
             <div class="links">
               <div class="social">
                 <!-- <div class="center-y icon rounded instagram"></div> -->
+                <a class="icon" v-if="selection.instragram" v-bind:href="selection.instagram">
+                  <div class="icon rounded instagram-icon"></div>
+                </a>
                 <a class="icon" v-if="selection.facebook" v-bind:href="selection.facebook">
                   <div class="icon rounded facebook-icon"></div>
                 </a>
@@ -150,7 +153,7 @@
             ></div>
           </div>
           <div class="description">{{ selection.description }}</div>
-          <div class="contact center-area">
+          <div v-if="selection.phone" class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
                 <div class="phone-icon icon center-x center-y"></div>
@@ -158,7 +161,7 @@
             </div>
             <div class="phone-number center-y">{{ selection.phone }}</div>
           </div>
-          <div class="contact center-area">
+          <div v-if="selection.mail" class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
                 <div class="mail-icon icon center-x center-y"></div>
@@ -166,7 +169,7 @@
             </div>
             <div class="mail center-y">{{ selection.mail }}</div>
           </div>
-          <div class="contact center-area">
+          <div v-if="selection.address" class="contact center-area">
             <div class="center-y button rounded primary-bg">
               <div class="center-area">
                 <div class="pin-icon icon center-x center-y"></div>
@@ -208,7 +211,9 @@
             </div>
           </div>
         </div>
-        <div class="expand-menu clickable center-area" @click="toggleMenu()"><div class="icon down-icon center-x center-y"></div></div>
+        <div class="expand-menu clickable center-area" @click="toggleMenu()">
+          <div class="icon down-icon center-x center-y"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -222,31 +227,78 @@ Vue.use(VueI18n);
 import * as L from "leaflet";
 import "leaflet.markercluster";
 
+import { getPoints } from "./api/fetcher";
+
 export default {
   name: "webcomp-creative-industries",
   i18n: new VueI18n({
     locale: "en",
     messages: {
       en: {
-        "industry": "Industry",
-        "industries": "Industries",
-        "type": "Type",
-        "filter": "Filter",
-        "search-placeholder": "Freelancers, Companies, ..."
+        industry: "Industry",
+        industries: "Industries",
+        type: "Type",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Companies, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architecture",
+        music: "Music",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Advertising",
+        handicraft: "Handicraft",
+        press: "Publishing & Press",
+        "performing-arts": "Performing Arts",
+        "visual-arts": "Visual Arts",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Company",
+        association: "Association",
+        entity: "Public entity"
       },
       de: {
-        "industry": "Industrie",
-        "industries": "Industrien",
-        "type": "Typ",
-        "filter": "Filter",
-        "search-placeholder": "Freelancers, Firmen, ..."
+        industry: "Industrie",
+        industries: "Industrien",
+        type: "Typ",
+        filter: "Filter",
+        "search-placeholder": "Freelancers, Firmen, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architektur",
+        music: "Musik",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Werbung",
+        handicraft: "Kunsthandwerk",
+        press: "Buch, Verlangswesen & Presse",
+        "performing-arts": "Darstellende Kunst",
+        "visual-arts": "Bildende Kunst",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Firma",
+        association: "Verband",
+        entity: "Öffentliche Einrichtung"
       },
       it: {
-        "industry": "Industria",
-        "industries": "Industrie",
-        "type": "Tipo",
-        "filter": "Filtra",
-        "search-placeholder": "Freelancer, Aziende, ..."
+        industry: "Industria",
+        industries: "Industrie",
+        type: "Tipo",
+        filter: "Filtra",
+        "search-placeholder": "Freelancer, Aziende, ...",
+        design: "Design",
+        "film-and-video": "Film & Video",
+        architecture: "Architettura",
+        music: "Musica",
+        "radio-and-tv": "Radio & TV",
+        advertising: "Pubblicità",
+        handicraft: "Artigianato artistico",
+        press: "Editoria & Stampa",
+        "performing-arts": "Arti performative",
+        "visual-arts": "Arti visive",
+        "software-and-games": "Software & Games",
+        freelancer: "Freelancer",
+        company: "Azienda",
+        association: "Associazione",
+        entity: "Ente pubblico"
       }
     }
   }),
@@ -254,6 +306,7 @@ export default {
     return {
       publicPath: "/public/",
 
+      appWidth: "",
       menuActive: false,
       map: null,
       center: [46.643211, 11.365379],
@@ -278,298 +331,201 @@ export default {
       searchIsActive: false,
       filterIsActive: false,
 
-      activities: [
-        {
-          id: 0,
-          name: "Freelancer",
-          active: false
-        },
-        {
-          id: 1,
-          name: "Company",
-          active: false
-        },
-        {
-          id: 2,
-          name: "Entity",
-          active: false
-        }
-      ],
-    industries: [
-        {
-          id: 0,
-          name: "Architecture",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/00.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/00.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 1,
-          name: "Software Production",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/01.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/01.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 2,
-          name: "Design",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/02.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/02.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 3,
-          name: "Editoria & Stampa",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/03.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/03.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 4,
-          name: "Visual Arts",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/04.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/04.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 5,
-          name: "Video Production",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/05.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/05.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 6,
-          name: "Radio & TV",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/06.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/06.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 7,
-          name: "Music",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/07.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/07.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 8,
-          name: "Performing Arts",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/08.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/08.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 9,
-          name: "",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/09.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/09.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 10,
-          name: "Education",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/10.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/10.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        },
-        {
-          id: 11,
-          name: "Advertising",
-          sectors: [],
-          active: false,
-          icon: require("@/assets/icons/industries/11.png"),
-          marker: L.icon({
-            iconUrl: require("@/assets/markers/11.png"),
-            iconSize: [18.5, 30], // size of the icon
-            iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
-          })
-        }
-      ]
+      activities: [],
+      industries: [],
+      points: []
     };
   },
   props: {
-    locale: { type: String, default: () => "en" },
-    points: {
-      type: Array,
-      default: () => [
-        {
-          id: 0,
-          name: "Bozen",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          address: "Piazza Universita', 39100 Bolzano (BZ)",
-          coords: [46.49067, 11.33982],
-          logo: require("@/assets/logos/flashbeing.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "jdsajsd",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 1,
-          name: "Brixen",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          address: "Via Volta",
-          coords: [46.71503, 11.65598],
-          logo: require("@/assets/logos/unibz.png"),
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-          linkedin: "linkedin.com",
-          facebook: "facebook.com",
-          website: "jdsajsd",
-          phone: "38923820",
-          mail: "shsaas@kjdfjds.co",
-          active: false
-        },
-        {
-          id: 2,
-          name: "Bruneck",
-          industrie: 0,
-          sector: "UniBz",
-          activity: 2,
-          coords: [46.79942, 11.93429],
-          logo: require("@/assets/logos/unibz.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "nada.com",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 3,
-          name: "Claudiana",
-          industrie: 0,
-          sector: "Private Uni",
-          activity: 2,
-          coords: [46.499657, 11.31319],
-          logo: require("@/assets/logos/unibz.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "xyz.abc",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 4,
-          name: "FlashBeing",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 1,
-          coords: [46.488827, 11.332528],
-          logo: require("@/assets/logos/flashbeing.png"),
-          description: "Lorem Ipsum lorot sit amet",
-          linkedin: "",
-          facebook: "",
-          website: "abc.com",
-          phone: "",
-          mail: "",
-          active: false
-        },
-        {
-          id: 5,
-          name: "Free Software Lab",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 1,
-          coords: [46.478827, 11.332528],
-          active: false
-        },
-        {
-          id: 6,
-          name: "Tizio",
-          industrie: 1,
-          sector: "Software Production",
-          activity: 0,
-          coords: [46.458827, 11.332528],
-          active: false
-        },
-        {
-          id: 7,
-          name: "Test",
-          industrie: 0,
-          sector: "Private Uni",
-          activity: 2,
-          coords: [46.488827, 11.332528],
-          active: false
-        }
-      ]
-    }
+    locale: { type: String, default: () => "en" }
   },
-  mounted() {
+  beforeMount() {
     this.$i18n.locale = this.locale;
-    this.currentSingleboxTitle = this.$t('industries');
+
+    this.currentSingleboxTitle = this.$t("industries");
+    this.activities = [
+      {
+        id: 0,
+        name: this.$t("freelancer"),
+        active: false
+      },
+      {
+        id: 1,
+        name: this.$t("company"),
+        active: false
+      },
+      {
+        id: 2,
+        name: this.$t("association"),
+        active: false
+      },
+      {
+        id: 3,
+        name: this.$t("entity"),
+        active: false
+      }
+    ];
+    this.industries = [
+      {
+        id: 0,
+        name: this.$t("architecture"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/00.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/00.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 1,
+        name: this.$t("software-and-games"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/01.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/01.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 2,
+        name: this.$t("design"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/02.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/02.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 3,
+        name: this.$t("press"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/03.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/03.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 4,
+        name: this.$t("visual-arts"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/04.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/04.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 5,
+        name: this.$t("film-and-video"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/05.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/05.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 6,
+        name: this.$t("radio-and-tv"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/06.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/06.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 7,
+        name: this.$t("music"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/07.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/07.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 8,
+        name: this.$t("performing-arts"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/08.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/08.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 9,
+        name: this.$t("handicraft"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/09.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/09.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      },
+      {
+        id: 10,
+        name: this.$t("advertising"),
+        sectors: [],
+        active: false,
+        icon: require("@/assets/icons/industries/11.png"),
+        marker: L.icon({
+          iconUrl: require("@/assets/markers/11.png"),
+          iconSize: [18.5, 30], // size of the icon
+          iconAnchor: [24, 32] // point of the icon which will correspond to marker's location
+        })
+      }
+    ];
+  },
+  async mounted() {
+    this.points = await getPoints(this.locale, "/");
+
     this.initMap();
     this.initMarkers();
     this.initFilters();
     this.renderFilters();
+    this.setResponsive();
+    var self = this;
+    window.addEventListener("resize", function() {
+      self.setResponsive();
+    });
   },
   methods: {
+    setResponsive() {
+      var app = this.$refs["app"];
+      var w = app.clientWidth;
+
+      if (w <= 500) {
+        this.appWidth = "small";
+      } else if (w <= 1199) {
+        this.appWidth = "medium";
+      } else {
+        this.appWidth = "large";
+      }
+    },
     toggleMenu() {
       this.menuActive = !this.menuActive;
     },
@@ -812,7 +768,6 @@ export default {
         );
 
         if (!industrie.sectors.includes(point.sector)) {
-          console.log("Push " + point.sector + " for " + industrie.name);
           industrie.sectors.push(point.sector);
         }
 
@@ -843,7 +798,6 @@ export default {
         const industrie = this.industries.find(
           industrie => industrie.id === point.industrie
         );
-        console.log(industrie.name);
 
         point.leafletObject = L.marker(point.coords, {
           icon: industrie.marker,
