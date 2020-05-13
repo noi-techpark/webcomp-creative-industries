@@ -49,7 +49,6 @@ function parsePointData(index, element) {
 
   var industryId
   var activityTypeId
-  var website
 
   switch (meta.industry.trim().toLowerCase()) {
     case "architecture":
@@ -106,8 +105,22 @@ function parsePointData(index, element) {
   }
 
   var protocolRegex = /(.+:\/\/)/gm;
-  console.log(meta.website)
-  website = meta.website.replace(protocolRegex, "")
+  var fb;
+  var ig;
+  var linkedin;
+  var website;
+  if (meta.fb) {
+    fb = meta.fb.replace(protocolRegex, "");
+  }
+  if (meta.ig) {
+    ig = meta.ig.replace(protocolRegex, "");
+  }
+  if (meta.linkedin) {
+    linkedin = meta.linkedin.replace(protocolRegex, "");
+  }
+  if (meta.website) {
+    website = meta.website.replace(protocolRegex, "");
+  }
 
   return {
     id: index,
@@ -122,9 +135,9 @@ function parsePointData(index, element) {
     descriptionEn: meta.description.en,
     descriptionDe: meta.description.de,
     descriptionIt: meta.description.it,
-    facebook: meta.fb,
-    instagram: meta.ig,
-    linkedin: meta.linkedin,
+    facebook: fb,
+    instagram: ig,
+    linkedin: linkedin,
     website: website,
     phone: meta.phone_number,
     mail: meta.email,
