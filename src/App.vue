@@ -1,5 +1,5 @@
-<template style="width: 99vw; height: 99vh;">
-  <div id="app" ref="app" class="container" v-bind:class="appWidth" v-on:resize="setResponsive()">
+<template>
+  <div id="app" ref="app" class="container" :style="{ width: width, height: height}" v-bind:class="appWidth" v-on:resize="setResponsive()">
     <div id="map" ref="map" class="map"></div>
     <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
       <div class="center-area">
@@ -106,7 +106,7 @@
       >
         <div class="select-list">
           <div class="select-item center-area" v-if="results.length === 0">
-            <div class="select-item-label center-y">No results.</div>
+            <div class="select-item-label center-y">{{ $t('no-result') }}</div>
           </div>
           <div
             class="select-item center-area"
@@ -132,13 +132,13 @@
           <div class="links">
             <div class="social">
               <!-- <div class="center-y icon rounded instagram"></div> -->
-              <a class="icon" v-if="selection.instragram" :href="selection.instagram">
+              <a class="icon" v-if="selection.instragram" :href="'//' + selection.instagram" target="_blank">
                 <div class="icon rounded instagram-icon"></div>
               </a>
-              <a class="icon" v-if="selection.facebook" :href="selection.facebook">
+              <a class="icon" v-if="selection.facebook" :href="'//' + selection.facebook" target="_blank">
                 <div class="icon rounded facebook-icon"></div>
               </a>
-              <a class="icon" v-if="selection.linkedin" :href="selection.linkedin">
+              <a class="icon" v-if="selection.linkedin" :href="'//' + selection.linkedin" target="_blank">
                 <div class="icon rounded linkedin-icon"></div>
               </a>
             </div>
@@ -152,6 +152,14 @@
           ></div>
         </div>
         <div class="description">{{ selection.description }}</div>
+        <div v-if="selection.address" class="contact center-area">
+          <div class="center-y button rounded primary-bg">
+            <div class="center-area">
+              <div class="pin-icon icon center-x center-y"></div>
+            </div>
+          </div>
+          <div class="address center-y">{{ selection.address }}</div>
+        </div>
         <div v-if="selection.phone" class="contact center-area">
           <div class="center-y button rounded primary-bg">
             <div class="center-area">
@@ -160,7 +168,7 @@
           </div>
           <div class="phone-number center-y">{{ selection.phone }}</div>
         </div>
-        <div v-if="selection.mail" class="contact center-area">
+        <div v-if="selection.mail" class="contact center-area" style="padding-bottom: 25px;">
           <div class="center-y button rounded primary-bg">
             <div class="center-area">
               <div class="mail-icon icon center-x center-y"></div>
@@ -169,14 +177,6 @@
           <div class="mail center-y">
             <a :href="'mailto:' + selection.mail" style="color: black; text-decoration: none;">{{ selection.mail }}</a>
           </div>
-        </div>
-        <div v-if="selection.address" class="contact center-area">
-          <div class="center-y button rounded primary-bg">
-            <div class="center-area">
-              <div class="pin-icon icon center-x center-y"></div>
-            </div>
-          </div>
-          <div class="address center-y">{{ selection.address }}</div>
         </div>
       </div>
       <div id="filters" class="singlebox" v-bind:class="{active: filterIsActive}">
@@ -240,6 +240,7 @@ export default {
         type: "Type",
         filter: "Filter",
         "search-placeholder": "Freelancers, Companies, ...",
+        "no-result": "No results.",
         design: "Design",
         "film-and-video": "Film & Video",
         architecture: "Architecture",
@@ -262,6 +263,7 @@ export default {
         type: "Typ",
         filter: "Filter",
         "search-placeholder": "Freelancers, Firmen, ...",
+        "no-result": "Keine Ergebnisse.",
         design: "Design",
         "film-and-video": "Film & Video",
         architecture: "Architektur",
@@ -284,6 +286,7 @@ export default {
         type: "Tipo",
         filter: "Filtra",
         "search-placeholder": "Freelancer, Aziende, ...",
+        "no-result": "Nessun risultato.",
         design: "Design",
         "film-and-video": "Film & Video",
         architecture: "Architettura",
@@ -337,7 +340,10 @@ export default {
     };
   },
   props: {
-    locale: { type: String, default: () => "en" }
+    locale: { type: String, default: () => "en" },
+    width: { type: String, default: () => "100%"},
+    height: { type: String, default: () => "100%"}
+
   },
   beforeMount() {
     this.$i18n.locale = this.locale;

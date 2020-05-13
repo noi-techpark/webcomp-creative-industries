@@ -20,6 +20,7 @@
 
   #omnibox.expanded {
     height: 65%;
+    padding-bottom: 30px;
   }
 
   #omnibox .expand-menu .icon {
