@@ -1,219 +1,219 @@
-<template>
-  <div>
-    <div id="app" ref="app" class="container" v-bind:class="appWidth" v-on:resize="setResponsive()">
-      <div id="map" ref="map" class="map"></div>
-      <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
-        <div class="center-area">
-          <div class="center-icon icon center-x center-y"></div>
+<template style="width: 99vw; height: 99vh;">
+  <div id="app" ref="app" class="container" v-bind:class="appWidth" v-on:resize="setResponsive()">
+    <div id="map" ref="map" class="map"></div>
+    <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
+      <div class="center-area">
+        <div class="center-icon icon center-x center-y"></div>
+      </div>
+    </div>
+    <div class="logo bottom-left"></div>
+    <div id="omnibox" class="margined shadowed rounded" v-bind:class="{expanded: menuActive}">
+      <div class="navbar" v-bind:class="{ active: !filterIsActive}">
+        <div class="row">
+          <div
+            class="title-header center-area fill"
+            v-bind:class="{active: currentSinglebox !== 'industries' || search}"
+          >
+            <div
+              class="nav-back inline-block center-y icon back-icon clickable"
+              @click="stepBack()"
+            ></div>
+            <div class="title inline-block center-y title">{{ currentSingleboxTitle }}</div>
+          </div>
+          <div class="center-area">
+            <input
+              ref="search-bar"
+              class="search-bar inline-block center-y rounded"
+              v-bind:class="{active: searchIsActive}"
+              type="text"
+              :placeholder="$t('search-placeholder')"
+              v-model="searchValue"
+            />
+            <div
+              class="search-button inline-block button rounded center-y"
+              v-bind:class="{active: searchIsActive}"
+              @click="toggleSearchbar()"
+            >
+              <div class="center-area">
+                <div class="search-icon icon center-x center-y"></div>
+              </div>
+            </div>
+            <div class="inline-block button rounded center-y" @click="showFilters()">
+              <div class="center-area">
+                <div class="filter-icon icon center-x center-y"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="logo bottom-left"></div>
-      <div id="omnibox" class="margined shadowed rounded" v-bind:class="{expanded: menuActive}">
-        <div class="navbar" v-bind:class="{ active: !filterIsActive}">
-          <div class="row">
-            <div
-              class="title-header center-area fill"
-              v-bind:class="{active: currentSinglebox !== 'industries' || search}"
-            >
-              <div
-                class="nav-back inline-block center-y icon back-icon clickable"
-                @click="stepBack()"
-              ></div>
-              <div class="title inline-block center-y title">{{ currentSingleboxTitle }}</div>
-            </div>
-            <div class="center-area">
-              <input
-                ref="search-bar"
-                class="search-bar inline-block center-y rounded"
-                v-bind:class="{active: searchIsActive}"
-                type="text"
-                :placeholder="$t('search-placeholder')"
-                v-model="searchValue"
-              />
-              <div
-                class="search-button inline-block button rounded center-y"
-                v-bind:class="{active: searchIsActive}"
-                @click="toggleSearchbar()"
-              >
-                <div class="center-area">
-                  <div class="search-icon icon center-x center-y"></div>
-                </div>
-              </div>
-              <div class="inline-block button rounded center-y" @click="showFilters()">
-                <div class="center-area">
-                  <div class="filter-icon icon center-x center-y"></div>
-                </div>
+      <div class="nav-filters navbar" v-bind:class="{active: filterIsActive}">
+        <div class="row">
+          <div class="center-area fill">
+            <div class="inline-block center-y title">{{ $t('filter') }}</div>
+          </div>
+          <div class="center-area">
+            <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
+              <div class="center-area">
+                <div class="confirm-icon icon center-x center-y"></div>
               </div>
             </div>
           </div>
         </div>
-        <div class="nav-filters navbar" v-bind:class="{active: filterIsActive}">
-          <div class="row">
-            <div class="center-area fill">
-              <div class="inline-block center-y title">{{ $t('filter') }}</div>
-            </div>
-            <div class="center-area">
-              <div class="inline-block button primary-bg rounded center-y" @click="showFilters()">
-                <div class="center-area">
-                  <div class="confirm-icon icon center-x center-y"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      </div>
 
-        <div
-          id="industries"
-          class="singlebox"
-          v-bind:class="{active: currentSinglebox === 'industries', shift: lastBoxes.includes('industries')}"
-        >
-          <div class="select-list">
+      <div
+        id="industries"
+        class="singlebox"
+        v-bind:class="{active: currentSinglebox === 'industries', shift: lastBoxes.includes('industries')}"
+      >
+        <div class="select-list">
+          <div
+            class="select-item center-area"
+            v-for="industrie in industries"
+            :key="industrie.id"
+            @click="industrieSelected(industrie.id)"
+          >
             <div
-              class="select-item center-area"
-              v-for="industrie in industries"
-              :key="industrie.id"
-              @click="industrieSelected(industrie.id)"
-            >
-              <div
-                class="industrie-icon icon center-y rounded primary-bg"
-                v-bind:style="{'background-image': 'url(' + industrie.icon + ')'}"
-              ></div>
-              <div class="select-item-label center-y">{{ industrie.name }}</div>
-              <div class="center-y icon forward-icon"></div>
-            </div>
-          </div>
-        </div>
-        <div
-          id="sectors"
-          class="singlebox"
-          v-bind:class="{active: currentSinglebox === 'sectors', shift: lastBoxes.includes('sectors')}"
-        >
-          <div class="select-list">
-            <div
-              class="select-item center-area"
-              v-for="sector in filters.sectors"
-              :key="sector"
-              @click="sectorSelected(sector)"
-            >
-              <div class="select-item-label center-y">{{ sector }}</div>
-              <div class="center-y icon forward-icon"></div>
-            </div>
-          </div>
-        </div>
-        <div
-          id="results"
-          class="singlebox"
-          v-bind:class="{active: currentSinglebox === 'results', shift: lastBoxes.includes('results')}"
-        >
-          <div class="select-list">
-            <div class="select-item center-area" v-if="results.length === 0">
-              <div class="select-item-label center-y">No results.</div>
-            </div>
-            <div
-              class="select-item center-area"
-              v-for="point in results"
-              :key="point"
-              @click="pointSelected(point.id)"
-            >
-              <div
-                class="center-y icon rounded primary-bg"
-                v-bind:style="{'background-image': 'url(' + point.logo + ')'}"
-              ></div>
-              <div class="select-item-label center-y">{{ point.name }}</div>
-              <div class="center-y icon forward-icon"></div>
-            </div>
-          </div>
-        </div>
-        <div
-          id="selection"
-          class="singlebox"
-          v-bind:class="{active: currentSinglebox === 'selection'}"
-        >
-          <div class="row">
-            <div class="links">
-              <div class="social">
-                <!-- <div class="center-y icon rounded instagram"></div> -->
-                <a class="icon" v-if="selection.instragram" v-bind:href="selection.instagram">
-                  <div class="icon rounded instagram-icon"></div>
-                </a>
-                <a class="icon" v-if="selection.facebook" v-bind:href="selection.facebook">
-                  <div class="icon rounded facebook-icon"></div>
-                </a>
-                <a class="icon" v-if="selection.linkedin" v-bind:href="selection.linkedin">
-                  <div class="icon rounded linkedin-icon"></div>
-                </a>
-              </div>
-              <div class="website">
-                <a v-bind:href="selection.website">{{ selection.website }}</a>
-              </div>
-            </div>
-            <div
-              class="logo rounded"
-              v-bind:style="{'background-image': 'url(' + selection.logo + ')'}"
+              class="industrie-icon icon center-y rounded primary-bg"
+              v-bind:style="{'background-image': 'url(' + industrie.icon + ')'}"
             ></div>
-          </div>
-          <div class="description">{{ selection.description }}</div>
-          <div v-if="selection.phone" class="contact center-area">
-            <div class="center-y button rounded primary-bg">
-              <div class="center-area">
-                <div class="phone-icon icon center-x center-y"></div>
-              </div>
-            </div>
-            <div class="phone-number center-y">{{ selection.phone }}</div>
-          </div>
-          <div v-if="selection.mail" class="contact center-area">
-            <div class="center-y button rounded primary-bg">
-              <div class="center-area">
-                <div class="mail-icon icon center-x center-y"></div>
-              </div>
-            </div>
-            <div class="mail center-y">{{ selection.mail }}</div>
-          </div>
-          <div v-if="selection.address" class="contact center-area">
-            <div class="center-y button rounded primary-bg">
-              <div class="center-area">
-                <div class="pin-icon icon center-x center-y"></div>
-              </div>
-            </div>
-            <div class="address center-y">{{ selection.address }}</div>
+            <div class="select-item-label center-y">{{ industrie.name }}</div>
+            <div class="center-y icon forward-icon"></div>
           </div>
         </div>
-        <div id="filters" class="singlebox" v-bind:class="{active: filterIsActive}">
-          <div class="filter-class">
-            <div class="title">{{ $t('type') }}:</div>
-            <div class="form-check" v-for="activity in activities" :key="activity.id">
-              <label class="form-check-label">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  v-model="activity.active"
-                  @change="activityChanged(activity.id, activity.active)"
-                />
-                <span></span>
-                {{ activity.name }}
-              </label>
+      </div>
+      <div
+        id="sectors"
+        class="singlebox"
+        v-bind:class="{active: currentSinglebox === 'sectors', shift: lastBoxes.includes('sectors')}"
+      >
+        <div class="select-list">
+          <div
+            class="select-item center-area"
+            v-for="sector in filters.sectors"
+            :key="sector"
+            @click="sectorSelected(sector)"
+          >
+            <div class="select-item-label center-y">{{ sector }}</div>
+            <div class="center-y icon forward-icon"></div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="results"
+        class="singlebox"
+        v-bind:class="{active: currentSinglebox === 'results', shift: lastBoxes.includes('results')}"
+      >
+        <div class="select-list">
+          <div class="select-item center-area" v-if="results.length === 0">
+            <div class="select-item-label center-y">No results.</div>
+          </div>
+          <div
+            class="select-item center-area"
+            v-for="point in results"
+            :key="point"
+            @click="pointSelected(point.id)"
+          >
+            <div
+              class="center-y icon rounded placeholder"
+              v-bind:style="{'background-image': 'url(' + point.logo + ')'}"
+            ></div>
+            <div class="select-item-label center-y">{{ point.name }}</div>
+            <div class="center-y icon forward-icon"></div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="selection"
+        class="singlebox"
+        v-bind:class="{active: currentSinglebox === 'selection'}"
+      >
+        <div class="row">
+          <div class="links">
+            <div class="social">
+              <!-- <div class="center-y icon rounded instagram"></div> -->
+              <a class="icon" v-if="selection.instragram" :href="selection.instagram">
+                <div class="icon rounded instagram-icon"></div>
+              </a>
+              <a class="icon" v-if="selection.facebook" :href="selection.facebook">
+                <div class="icon rounded facebook-icon"></div>
+              </a>
+              <a class="icon" v-if="selection.linkedin" :href="selection.linkedin">
+                <div class="icon rounded linkedin-icon"></div>
+              </a>
+            </div>
+            <div class="website">
+              <a :href="'//' + selection.website" target="_blank">{{ selection.website }}</a>
             </div>
           </div>
+          <div
+            class="logo rounded placeholder"
+            v-bind:style="{'background-image': 'url(' + selection.logo + ')'}"
+          ></div>
+        </div>
+        <div class="description">{{ selection.description }}</div>
+        <div v-if="selection.phone" class="contact center-area">
+          <div class="center-y button rounded primary-bg">
+            <div class="center-area">
+              <div class="phone-icon icon center-x center-y"></div>
+            </div>
+          </div>
+          <div class="phone-number center-y">{{ selection.phone }}</div>
+        </div>
+        <div v-if="selection.mail" class="contact center-area">
+          <div class="center-y button rounded primary-bg">
+            <div class="center-area">
+              <div class="mail-icon icon center-x center-y"></div>
+            </div>
+          </div>
+          <div class="mail center-y">
+            <a :href="'mailto:' + selection.mail" style="color: black; text-decoration: none;">{{ selection.mail }}</a>
+          </div>
+        </div>
+        <div v-if="selection.address" class="contact center-area">
+          <div class="center-y button rounded primary-bg">
+            <div class="center-area">
+              <div class="pin-icon icon center-x center-y"></div>
+            </div>
+          </div>
+          <div class="address center-y">{{ selection.address }}</div>
+        </div>
+      </div>
+      <div id="filters" class="singlebox" v-bind:class="{active: filterIsActive}">
+        <div class="filter-class">
+          <div class="title">{{ $t('type') }}:</div>
+          <div class="form-check" v-for="activity in activities" :key="activity.id">
+            <label class="form-check-label">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                v-model="activity.active"
+                @change="activityChanged(activity.id, activity.active)"
+              />
+              <span></span>
+              {{ activity.name }}
+            </label>
+          </div>
+        </div>
 
-          <div class="filter-class" v-if="search">
-            <div class="title">{{ $t('industry')}}:</div>
-            <div class="form-check" v-for="industrie in industries" :key="industrie.id">
-              <label class="form-check-label">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  v-model="industrie.active"
-                  @change="industrieChanged(industrie.id, industrie.active)"
-                />
-                <span></span>
-                {{ industrie.name }}
-              </label>
-            </div>
+        <div class="filter-class" v-if="search">
+          <div class="title">{{ $t('industry')}}:</div>
+          <div class="form-check" v-for="industrie in industries" :key="industrie.id">
+            <label class="form-check-label">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                v-model="industrie.active"
+                @change="industrieChanged(industrie.id, industrie.active)"
+              />
+              <span></span>
+              {{ industrie.name }}
+            </label>
           </div>
         </div>
-        <div class="expand-menu clickable center-area" @click="toggleMenu()">
-          <div class="icon down-icon center-x center-y"></div>
-        </div>
+      </div>
+      <div class="expand-menu clickable center-area" @click="toggleMenu()">
+        <div class="icon down-icon center-x center-y"></div>
       </div>
     </div>
   </div>

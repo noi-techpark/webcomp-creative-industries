@@ -49,6 +49,7 @@ function parsePointData(index, element) {
 
   var industryId
   var activityTypeId
+  var website
 
   switch (meta.industry.trim().toLowerCase()) {
     case "architecture":
@@ -104,6 +105,10 @@ function parsePointData(index, element) {
       break;
   }
 
+  var protocolRegex = /(.+:\/\/)/gm;
+  console.log(meta.website)
+  website = meta.website.replace(protocolRegex, "")
+
   return {
     id: index,
     name: meta.name,
@@ -113,14 +118,14 @@ function parsePointData(index, element) {
     sectorIt: meta.sector.it,
     activity: activityTypeId,
     coords: [element.scoordinate.y, element.scoordinate.x],
-    logo: require("@/assets/logos/flashbeing.png"),
+    logo: meta.logo,
     descriptionEn: meta.description.en,
     descriptionDe: meta.description.de,
     descriptionIt: meta.description.it,
     facebook: meta.fb,
     instagram: meta.ig,
     linkedin: meta.linkedin,
-    website: meta.website,
+    website: website,
     phone: meta.phone_number,
     mail: meta.email,
     active: true
