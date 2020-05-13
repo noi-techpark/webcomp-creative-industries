@@ -1,5 +1,5 @@
-<template style="width: 99vw; height: 99vh;">
-  <div id="app" ref="app" class="container" v-bind:class="appWidth" v-on:resize="setResponsive()">
+<template>
+  <div id="app" ref="app" class="container" :style="{ width: width, height: height}" v-bind:class="appWidth" v-on:resize="setResponsive()">
     <div id="map" ref="map" class="map"></div>
     <div class="center-button inline-block button white-bg rounded" @click="centerMap()">
       <div class="center-area">
@@ -340,7 +340,10 @@ export default {
     };
   },
   props: {
-    locale: { type: String, default: () => "en" }
+    locale: { type: String, default: () => "en" },
+    width: { type: String, default: () => "100%"},
+    height: { type: String, default: () => "100%"}
+
   },
   beforeMount() {
     this.$i18n.locale = this.locale;
