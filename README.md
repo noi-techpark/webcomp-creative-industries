@@ -26,7 +26,20 @@ Include the webcompscript file `dist/webcomp-creative-industries.js` in your HTM
 Set the language of the web component with `locale`.
 
 Type: string
+
 Options: "en", "de", "it"
+
+#### width, height
+
+Set the dimensions of the web component with `width` and `height`.
+
+Type: string
+
+Default: width: 100%, height: 100%
+ 
+**Note: You need to specify the unit, e.g. em, px, etc.**
+
+To make the component responsive, you can either modify the entries with JavaScript or set a CSS styling for `webcomp-creative-industries`
 
 
 ## Getting started

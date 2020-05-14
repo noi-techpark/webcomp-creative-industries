@@ -15528,7 +15528,7 @@ function parsePointData(index, element) {
       break;
   }
 
-  var protocolRegex = /(.+:\/\/)/gm;
+  var protocolRegex = /^(http[s]?:\/\/)/gm;
   var fb;
   var ig;
   var linkedin;
@@ -15543,6 +15543,7 @@ function parsePointData(index, element) {
   }
 
   if (meta.linkedin) {
+    console.log(meta.linkedin);
     linkedin = meta.linkedin.replace(protocolRegex, "");
   }
 
