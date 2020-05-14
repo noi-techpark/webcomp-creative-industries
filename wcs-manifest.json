@@ -46,6 +46,20 @@
           ],
           "default": "en"
         }
+      },
+      {
+        "key": "width",
+        "type": "text",
+        "label": "Width as CSS string like 100px or 50%",
+        "required": false,
+        "default": "1050px"
+      },
+      {
+        "key": "height",
+        "type": "text",
+        "label": "Height as CSS string like 100px or 50%",
+        "required": false,
+        "default": "780px"
       }
     ]
   }
