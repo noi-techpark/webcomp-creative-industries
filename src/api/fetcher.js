@@ -151,7 +151,6 @@ function parseURL(url) {
   if (!protocolRegex.test(url)) {
     return [url, "//" + url];
   } else {
-    console.log(url)
     return [url.replace(protocolRegex, ""), url]; 
   }
 }
