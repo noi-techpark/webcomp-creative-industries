@@ -143,7 +143,7 @@
               </a>
             </div>
             <div class="website">
-              <a :href="'//' + selection.website" target="_blank">{{ selection.website }}</a>
+              <a :href="selection.websiteURL" target="_blank">{{ selection.website }}</a>
             </div>
           </div>
           <div
