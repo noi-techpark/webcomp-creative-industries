@@ -104,7 +104,7 @@ npm run lint
 To create the distributable files, execute the following command:
 
 ```bash
-npm run build:wc
+npm run build
 ```
 
 ## Docker environment
