@@ -104,23 +104,21 @@ function parsePointData(index, element) {
       break;
   }
 
-  var protocolRegex = /^(http[s]?:\/\/)/gm;
-  var fb;
-  var ig;
-  var linkedin;
-  var website;
+  var fb, ig, linkedin;
+  var website, websiteURL;
   if (meta.fb) {
-    fb = meta.fb.replace(protocolRegex, "");
+    fb = parseURL(meta.fb);
   }
   if (meta.ig) {
-    ig = meta.ig.replace(protocolRegex, "");
+    ig = parseURL(meta.ig);
   }
   if (meta.linkedin) {
-    console.log(meta.linkedin)
-    linkedin = meta.linkedin.replace(protocolRegex, "");
+    linkedin = parseURL(meta.linkedin);
   }
   if (meta.website) {
-    website = meta.website.replace(protocolRegex, "");
+    var url = parseURL(meta.website);
+    website = url[0];
+    websiteURL = url[1];
   }
 
   return {
@@ -140,8 +138,19 @@ function parsePointData(index, element) {
     instagram: ig,
     linkedin: linkedin,
     website: website,
+    websiteURL: websiteURL,
     phone: meta.phone_number,
     mail: meta.email,
     active: true
+  }
+}
+
+function parseURL(url) {
+  var protocolRegex = /^(http[s]?:\/\/)/gm;
+
+  if (!protocolRegex.test(url)) {
+    return [url, "//" + url];
+  } else {
+    return [url.replace(protocolRegex, ""), url]; 
   }
 }
