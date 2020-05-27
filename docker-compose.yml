@@ -8,12 +8,4 @@ services:
     command: npm run start
     ports:
       - "8999:8080"
-  # serve:
-  #   image: python:3.6-alpine
-  #   volumes:
-  #     - ./:/code
-  #   working_dir: /code/work
-  #   command: python -m http.server
-  #   ports:
-  #     - "8999:8000"
-  #   tty: true
+    tty: true
