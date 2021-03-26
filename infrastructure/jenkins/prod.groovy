@@ -36,22 +36,22 @@ pipeline {
         }
         stage('Git Tag') {
             steps {
-                ansiColor('xterm') {
-                    sshagent (credentials: ['jenkins_github_ssh_key']) {
-                        sh """
-                          git config --global user.email "info@opendatahub.bz.it"
-                          git config --global user.name "Jenkins"
-                          git remote set-url origin ${GIT_REPOSITORY}
-                          git add -A
-                          git commit --allow-empty -m "Version ${VERSION}"
-                          git tag --delete v${VERSION} || true
-                          git tag -a v${VERSION} -m "Version ${VERSION}"
-                          mkdir -p ~/.ssh
-                          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-                          git push origin HEAD:master
-                          git push origin --tags
-                        """
-                    }
+                sshagent (credentials: ['jenkins_github_ssh_key']) {
+                    sh """
+                        mkdir -p ~/.ssh
+                        ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                        git config --global user.email "info@opendatahub.bz.it"
+                        git config --global user.name "Jenkins"
+                        git remote set-url ${WC_GIT_REMOTE} ${GIT_URL}
+                        git add ${WC_DIST_PATH}/*
+                        git add -A
+                        git commit --allow-empty -m "Version ${VERSION}"
+                        git tag --delete v${VERSION} || true
+                        git push ${WC_GIT_REMOTE} :v${VERSION} || true
+                        git tag -a v${VERSION} -m "Version ${VERSION}"
+                        git push ${WC_GIT_REMOTE} HEAD:${WC_GIT_BRANCH}
+                        git push ${WC_GIT_REMOTE} v${VERSION}
+                    """
                 }
             }
         }
