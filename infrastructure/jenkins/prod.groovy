@@ -1,28 +1,26 @@
 pipeline {
     agent {
         dockerfile {
-            filename 'infrastructure/docker/Dockerfile'
-            additionalBuildArgs '--build-arg JENKINS_USER_ID=`id -u jenkins` --build-arg JENKINS_GROUP_ID=`id -g jenkins`'
+            filename 'infrastructure/docker/node.dockerfile'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=$(id -u jenkins) --build-arg JENKINS_GROUP_ID=$(id -g jenkins)'
         }
     }
-
     options {
         ansiColor('xterm')
     }
-
     parameters {
-        string(name: 'VERSION', defaultValue: '1.0.0', description: 'Version')
+        string(name: 'VERSION', defaultValue: '1.0.0', description: 'Version (without a leading "v")', trim: true)
     }
-
     environment {
-        GIT_REPOSITORY = "git@github.com:noi-techpark/webcomp-creative-industries.git"
+        WC_GIT_REMOTE = get_git_remote()
+        WC_GIT_BRANCH = get_git_branch()
+        WC_DIST_PATH = "dist"
     }
-
     stages {
         stage('Clean') {
             steps {
                 sh '''
-                  rm -rf dist node_modules
+                  rm -rf dist
                 '''
             }
         }
@@ -58,4 +56,13 @@ pipeline {
             }
         }
     }
+}
+
+// Helper functions
+def get_git_remote() {
+    return env.GIT_BRANCH.split('/')[0]
+}
+
+def get_git_branch() {
+    return env.GIT_BRANCH.split('/')[1]
 }
