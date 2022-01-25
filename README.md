@@ -2,6 +2,8 @@
 
 This project will display a map with the entities located in South Tyrol and working in the Creative Industries.
 
+[![CI](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/ci.yml/badge.svg)](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/ci.yml)
+
 ## Table of contents
 
 - [Usage](#usage)
