@@ -1,8 +1,10 @@
-# webcomp-creative-industries
+# Webcomponent for creative industries map
 
 This project will display a map with the entities located in South Tyrol and working in the Creative Industries.
 
-[![CI](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/ci.yml/badge.svg)](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/ci.yml)
+Do you want to see it in action? Go to our [web component store](https://webcomponents.opendatahub.bz.it/webcomponent/f1321372-6629-4912-a331-77d5d91dd646)!
+
+[![CI/CD](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/main.yml)
 
 ## Table of contents
 
@@ -163,17 +165,7 @@ For support, please contact [help@opendatahub.bz.it](mailto:help@opendatahub.bz.
 
 ### Contributing
 
-If you'd like to contribute, please follow the following instructions:
-
-- Fork the repository.
-
-- Checkout a topic branch from the `development` branch.
-
-- Make sure the tests are passing.
-
-- Create a pull request against the `development` branch.
-
-A more detailed description can be found here: [https://github.com/noi-techpark/documentation/blob/master/contributors.md](https://github.com/noi-techpark/documentation/blob/master/contributors.md).
+If you'd like to contribute, please follow the Contributor Guidelines that can be found at [https://github.com/noi-techpark/odh-docs/wiki/Contributor-Guidelines%3A-Getting-started](https://github.com/noi-techpark/odh-docs/wiki/Contributor-Guidelines%3A-Getting-started).
 
 ### Documentation
 
