@@ -15392,7 +15392,7 @@ var es_string_trim = __webpack_require__("498a");
 
 // CONCATENATED MODULE: ./src/api/config.js
 /* harmony default export */ var config = ({
-  API_BASE_URL: "https://mobility.api.opendatahub.bz.it/v2/flat/CreativeIndustry" //ToDo: integrate with pipeline
+  API_BASE_URL: "https://mobility.api.opendatahub.bz.it/v2/flat/CreativeIndustry&origin=webcomp-creative-industries" //ToDo: integrate with pipeline
 
 });
 // EXTERNAL MODULE: ./node_modules/axios/index.js
