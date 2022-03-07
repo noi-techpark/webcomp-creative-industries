@@ -3,6 +3,7 @@
   "description": "A webcomponent to display the entities located in South Tyrol and working in the Creative Industries on a map.",
   "descriptionAbstract": "A webcomponent for creative industries map",
   "license": "AGPL-3.0-or-later",
+  "repositoryUrl": "https://github.com/noi-techpark/webcomp-creative-industries",
   "copyrightHolders": [
     {
       "name": "IDM",
