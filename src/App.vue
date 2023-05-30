@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2021 NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 <template>
   <div id="app" ref="app" class="container" :style="{ width: width, height: height}" v-bind:class="appWidth" v-on:resize="setResponsive()">
     <div id="map" ref="map" class="map"></div>

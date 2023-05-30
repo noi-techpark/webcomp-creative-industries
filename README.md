@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2021 NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # Webcomponent for creative industries map
 
 This project will display a map with the entities located in South Tyrol and working in the Creative Industries.
