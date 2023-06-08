@@ -10,6 +10,7 @@ This project will display a map with the entities located in South Tyrol and wor
 
 Do you want to see it in action? Go to our [web component store](https://webcomponents.opendatahub.bz.it/webcomponent/f1321372-6629-4912-a331-77d5d91dd646)!
 
+![REUSE Compliance](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/reuse.yml/badge.svg)
 [![CI/CD](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/main.yml)
 
 ## Table of contents
