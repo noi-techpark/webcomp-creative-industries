@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 This project will display a map with the entities located in South Tyrol and working in the Creative Industries.
 
-Do you want to see it in action? Go to our [web component store](https://webcomponents.opendatahub.bz.it/webcomponent/f1321372-6629-4912-a331-77d5d91dd646)!
+Do you want to see it in action? Go to our [web component store](https://webcomponents.opendatahub.com/webcomponent/f1321372-6629-4912-a331-77d5d91dd646)!
 
 ![REUSE Compliance](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/reuse.yml/badge.svg)
 [![CI/CD](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/webcomp-creative-industries/actions/workflows/main.yml)
@@ -168,7 +168,7 @@ docker-compose run --rm app /bin/bash -c "npm run start"
 
 ### Support
 
-For support, please contact [help@opendatahub.bz.it](mailto:help@opendatahub.bz.it).
+For support, please contact [help@opendatahub.com](mailto:help@opendatahub.com).
 
 ### Contributing
 
