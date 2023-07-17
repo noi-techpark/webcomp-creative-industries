@@ -4,6 +4,7 @@
   "descriptionAbstract": "A webcomponent for creative industries map",
   "license": "AGPL-3.0-or-later",
   "repositoryUrl": "https://github.com/noi-techpark/webcomp-creative-industries.git",
+  "shortName": "creative-industries",
   "copyrightHolders": [
     {
       "name": "IDM",
