@@ -835,7 +835,7 @@ export default {
         {
           maxZoom: 18,
           attribution:
-            '&copy; <a href="https://opendatahub.com">Data by Open Data Hub</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+            '<a href="https://opendatahub.com">OpenDataHub.com</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
         }
       );
 
