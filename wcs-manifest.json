@@ -23,8 +23,7 @@
   ],
   "image": "wcs-logo.png",
   "searchTags": [
-    "map",
-    "creative industries"
+    "map"
   ],
   "dist": {
     "basePath": "dist",
