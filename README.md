@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Webcomponent for creative industries map
 
-This project will display a map with the entities located in South Tyrol and working in the Creative Industries.
+This project will display a map with the entities located in South Tyrol and working in the Creative Industries. 
 
 Do you want to see it in action? Go to our [web component store](https://webcomponents.opendatahub.com/webcomponent/f1321372-6629-4912-a331-77d5d91dd646)!
 
