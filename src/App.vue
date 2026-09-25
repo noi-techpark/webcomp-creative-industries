@@ -232,6 +232,8 @@ Vue.use(VueI18n);
 
 import * as L from "leaflet";
 import "leaflet.markercluster";
+import "@maplibre/maplibre-gl-leaflet";
+
 
 import { getPoints } from "./api/fetcher";
 
@@ -825,19 +827,23 @@ export default {
     },
 
     initMap() {
-      this.map = L.map(this.$refs.map, { zoomControl: false }).setView(
+      this.map = L.map(this.$refs.map, { 
+        zoomControl: false,
+        minZoom: 0,
+        maxZoom: 19 
+      }).setView(
         this.center,
         this.zoom
       );
       L.control.zoom({ position: "bottomright" }).addTo(this.map);
-      this.tileLayer = L.tileLayer(
-        "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png",
-        {
-          maxZoom: 18,
-          attribution:
-            '<a target="_blank" href="https://opendatahub.com">OpenDataHub.com</a> | &copy; <a target="_blank" href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a target="_blank" href="https://carto.com/attribution">CARTO</a>'
-        }
-      );
+      this.tileLayer = L.maplibreGL({
+        style: "https://tiles.openfreemap.org/styles/positron",
+        attribution:
+          '<a target="_blank" href="https://opendatahub.com">OpenDataHub.com</a> | ' +
+          '&copy; <a target="_blank" href="https://openfreemap.org">OpenFreeMap</a> ' +
+          '&copy; <a target="_blank" href="https://www.openmaptiles.org/">OpenMapTiles</a> ' +
+          '&copy; <a target="_blank" href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      });
 
       this.tileLayer.addTo(this.map);
       setTimeout(() => {
@@ -864,4 +870,5 @@ export default {
 @import "../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
 @import "assets/css/style.css";
 @import "assets/css/responsive.css";
+ @import "../node_modules/maplibre-gl/dist/maplibre-gl.css";
 </style>
